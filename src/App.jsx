@@ -41,21 +41,17 @@ function App() {
     }
   }, [])
 
-  useEffect(() => {
-    generateQR()
-  }, [])
-
   const getQRData = () => {
     switch(currentTab) {
       case 'url':
-        return urlInput || ''
+        return urlInput.trim() || ''
       case 'text':
-        return textInput || ''
+        return textInput.trim() || ''
       case 'wifi':
-        if (!wifiSsid) return ''
+        if (!wifiSsid.trim()) return ''
         return `WIFI:T:${wifiType};S:${wifiSsid};P:${wifiPassword};;`
       case 'email':
-        if (!emailInput) return ''
+        if (!emailInput.trim()) return ''
         let mailto = `mailto:${emailInput}`
         const params = []
         if (emailSubject) params.push(`subject=${encodeURIComponent(emailSubject)}`)
@@ -63,7 +59,7 @@ function App() {
         if (params.length) mailto += '?' + params.join('&')
         return mailto
       case 'phone':
-        return phoneInput ? `tel:${phoneInput}` : ''
+        return phoneInput.trim() ? `tel:${phoneInput.trim()}` : ''
       default:
         return ''
     }
@@ -75,6 +71,8 @@ function App() {
     }
     
     const data = getQRData()
+    
+    // Don't generate if no data
     if (!data) {
       return
     }
@@ -114,6 +112,12 @@ function App() {
     setQrCode(qr)
   }
 
+  // Generate on mount
+  useEffect(() => {
+    generateQR()
+  }, [])
+
+  // Auto-generate when inputs change
   useEffect(() => {
     const timer = setTimeout(() => {
       if (getQRData()) {
@@ -170,6 +174,21 @@ function App() {
     setCurrentTab(tab)
   }
 
+  const clearAll = () => {
+    setUrlInput('')
+    setTextInput('')
+    setWifiSsid('')
+    setWifiPassword('')
+    setEmailInput('')
+    setEmailSubject('')
+    setEmailBody('')
+    setPhoneInput('')
+    if (qrRef.current) {
+      qrRef.current.innerHTML = '<div class="placeholder">Enter content above</div>'
+    }
+    setQrCode(null)
+  }
+
   const presets = [
     { name: 'Classic', fg: '#000000', bg: '#ffffff', style: 'square', corner: 'square' },
     { name: 'Dark', fg: '#ffffff', bg: '#000000', style: 'square', corner: 'square' },
@@ -177,7 +196,6 @@ function App() {
     { name: 'Forest', fg: '#22c55e', bg: '#052e16', style: 'rounded', corner: 'extra-rounded' },
     { name: 'Sunset', fg: '#f97316', bg: '#431407', style: 'classy', corner: 'extra-rounded' },
     { name: 'Purple', fg: '#a855f7', bg: '#1e1b4b', style: 'classy-rounded', corner: 'extra-rounded' },
-    { name: 'Trans', fg: '#000000', bg: 'transparent', style: 'square', corner: 'square', trans: true },
   ]
 
   const applyPreset = (preset) => {
@@ -185,7 +203,13 @@ function App() {
     setColorBg(preset.bg)
     setQrStyle(preset.style)
     setCornerStyle(preset.corner)
-    setBgTransparent(preset.trans || false)
+    setBgTransparent(false)
+  }
+
+  const handlePayment = () => {
+    // Create a checkout session and redirect
+    const stripeLink = 'https://buy.stripe.com/9B6bJ11xH48nd2h4OZ3Nm02'
+    window.open(stripeLink, '_blank')
   }
 
   return (
@@ -266,16 +290,21 @@ function App() {
                 <button 
                   key={preset.name}
                   className="preset-btn"
-                  style={{ 
-                    background: preset.trans ? 'repeating-conic-gradient(#333 0% 25%, #222 0% 50%) 50% / 8px 8px' : preset.bg 
-                  }}
+                  style={{ background: preset.bg }}
                   onClick={() => applyPreset(preset)}
                   title={preset.name}
                 >
-                  {!preset.trans && <div style={{ background: preset.fg, width: 20, height: 20, borderRadius: 4 }}></div>}
-                  {preset.trans && <div style={{ background: '#000', width: 20, height: 20, borderRadius: 4, opacity: 0.5 }}></div>}
+                  <div style={{ background: preset.fg, width: 20, height: 20, borderRadius: 4 }}></div>
                 </button>
               ))}
+              <button 
+                className="preset-btn"
+                style={{ background: 'repeating-conic-gradient(#333 0% 25%, #222 0% 50%) 50% / 8px 8px' }}
+                onClick={() => { setBgTransparent(true); setColorFg('#000000') }}
+                title="Transparent"
+              >
+                <div style={{ background: '#000', width: 20, height: 20, borderRadius: 4, opacity: 0.5 }}></div>
+              </button>
             </div>
           </div>
 
@@ -303,7 +332,7 @@ function App() {
               <div className="checkbox-row">
                 <label className="checkbox">
                   <input type="checkbox" checked={bgTransparent} onChange={(e) => setBgTransparent(e.target.checked)} />
-                  <span>Transparent background</span>
+                  <span>Transparent</span>
                 </label>
               </div>
             </div>
@@ -314,7 +343,7 @@ function App() {
                 <label>Corners</label>
                 <label className="checkbox small">
                   <input type="checkbox" checked={useCustomCorners} onChange={(e) => setUseCustomCorners(e.target.checked)} />
-                  <span>Custom color</span>
+                  <span>Custom</span>
                 </label>
               </div>
               <div className="style-row">
@@ -332,14 +361,12 @@ function App() {
                       <span>Square</span>
                       <div className="color-row">
                         <input type="color" value={colorCornerSquare || colorFg} onChange={(e) => setColorCornerSquare(e.target.value)} />
-                        <span>{(colorCornerSquare || colorFg).slice(0,7)}</span>
                       </div>
                     </div>
                     <div className="style-item">
                       <span>Dot</span>
                       <div className="color-row">
                         <input type="color" value={colorCornerDot || colorFg} onChange={(e) => setColorCornerDot(e.target.value)} />
-                        <span>{(colorCornerDot || colorFg).slice(0,7)}</span>
                       </div>
                     </div>
                   </>
@@ -423,11 +450,7 @@ function App() {
         <div className="card preview-section">
           <div className="preview-header">
             <span>Preview</span>
-            {qrCode && <button className="clear-btn" onClick={() => { 
-              setUrlInput(''); 
-              setTextInput(''); 
-              qrRef.current.innerHTML = '<div class=\'placeholder\'>Enter content above</div>' 
-            }}>Clear</button>}
+            <button className="clear-btn" onClick={clearAll}>Clear</button>
           </div>
           
           <div className="preview-frame" style={{ background: bgTransparent ? 'repeating-conic-gradient(#2a2a3a 0% 25%, #1a1a2a 0% 50%) 50% / 16px 16px' : colorBg }}>
@@ -449,32 +472,13 @@ function App() {
             </div>
           ) : (
             <div className="promo-card">
-              <p>✨ Unlock downloads + no watermark</p>
-              <a href="https://buy.stripe.com/9B6bJ11xH48nd2h4OZ3Nm02" target="_blank" rel="noopener noreferrer" className="promo-btn">
-                Get Pro - $2
-              </a>
+              <p>✨ Unlock downloads</p>
+              <button onClick={handlePayment} className="promo-btn">
+                Pay $2 & Download
+              </button>
+              <p className="secure-text">🔒 Secure payment</p>
             </div>
           )}
-
-          {/* Subscription Plans */}
-          <div className="plans">
-            <div className="plan-header">
-              <span className="plan-icon">📊</span>
-              <span>Short URLs + Analytics</span>
-            </div>
-            <a href="https://buy.stripe.com/7sYeVd7W548n8M195f3Nm03" target="_blank" rel="noopener noreferrer" className="plan">
-              <span>5 URLs</span>
-              <span className="price">$5/mo</span>
-            </a>
-            <a href="https://buy.stripe.com/6oU3cv3FP9sHe6l5T33Nm04" target="_blank" rel="noopener noreferrer" className="plan">
-              <span>20 URLs</span>
-              <span className="price">$15/mo</span>
-            </a>
-            <a href="https://buy.stripe.com/eVqbJ1ektcETbYd95f3Nm05" target="_blank" rel="noopener noreferrer" className="plan">
-              <span>100 URLs</span>
-              <span className="price">$50/mo</span>
-            </a>
-          </div>
         </div>
       </div>
 
