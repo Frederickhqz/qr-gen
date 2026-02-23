@@ -2,45 +2,42 @@ import { useState, useRef, useEffect } from 'react'
 import QRCodeStyling from 'qr-code-styling'
 import './App.css'
 
-// Pattern icons as SVG components
+// Pattern icons - simple SVG shapes
 const PatternIcons = {
   square: (
-    <svg viewBox="0 0 24 24" fill="currentColor">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
       <rect x="3" y="3" width="18" height="18" rx="2"/>
     </svg>
   ),
   dot: (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/>
-      <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
-      <circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="19" r="2"/>
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+      <circle cx="5" cy="5" r="2.5"/><circle cx="12" cy="5" r="2.5"/><circle cx="19" cy="5" r="2.5"/>
+      <circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/>
+      <circle cx="5" cy="19" r="2.5"/><circle cx="12" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/>
     </svg>
   ),
   rounded: (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <rect x="3" y="3" width="6" height="6" rx="3"/><rect x="9" y="3" width="6" height="6" rx="3"/><rect x="15" y="3" width="6" height="6" rx="3"/>
-      <rect x="3" y="9" width="6" height="6" rx="3"/><rect x="9" y="9" width="6" height="6" rx="3"/><rect x="15" y="9" width="6" height="6" rx="3"/>
-      <rect x="3" y="15" width="6" height="6" rx="3"/><rect x="9" y="15" width="6" height="6" rx="3"/><rect x="15" y="15" width="6" height="6" rx="3"/>
-    </svg>
-  ),
-  'extra-rounded': (
-    <svg viewBox="0 0 24 24" fill="currentColor">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
       <rect x="2" y="2" width="20" height="20" rx="10"/>
     </svg>
   ),
+  'extra-rounded': (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+      <rect x="1" y="1" width="22" height="22" rx="11"/>
+    </svg>
+  ),
   classy: (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <rect x="3" y="3" width="4" height="4" rx="2"/><rect x="10" y="3" width="4" height="4" rx="2"/><rect x="17" y="3" width="4" height="4" rx="2"/>
-      <rect x="3" y="10" width="4" height="4" rx="2"/><rect x="10" y="10" width="4" height="4" rx="2"/><rect x="17" y="10" width="4" height="4" rx="2"/>
-      <rect x="3" y="17" width="4" height="4" rx="2"/><rect x="10" y="17" width="4" height="4" rx="2"/><rect x="17" y="17" width="4" height="4" rx="2"/>
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+      <rect x="2" y="2" width="7" height="7" rx="2"/><rect x="15" y="2" width="7" height="7" rx="2"/>
+      <rect x="2" y="15" width="7" height="7" rx="2"/><rect x="15" y="15" width="7" height="7" rx="2"/>
       <circle cx="12" cy="12" r="4"/>
     </svg>
   ),
   'classy-rounded': (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <rect x="2" y="2" width="5" height="5" rx="2.5"/><rect x="9.5" y="2" width="5" height="5" rx="2.5"/><rect x="17" y="2" width="5" height="5" rx="2.5"/>
-      <rect x="2" y="9.5" width="5" height="5" rx="2.5"/><circle cx="12" cy="12" r="5"/><rect x="17" y="9.5" width="5" height="5" rx="2.5"/>
-      <rect x="2" y="17" width="5" height="5" rx="2.5"/><rect x="9.5" y="17" width="5" height="5" rx="2.5"/><rect x="17" y="17" width="5" height="5" rx="2.5"/>
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+      <rect x="1" y="1" width="8" height="8" rx="4"/><rect x="15" y="1" width="8" height="8" rx="4"/>
+      <rect x="1" y="15" width="8" height="8" rx="4"/><rect x="15" y="15" width="8" height="8" rx="4"/>
+      <circle cx="12" cy="12" r="5"/>
     </svg>
   )
 }
@@ -48,17 +45,18 @@ const PatternIcons = {
 // Corner style icons
 const CornerIcons = {
   square: (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+      <path d="M4 4h5v5H4zM15 4h5v5h-5zM4 15h5v5H4zM15 15h5v5h-5z"/>
     </svg>
   ),
   dot: (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/>
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+      <circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="6.5" r="2.5"/>
+      <circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>
     </svg>
   ),
   'extra-rounded': (
-    <svg viewBox="0 0 24 24" fill="currentColor">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
       <rect x="2" y="2" width="8" height="8" rx="4"/><rect x="14" y="2" width="8" height="8" rx="4"/>
       <rect x="2" y="14" width="8" height="8" rx="4"/><rect x="14" y="14" width="8" height="8" rx="4"/>
     </svg>
