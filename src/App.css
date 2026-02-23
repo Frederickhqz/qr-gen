@@ -69,6 +69,19 @@ header p {
   font-size: 0.9rem;
 }
 
+header .tagline {
+  color: #22c55e;
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+
+header .subtagline {
+  color: #f59e0b;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
 /* Card */
 .card {
   background: var(--bg-card);
@@ -544,6 +557,14 @@ header p {
 .download-btns button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.email-btn {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+}
+
+.email-btn:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
 }
 
 .download-btns .icon {

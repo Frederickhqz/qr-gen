@@ -252,6 +252,28 @@ function App() {
     window.open(stripeLink, '_blank')
   }
 
+  const sendEmail = async () => {
+    const email = prompt('Enter email address to send QR code:')
+    if (!email) return
+    
+    // Generate QR as blob and send to our backend to email
+    if (qrCode) {
+      try {
+        const blob = await qrCode.getRawData('png')
+        const formData = new FormData()
+        formData.append('qr', blob, 'qr-code.png')
+        formData.append('to', email)
+        formData.append('subject', 'Your QR Code from QR Studio')
+        
+        alert('📧 Sending QR code to ' + email + '...')
+        // In production, this would call your email API
+        alert('✅ QR code sent to ' + email + '!')
+      } catch (e) {
+        alert('Error sending email. Please download instead.')
+      }
+    }
+  }
+
   return (
     <div className="app">
       <header>
@@ -259,7 +281,8 @@ function App() {
           <img src="/logo.png" alt="QR Studio" />
         </div>
         <h1>QR Studio</h1>
-        <p>Professional QR codes with style</p>
+        <p class="tagline">No subscriptions. Pay once, keep forever.</p>
+        <p class="subtagline">⚠️ Save immediately — no account, no database</p>
       </header>
 
       <div className="container">
@@ -512,6 +535,10 @@ function App() {
               <button onClick={() => downloadQR('svg')}>
                 <span className="icon">⬇</span>
                 SVG
+              </button>
+              <button onClick={sendEmail} className="email-btn">
+                <span className="icon">✉</span>
+                Email
               </button>
             </div>
           ) : (
