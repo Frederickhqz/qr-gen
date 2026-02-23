@@ -7,6 +7,7 @@ function App() {
   const [qrCode, setQrCode] = useState(null)
   const [logoUrl, setLogoUrl] = useState(null)
   const [hasLogo, setHasLogo] = useState(false)
+  const [isPaid, setIsPaid] = useState(false)
   const qrRef = useRef(null)
 
   const [urlInput, setUrlInput] = useState('')
@@ -21,12 +22,25 @@ function App() {
 
   const [colorFg, setColorFg] = useState('#000000')
   const [colorBg, setColorBg] = useState('#ffffff')
+  const [bgTransparent, setBgTransparent] = useState(false)
+  const [colorCornerSquare, setColorCornerSquare] = useState('')
+  const [colorCornerDot, setColorCornerDot] = useState('')
+  const [useCustomCorners, setUseCustomCorners] = useState(false)
+  
   const [qrStyle, setQrStyle] = useState('square')
   const [cornerStyle, setCornerStyle] = useState('square')
   const [logoSize, setLogoSize] = useState(0.4)
   const [logoMargin, setLogoMargin] = useState(10)
+  const [padding, setPadding] = useState(20)
 
-  // Auto-generate on load
+  // Check for payment status
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('paid') === 'true') {
+      setIsPaid(true)
+    }
+  }, [])
+
   useEffect(() => {
     generateQR()
   }, [])
@@ -62,13 +76,12 @@ function App() {
     
     const data = getQRData()
     if (!data) {
-      // Show placeholder if no data
       return
     }
-    
-    const qr = new QRCodeStyling({
-      width: 280,
-      height: 280,
+
+    const qrOptions = {
+      width: 280 + (padding * 2),
+      height: 280 + (padding * 2),
       data: data,
       image: logoUrl,
       dotsOptions: {
@@ -76,28 +89,31 @@ function App() {
         type: qrStyle
       },
       backgroundOptions: {
-        color: colorBg,
+        color: bgTransparent ? 'transparent' : colorBg,
       },
       cornersSquareOptions: {
         type: cornerStyle,
-        color: colorFg
+        color: useCustomCorners && colorCornerSquare ? colorCornerSquare : colorFg
       },
       cornersDotOptions: {
         type: cornerStyle,
-        color: colorFg
+        color: useCustomCorners && colorCornerDot ? colorCornerDot : colorFg
       },
       imageOptions: {
         crossOrigin: "anonymous",
         margin: logoMargin,
         imageSize: logoSize
+      },
+      qrOptions: {
+        margin: padding
       }
-    })
+    }
 
+    const qr = new QRCodeStyling(qrOptions)
     qr.append(qrRef.current)
     setQrCode(qr)
   }
 
-  // Auto-generate when inputs change
   useEffect(() => {
     const timer = setTimeout(() => {
       if (getQRData()) {
@@ -105,11 +121,17 @@ function App() {
       }
     }, 300)
     return () => clearTimeout(timer)
-  }, [urlInput, textInput, wifiSsid, wifiPassword, wifiType, emailInput, emailSubject, emailBody, phoneInput, colorFg, colorBg, qrStyle, cornerStyle, logoUrl, logoSize, logoMargin])
+  }, [urlInput, textInput, wifiSsid, wifiPassword, wifiType, emailInput, emailSubject, emailBody, phoneInput, colorFg, colorBg, bgTransparent, qrStyle, cornerStyle, logoUrl, logoSize, logoMargin, padding, colorCornerSquare, colorCornerDot, useCustomCorners])
 
   const downloadQR = (format) => {
     if (qrCode) {
-      qrCode.download({ name: "qr-code", extension: format })
+      qrCode.download({ 
+        name: "qr-code", 
+        extension: format,
+        backgroundOptions: {
+          color: bgTransparent ? undefined : colorBg
+        }
+      })
     }
   }
 
@@ -122,10 +144,8 @@ function App() {
       }
       const reader = new FileReader()
       reader.onload = (e) => {
-        // Auto-adjust size for larger images
         const img = new Image()
         img.onload = () => {
-          // If image is large, reduce size
           if (img.width > 500 || img.height > 500) {
             setLogoSize(0.25)
           } else if (img.width > 200 || img.height > 200) {
@@ -157,6 +177,7 @@ function App() {
     { name: 'Forest', fg: '#22c55e', bg: '#052e16', style: 'rounded', corner: 'extra-rounded' },
     { name: 'Sunset', fg: '#f97316', bg: '#431407', style: 'classy', corner: 'extra-rounded' },
     { name: 'Purple', fg: '#a855f7', bg: '#1e1b4b', style: 'classy-rounded', corner: 'extra-rounded' },
+    { name: 'Trans', fg: '#000000', bg: 'transparent', style: 'square', corner: 'square', trans: true },
   ]
 
   const applyPreset = (preset) => {
@@ -164,6 +185,7 @@ function App() {
     setColorBg(preset.bg)
     setQrStyle(preset.style)
     setCornerStyle(preset.corner)
+    setBgTransparent(preset.trans || false)
   }
 
   return (
@@ -244,11 +266,14 @@ function App() {
                 <button 
                   key={preset.name}
                   className="preset-btn"
-                  style={{ background: preset.bg }}
+                  style={{ 
+                    background: preset.trans ? 'repeating-conic-gradient(#333 0% 25%, #222 0% 50%) 50% / 8px 8px' : preset.bg 
+                  }}
                   onClick={() => applyPreset(preset)}
                   title={preset.name}
                 >
-                  <div style={{ background: preset.fg, width: 20, height: 20, borderRadius: 4 }}></div>
+                  {!preset.trans && <div style={{ background: preset.fg, width: 20, height: 20, borderRadius: 4 }}></div>}
+                  {preset.trans && <div style={{ background: '#000', width: 20, height: 20, borderRadius: 4, opacity: 0.5 }}></div>}
                 </button>
               ))}
             </div>
@@ -256,43 +281,97 @@ function App() {
 
           {/* Styling */}
           <div className="styling">
-            <div className="style-row">
-              <div className="style-item">
-                <label>Color</label>
-                <div className="color-row">
-                  <input type="color" value={colorFg} onChange={(e) => setColorFg(e.target.value)} />
-                  <span>{colorFg}</span>
+            {/* Colors */}
+            <div className="style-section">
+              <label>Colors</label>
+              <div className="style-row">
+                <div className="style-item">
+                  <span>Dots</span>
+                  <div className="color-row">
+                    <input type="color" value={colorFg} onChange={(e) => setColorFg(e.target.value)} />
+                    <span>{colorFg}</span>
+                  </div>
+                </div>
+                <div className="style-item">
+                  <span>Background</span>
+                  <div className="color-row">
+                    <input type="color" value={colorBg} onChange={(e) => setColorBg(e.target.value)} disabled={bgTransparent} />
+                    <span>{bgTransparent ? '✕' : colorBg}</span>
+                  </div>
                 </div>
               </div>
-              <div className="style-item">
-                <label>Background</label>
-                <div className="color-row">
-                  <input type="color" value={colorBg} onChange={(e) => setColorBg(e.target.value)} />
-                  <span>{colorBg}</span>
-                </div>
+              <div className="checkbox-row">
+                <label className="checkbox">
+                  <input type="checkbox" checked={bgTransparent} onChange={(e) => setBgTransparent(e.target.checked)} />
+                  <span>Transparent background</span>
+                </label>
               </div>
             </div>
 
-            <div className="style-row">
-              <div className="style-item">
-                <label>Pattern</label>
-                <select value={qrStyle} onChange={(e) => setQrStyle(e.target.value)}>
-                  <option value="square">Square</option>
-                  <option value="dot">Dot</option>
-                  <option value="rounded">Rounded</option>
-                  <option value="extra-rounded">Extra Rounded</option>
-                  <option value="classy">Classy</option>
-                  <option value="classy-rounded">Classy Rounded</option>
-                </select>
-              </div>
-              <div className="style-item">
+            {/* Corners */}
+            <div className="style-section">
+              <div className="section-header">
                 <label>Corners</label>
-                <select value={cornerStyle} onChange={(e) => setCornerStyle(e.target.value)}>
-                  <option value="square">Square</option>
-                  <option value="dot">Dot</option>
-                  <option value="extra-rounded">Extra Rounded</option>
-                </select>
+                <label className="checkbox small">
+                  <input type="checkbox" checked={useCustomCorners} onChange={(e) => setUseCustomCorners(e.target.checked)} />
+                  <span>Custom color</span>
+                </label>
               </div>
+              <div className="style-row">
+                <div className="style-item">
+                  <span>Style</span>
+                  <select value={cornerStyle} onChange={(e) => setCornerStyle(e.target.value)}>
+                    <option value="square">Square</option>
+                    <option value="dot">Dot</option>
+                    <option value="extra-rounded">Extra Rounded</option>
+                  </select>
+                </div>
+                {useCustomCorners && (
+                  <>
+                    <div className="style-item">
+                      <span>Square</span>
+                      <div className="color-row">
+                        <input type="color" value={colorCornerSquare || colorFg} onChange={(e) => setColorCornerSquare(e.target.value)} />
+                        <span>{(colorCornerSquare || colorFg).slice(0,7)}</span>
+                      </div>
+                    </div>
+                    <div className="style-item">
+                      <span>Dot</span>
+                      <div className="color-row">
+                        <input type="color" value={colorCornerDot || colorFg} onChange={(e) => setColorCornerDot(e.target.value)} />
+                        <span>{(colorCornerDot || colorFg).slice(0,7)}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Pattern */}
+            <div className="style-section">
+              <label>Pattern</label>
+              <select value={qrStyle} onChange={(e) => setQrStyle(e.target.value)}>
+                <option value="square">Square</option>
+                <option value="dot">Dot</option>
+                <option value="rounded">Rounded</option>
+                <option value="extra-rounded">Extra Rounded</option>
+                <option value="classy">Classy</option>
+                <option value="classy-rounded">Classy Rounded</option>
+              </select>
+            </div>
+
+            {/* Padding */}
+            <div className="style-section">
+              <label>Padding: {padding}px</label>
+              <input 
+                type="range" 
+                min="0" 
+                max="60" 
+                step="4"
+                value={padding} 
+                onChange={(e) => setPadding(parseInt(e.target.value))} 
+                className="slider"
+              />
             </div>
 
             {/* Logo Section */}
@@ -310,16 +389,29 @@ function App() {
                     <img src={logoUrl} alt="Logo" />
                     <button className="remove-logo" onClick={clearLogo}>×</button>
                   </div>
-                  <div className="logo-slider">
-                    <span>Size</span>
-                    <input 
-                      type="range" 
-                      min="0.15" 
-                      max="0.5" 
-                      step="0.05" 
-                      value={logoSize} 
-                      onChange={(e) => setLogoSize(parseFloat(e.target.value))} 
-                    />
+                  <div className="logo-sliders">
+                    <div className="slider-row">
+                      <span>Size</span>
+                      <input 
+                        type="range" 
+                        min="0.15" 
+                        max="0.5" 
+                        step="0.05" 
+                        value={logoSize} 
+                        onChange={(e) => setLogoSize(parseFloat(e.target.value))} 
+                      />
+                    </div>
+                    <div className="slider-row">
+                      <span>Margin</span>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="30" 
+                        step="2"
+                        value={logoMargin} 
+                        onChange={(e) => setLogoMargin(parseInt(e.target.value))} 
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -331,16 +423,20 @@ function App() {
         <div className="card preview-section">
           <div className="preview-header">
             <span>Preview</span>
-            {qrCode && <button className="clear-btn" onClick={() => { setUrlInput(''); setTextInput(''); qrRef.current.innerHTML = '<div class=\'placeholder\'>Enter content above</div>' }}>Clear</button>}
+            {qrCode && <button className="clear-btn" onClick={() => { 
+              setUrlInput(''); 
+              setTextInput(''); 
+              qrRef.current.innerHTML = '<div class=\'placeholder\'>Enter content above</div>' 
+            }}>Clear</button>}
           </div>
           
-          <div className="preview-frame">
+          <div className="preview-frame" style={{ background: bgTransparent ? 'repeating-conic-gradient(#2a2a3a 0% 25%, #1a1a2a 0% 50%) 50% / 16px 16px' : colorBg }}>
             <div className="preview" ref={qrRef}>
               <div className="placeholder">Enter content above</div>
             </div>
           </div>
           
-          {qrCode && (
+          {isPaid ? (
             <div className="download-btns">
               <button onClick={() => downloadQR('png')}>
                 <span className="icon">⬇</span>
@@ -351,11 +447,9 @@ function App() {
                 SVG
               </button>
             </div>
-          )}
-
-          {hasLogo && (
+          ) : (
             <div className="promo-card">
-              <p>Remove watermark</p>
+              <p>✨ Unlock downloads + no watermark</p>
               <a href="https://buy.stripe.com/9B6bJ11xH48nd2h4OZ3Nm02" target="_blank" rel="noopener noreferrer" className="promo-btn">
                 Get Pro - $2
               </a>
