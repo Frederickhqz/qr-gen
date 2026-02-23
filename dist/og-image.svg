@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f1a"/>
+      <stop offset="50%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="100" y="115" width="1000" height="400" rx="40" fill="#ffffff" opacity="0.05"/>
+  <text x="600" y="280" font-family="Arial, sans-serif" font-size="180" font-weight="bold" fill="url(#grad)" text-anchor="middle">QR Studio</text>
+  <text x="600" y="380" font-family="Arial, sans-serif" font-size="50" fill="#9ca3af" text-anchor="middle">Professional QR Code Generator</text>
+  <circle cx="200" cy="200" r="30" fill="#6366f1" opacity="0.3"/>
+  <circle cx="1000" cy="430" r="50" fill="#a855f7" opacity="0.2"/>
+  <circle cx="150" cy="500" r="20" fill="#6366f1" opacity="0.4"/>
+  <circle cx="1050" cy="150" r="40" fill="#a855f7" opacity="0.3"/>
+</svg>
