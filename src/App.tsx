@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import QRCodeStyling from 'qr-code-styling'
 import './index.css'
+import './App.css'
 
 // QR Code Types
 type QRType = 
