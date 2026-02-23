@@ -255,7 +255,9 @@ function App() {
   return (
     <div className="app">
       <header>
-        <div className="logo-mark">⬡</div>
+        <div class="logo-mark">
+          <img src="/logo.png" alt="QR Studio" />
+        </div>
         <h1>QR Studio</h1>
         <p>Professional QR codes with style</p>
       </header>
