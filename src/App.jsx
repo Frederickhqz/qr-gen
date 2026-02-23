@@ -41,6 +41,25 @@ function App() {
     }
   }, [])
 
+  // Generate placeholder QR
+  const generatePlaceholder = () => {
+    if (qrRef.current) {
+      qrRef.current.innerHTML = ''
+    }
+    const qr = new QRCodeStyling({
+      width: 280 + (padding * 2),
+      height: 280 + (padding * 2),
+      data: 'https://qrstudio.app',
+      image: null,
+      dotsOptions: { color: '#333333', type: 'square' },
+      backgroundOptions: { color: '#f3f4f6' },
+      cornersSquareOptions: { type: 'square', color: '#333333' },
+      cornersDotOptions: { type: 'square', color: '#333333' },
+      qrOptions: { margin: padding }
+    })
+    qr.append(qrRef.current)
+  }
+
   const getQRData = () => {
     switch(currentTab) {
       case 'url':
@@ -65,6 +84,10 @@ function App() {
     }
   }
 
+  const hasContent = () => {
+    return !!getQRData()
+  }
+
   const generateQR = () => {
     if (qrRef.current) {
       qrRef.current.innerHTML = ''
@@ -72,8 +95,9 @@ function App() {
     
     const data = getQRData()
     
-    // Don't generate if no data
+    // Show placeholder if no data
     if (!data) {
+      generatePlaceholder()
       return
     }
 
@@ -120,15 +144,13 @@ function App() {
   // Auto-generate when inputs change
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (getQRData()) {
-        generateQR()
-      }
+      generateQR()
     }, 300)
     return () => clearTimeout(timer)
   }, [urlInput, textInput, wifiSsid, wifiPassword, wifiType, emailInput, emailSubject, emailBody, phoneInput, colorFg, colorBg, bgTransparent, qrStyle, cornerStyle, logoUrl, logoSize, logoMargin, padding, colorCornerSquare, colorCornerDot, useCustomCorners])
 
   const downloadQR = (format) => {
-    if (qrCode) {
+    if (qrCode && hasContent()) {
       qrCode.download({ 
         name: "qr-code", 
         extension: format,
@@ -183,9 +205,7 @@ function App() {
     setEmailSubject('')
     setEmailBody('')
     setPhoneInput('')
-    if (qrRef.current) {
-      qrRef.current.innerHTML = '<div class="placeholder">Enter content above</div>'
-    }
+    generatePlaceholder()
     setQrCode(null)
   }
 
@@ -207,7 +227,6 @@ function App() {
   }
 
   const handlePayment = () => {
-    // Create a checkout session and redirect
     const stripeLink = 'https://buy.stripe.com/9B6bJ11xH48nd2h4OZ3Nm02'
     window.open(stripeLink, '_blank')
   }
@@ -454,12 +473,14 @@ function App() {
           </div>
           
           <div className="preview-frame" style={{ background: bgTransparent ? 'repeating-conic-gradient(#2a2a3a 0% 25%, #1a1a2a 0% 50%) 50% / 16px 16px' : colorBg }}>
-            <div className="preview" ref={qrRef}>
-              <div className="placeholder">Enter content above</div>
-            </div>
+            <div className="preview" ref={qrRef}></div>
           </div>
           
-          {isPaid ? (
+          {!hasContent() ? (
+            <div className="hint-text">
+              👆 Enter content to generate QR
+            </div>
+          ) : isPaid ? (
             <div className="download-btns">
               <button onClick={() => downloadQR('png')}>
                 <span className="icon">⬇</span>
@@ -472,11 +493,11 @@ function App() {
             </div>
           ) : (
             <div className="promo-card">
-              <p>✨ Unlock downloads</p>
+              <p>💡 Screenshot preview or pay to download</p>
               <button onClick={handlePayment} className="promo-btn">
-                Pay $2 & Download
+                Pay $2 for Download
               </button>
-              <p className="secure-text">🔒 Secure payment</p>
+              <p className="secure-text">🔒 Secure payment • Apple Pay & Google Pay</p>
             </div>
           )}
         </div>
