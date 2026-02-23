@@ -41,25 +41,6 @@ function App() {
     }
   }, [])
 
-  // Generate placeholder QR
-  const generatePlaceholder = () => {
-    if (qrRef.current) {
-      qrRef.current.innerHTML = ''
-    }
-    const qr = new QRCodeStyling({
-      width: 280 + (padding * 2),
-      height: 280 + (padding * 2),
-      data: 'https://qrstudio.app',
-      image: null,
-      dotsOptions: { color: '#333333', type: 'square' },
-      backgroundOptions: { color: '#f3f4f6' },
-      cornersSquareOptions: { type: 'square', color: '#333333' },
-      cornersDotOptions: { type: 'square', color: '#333333' },
-      qrOptions: { margin: padding }
-    })
-    qr.append(qrRef.current)
-  }
-
   const getQRData = () => {
     switch(currentTab) {
       case 'url':
@@ -88,16 +69,57 @@ function App() {
     return !!getQRData()
   }
 
-  const generateQR = () => {
+  // Get effective colors
+  const getEffectiveFg = () => colorFg
+  const getEffectiveBg = () => bgTransparent ? 'transparent' : colorBg
+  const getEffectiveCornerSquare = () => useCustomCorners && colorCornerSquare ? colorCornerSquare : colorFg
+  const getEffectiveCornerDot = () => useCustomCorners && colorCornerDot ? colorCornerDot : colorFg
+
+  const generateQR = (dataOverride = null) => {
     if (qrRef.current) {
       qrRef.current.innerHTML = ''
     }
     
-    const data = getQRData()
+    const data = dataOverride !== null ? dataOverride : getQRData()
     
-    // Show placeholder if no data
-    if (!data) {
-      generatePlaceholder()
+    // Show styled placeholder if no data OR show placeholder when not paid
+    if (!data || (!isPaid && hasContent())) {
+      // Generate styled placeholder
+      const placeholderData = isPaid ? (getQRData() || 'https://qrgen.studio') : 'https://qrgen.studio'
+      
+      const qrOptions = {
+        width: 280 + (padding * 2),
+        height: 280 + (padding * 2),
+        data: placeholderData,
+        image: isPaid ? logoUrl : null,
+        dotsOptions: {
+          color: getEffectiveFg(),
+          type: qrStyle
+        },
+        backgroundOptions: {
+          color: getEffectiveBg() === 'transparent' ? '#f8f9fa' : getEffectiveBg(),
+        },
+        cornersSquareOptions: {
+          type: cornerStyle,
+          color: getEffectiveCornerSquare()
+        },
+        cornersDotOptions: {
+          type: cornerStyle,
+          color: getEffectiveCornerDot()
+        },
+        imageOptions: {
+          crossOrigin: "anonymous",
+          margin: logoMargin,
+          imageSize: logoSize
+        },
+        qrOptions: {
+          margin: padding
+        }
+      }
+
+      const qr = new QRCodeStyling(qrOptions)
+      qr.append(qrRef.current)
+      setQrCode(qr)
       return
     }
 
@@ -147,10 +169,10 @@ function App() {
       generateQR()
     }, 300)
     return () => clearTimeout(timer)
-  }, [urlInput, textInput, wifiSsid, wifiPassword, wifiType, emailInput, emailSubject, emailBody, phoneInput, colorFg, colorBg, bgTransparent, qrStyle, cornerStyle, logoUrl, logoSize, logoMargin, padding, colorCornerSquare, colorCornerDot, useCustomCorners])
+  }, [urlInput, textInput, wifiSsid, wifiPassword, wifiType, emailInput, emailSubject, emailBody, phoneInput, colorFg, colorBg, bgTransparent, qrStyle, cornerStyle, logoUrl, logoSize, logoMargin, padding, colorCornerSquare, colorCornerDot, useCustomCorners, isPaid])
 
   const downloadQR = (format) => {
-    if (qrCode && hasContent()) {
+    if (qrCode && hasContent() && isPaid) {
       qrCode.download({ 
         name: "qr-code", 
         extension: format,
@@ -205,8 +227,7 @@ function App() {
     setEmailSubject('')
     setEmailBody('')
     setPhoneInput('')
-    generatePlaceholder()
-    setQrCode(null)
+    generateQR()
   }
 
   const presets = [
@@ -493,7 +514,7 @@ function App() {
             </div>
           ) : (
             <div className="promo-card">
-              <p>💡 Screenshot preview or pay to download</p>
+              <p>💳 Pay to download your QR code</p>
               <button onClick={handlePayment} className="promo-btn">
                 Pay $2 for Download
               </button>
@@ -504,7 +525,7 @@ function App() {
       </div>
 
       <footer>
-        <span>QR Studio</span>
+        <span>qrgen.studio</span>
       </footer>
     </div>
   )
