@@ -6,6 +6,31 @@ import { compressLogo, type CompressedLogo } from './utils/logoCompress'
 import { dotStyles, cornerStyles, presets, type DotStyle, type CornerStyle } from './utils/styling'
 import './index.css'
 
+// Telegram WebApp type declarations
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: {
+        ready: () => void
+        openInvoice: (url: string, callback?: (status: string) => void) => void
+        close: () => void
+        initDataUnsafe?: {
+          user?: {
+            id: number
+            first_name: string
+            username?: string
+          }
+        }
+        platform?: string
+        version?: string
+      }
+    }
+  }
+}
+
+// Price constant
+const PRICE = 1.99
+
 // Form data type
 interface FormData {
   url: string
@@ -192,10 +217,38 @@ function App() {
     downloadQR.download({ name: 'qr-code', extension: format })
   }
 
-  // Simulate payment success (replace with actual Stripe integration)
+  // Check if running in Telegram
+  const isTelegram = typeof window !== 'undefined' && window.Telegram?.WebApp
+
+  // Initialize Telegram WebApp
+  useEffect(() => {
+    if (isTelegram) {
+      window.Telegram!.WebApp!.ready()
+    }
+  }, [isTelegram])
+
+  // Handle payment - Telegram or mock
   const handlePayment = () => {
-    // TODO: Integrate Stripe payment
-    setPaymentSuccess(true)
+    if (isTelegram && window.Telegram?.WebApp?.openInvoice) {
+      // Telegram payment URL - you'll need to create a bot and payment link
+      // Format: https://t.me/$YOUR_BOT?start=PAYMENT_INVOICE_ID
+      // or use a deep link: t.me/botname?start=invoice_id
+      const telegramPaymentUrl = 'https://t.me/$QRStudioBot?start=qr_payment'
+      
+      window.Telegram.WebApp.openInvoice(telegramPaymentUrl, (status) => {
+        if (status === 'paid') {
+          setPaymentSuccess(true)
+        } else if (status === 'cancelled') {
+          // User cancelled - do nothing
+        } else if (status === 'failed') {
+          // Payment failed - could show error
+          console.error('Payment failed')
+        }
+      })
+    } else {
+      // Mock payment for non-Telegram (Stripe integration would go here)
+      setPaymentSuccess(true)
+    }
   }
 
   // Apply preset
@@ -667,7 +720,7 @@ function App() {
             Download QR Code
           </button>
 
-          <p className="price-note">One-time payment • {qrSize}px download</p>
+          <p className="price-note">${PRICE.toFixed(2)} one-time • {qrSize}px download</p>
         </div>
       </main>
 
@@ -739,7 +792,7 @@ function App() {
 
                 <div className="modal-pricing">
                   <div className="price-option selected">
-                    <span className="price">$0.99</span>
+                    <span className="price">${PRICE.toFixed(2)}</span>
                     <span className="price-label">Single QR Code</span>
                     <ul className="price-features">
                       <li>PNG (high-res)</li>
@@ -777,15 +830,27 @@ function App() {
                       <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                       <line x1="1" y1="10" x2="23" y2="10"/>
                     </svg>
-                    Pay $0.99
+                    {isTelegram ? `Pay $${PRICE.toFixed(2)}` : `Pay $${PRICE.toFixed(2)}`}
                   </button>
 
                   <p className="secure-note">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                    </svg>
-                    Secured by Stripe
+                    {isTelegram ? (
+                      <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        Secured by Telegram Payments
+                      </>
+                    ) : (
+                      <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        Secured by Stripe
+                      </>
+                    )}
                   </p>
                 </div>
               </>
