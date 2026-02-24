@@ -1,6 +1,9 @@
 import type { QRType } from './icons'
 
 export function generateQRData(type: QRType, data: Record<string, string>): string {
+  const handle = (data.handle || 'username').replace('@', '')
+  const url = data.url || ''
+  
   switch (type) {
     case 'url':
       return data.url?.trim() || 'https://qrgen.studio'
@@ -40,87 +43,121 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
       if (data.description) ical += `DESCRIPTION:${data.description}\n`
       ical += 'END:VEVENT'
       return ical
+    
+    // Social
     case 'whatsapp':
       const waNum = (data.phone || '+15551234567').replace(/\D/g, '')
       return data.message ? `https://wa.me/${waNum}?text=${encodeURIComponent(data.message)}` : `https://wa.me/${waNum}`
+    case 'telegram':
+      return `https://t.me/${handle}`
+    case 'messenger':
+      return `https://m.me/${handle}`
+    case 'discord':
+      return `https://discord.gg/${handle.replace('#', '')}`
+    case 'threads':
+      return `https://threads.net/@${handle.replace('@', '')}`
     case 'instagram':
-      const igHandle = (data.handle || 'username').replace('@', '').replace('instagram.com/', '')
-      return `https://instagram.com/${igHandle}`
+      return `https://instagram.com/${handle}`
     case 'facebook':
-      const fbHandle = (data.handle || 'username').replace('facebook.com/', '').replace('@', '')
-      return `https://facebook.com/${fbHandle}`
+      return `https://facebook.com/${handle}`
     case 'twitter':
-      const twHandle = (data.handle || 'username').replace('@', '').replace('twitter.com/', '').replace('x.com/', '')
-      return `https://twitter.com/${twHandle}`
+      return `https://x.com/${handle.replace('@', '')}`
     case 'linkedin':
-      const liHandle = (data.handle || 'username').replace('linkedin.com/', '').replace('in/', '')
-      return `https://linkedin.com/in/${liHandle}`
+      return `https://linkedin.com/in/${handle}`
     case 'tiktok':
-      const ttHandle = (data.handle || 'username').replace('@', '').replace('tiktok.com/', '')
-      return `https://tiktok.com/@${ttHandle}`
+      return `https://tiktok.com/@${handle}`
     case 'snapchat':
-      const scHandle = (data.handle || 'username').replace('@', '').replace('snapchat.com/add/', '')
-      return `https://snapchat.com/add/${scHandle}`
+      return `https://snapchat.com/add/${handle}`
+    case 'youtube':
+      const ytId = url.match(/(?:v=|youtu\.be\/)([^&]+)/)?.[1]
+      return ytId ? `https://youtube.com/watch?v=${ytId}` : url || 'https://youtube.com'
+    case 'pinterest':
+      return `https://pinterest.com/${handle}`
+    case 'reddit':
+      return `https://reddit.com/u/${handle.replace('u/', '')}`
+    case 'twitch':
+      return `https://twitch.tv/${handle}`
+    case 'github':
+      return `https://github.com/${handle}`
+    case 'medium':
+      return `https://medium.com/@${handle.replace('@', '')}`
+    
+    // Payment
     case 'bitcoin':
       let btc = `bitcoin:${data.address || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'}`
       const btcParams = []
       if (data.amount) btcParams.push(`amount=${data.amount}`)
       return btcParams.length ? `${btc}?${btcParams.join('&')}` : btc
     case 'paypal':
-      return data.amount ? `https://paypal.me/${data.handle || 'username'}/${data.amount}` : `https://paypal.me/${data.handle || 'username'}`
+      return data.amount ? `https://paypal.me/${handle}/${data.amount}` : `https://paypal.me/${handle}`
     case 'venmo':
-      return data.message ? `https://venmo.com/${data.handle || 'username'}?note=${encodeURIComponent(data.message)}` : `https://venmo.com/${data.handle || 'username'}`
-    case 'youtube':
-      const ytId = data.url?.match(/(?:v=|youtu\.be\/)([^&]+)/)?.[1]
-      return ytId ? `https://youtube.com/watch?v=${ytId}` : data.url || 'https://youtube.com'
-    case 'spotify':
-      return data.url || 'https://spotify.com'
+      return data.message ? `https://venmo.com/${handle}?note=${encodeURIComponent(data.message)}` : `https://venmo.com/${handle}`
+    case 'cashapp':
+      return `https://cash.app/${handle.replace('$', '')}`
+    
+    // Platform
     case 'appstore':
-      const appId = data.url?.match(/id(\d+)/)?.[1]
-      return appId ? `https://apps.apple.com/app/id${appId}` : data.url || 'https://apps.apple.com'
+      const appId = url.match(/id(\d+)/)?.[1]
+      return appId ? `https://apps.apple.com/app/id${appId}` : url || 'https://apps.apple.com'
     case 'googleplay':
-      const pkg = data.url?.match(/id=([^&]+)/)?.[1]
-      return pkg ? `https://play.google.com/store/apps/details?id=${pkg}` : data.url || 'https://play.google.com'
+      const pkg = url.match(/id=([^&]+)/)?.[1]
+      return pkg ? `https://play.google.com/store/apps/details?id=${pkg}` : url || 'https://play.google.com'
     case 'amazon':
-      return data.url || 'https://amazon.com'
+      return url || 'https://amazon.com'
     case 'googlemaps':
-      const coords = data.url?.match(/[-.\d]+,[-.\d]+/)?.[0]
-      return coords ? `https://www.google.com/maps?q=${coords}` : data.url || 'https://maps.google.com'
+      const coords = url.match(/[-.\d]+,[-.\d]+/)?.[0]
+      return coords ? `https://www.google.com/maps?q=${coords}` : url || 'https://maps.google.com'
     case 'applemaps':
-      const appleCoords = data.url?.match(/[-.\d]+,[-.\d]+/)?.[0]
-      return appleCoords ? `http://maps.apple.com/?q=${appleCoords}` : data.url || 'http://maps.apple.com'
+      const appleCoords = url.match(/[-.\d]+,[-.\d]+/)?.[0]
+      return appleCoords ? `http://maps.apple.com/?q=${appleCoords}` : url || 'http://maps.apple.com'
+    case 'spotify':
+      return url || 'https://spotify.com'
+    case 'website':
+      return url || 'https://example.com'
+      
     default:
       return 'https://qrgen.studio'
   }
 }
 
 export function generatePlaceholderData(type: QRType): string {
-  switch (type) {
-    case 'url': return 'https://example.com'
-    case 'text': return 'Your text here'
-    case 'wifi': return 'WIFI:T:WPA;S:Network;P:password;;'
-    case 'email': return 'mailto:hello@example.com'
-    case 'phone': return 'tel:+15551234567'
-    case 'sms': return 'sms:+15551234567'
-    case 'vcard': return 'BEGIN:VCARD\nVERSION:3.0\nFN:John Doe\nEND:VCARD'
-    case 'event': return 'BEGIN:VEVENT\nSUMMARY:Sample Event\nEND:VEVENT'
-    case 'whatsapp': return 'https://wa.me/15551234567'
-    case 'instagram': return 'https://instagram.com/sample'
-    case 'facebook': return 'https://facebook.com/sample'
-    case 'twitter': return 'https://twitter.com/sample'
-    case 'linkedin': return 'https://linkedin.com/in/sample'
-    case 'tiktok': return 'https://tiktok.com/@sample'
-    case 'snapchat': return 'https://snapchat.com/add/sample'
-    case 'bitcoin': return 'bitcoin:bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'
-    case 'paypal': return 'https://paypal.me/sample'
-    case 'venmo': return 'https://venmo.com/sample'
-    case 'youtube': return 'https://youtube.com'
-    case 'spotify': return 'https://spotify.com'
-    case 'appstore': return 'https://apps.apple.com'
-    case 'googleplay': return 'https://play.google.com'
-    case 'amazon': return 'https://amazon.com'
-    case 'googlemaps': return 'https://maps.google.com'
-    case 'applemaps': return 'http://maps.apple.com'
-    default: return 'https://qrgen.studio'
+  const placeholders: Record<string, string> = {
+    url: 'https://example.com',
+    text: 'Your text here',
+    wifi: 'WIFI:T:WPA;S:Network;P:password;;',
+    email: 'mailto:hello@example.com',
+    phone: 'tel:+15551234567',
+    sms: 'sms:+15551234567',
+    vcard: 'BEGIN:VCARD\nVERSION:3.0\nFN:John Doe\nEND:VCARD',
+    event: 'BEGIN:VEVENT\nSUMMARY:Sample Event\nEND:VEVENT',
+    whatsapp: 'https://wa.me/15551234567',
+    telegram: 'https://t.me/username',
+    messenger: 'https://m.me/username',
+    discord: 'https://discord.gg/invite',
+    threads: 'https://threads.net/@username',
+    instagram: 'https://instagram.com/sample',
+    facebook: 'https://facebook.com/sample',
+    twitter: 'https://x.com/sample',
+    linkedin: 'https://linkedin.com/in/sample',
+    tiktok: 'https://tiktok.com/@sample',
+    snapchat: 'https://snapchat.com/add/sample',
+    youtube: 'https://youtube.com',
+    pinterest: 'https://pinterest.com/sample',
+    reddit: 'https://reddit.com/u/sample',
+    twitch: 'https://twitch.tv/sample',
+    github: 'https://github.com/sample',
+    medium: 'https://medium.com/@sample',
+    bitcoin: 'bitcoin:bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    paypal: 'https://paypal.me/sample',
+    venmo: 'https://venmo.com/sample',
+    cashapp: 'https://cash.app/sample',
+    appstore: 'https://apps.apple.com',
+    googleplay: 'https://play.google.com',
+    amazon: 'https://amazon.com',
+    googlemaps: 'https://maps.google.com',
+    applemaps: 'http://maps.apple.com',
+    spotify: 'https://spotify.com',
+    website: 'https://example.com',
   }
+  return placeholders[type] || 'https://qrgen.studio'
 }

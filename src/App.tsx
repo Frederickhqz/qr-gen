@@ -29,7 +29,10 @@ declare global {
 }
 
 // Price constant
-const PRICE = 0.99
+const PRICE = 1.99
+
+// Common download sizes
+const DOWNLOAD_SIZES = [200, 300, 400, 500, 600, 800, 1000, 1200, 1500, 2000]
 
 // Form data type
 interface FormData {
@@ -82,13 +85,14 @@ function App() {
   const [gradientColor1, setGradientColor1] = useState('#007AFF')
   const [gradientColor2, setGradientColor2] = useState('#5856D6')
   const [gradientType, setGradientType] = useState<'linear' | 'radial'>('linear')
-  const [qrSize, setQrSize] = useState(300)
+  const [qrSize, setQrSize] = useState(800)
   
-  // Logo state
+  // Logo/Icon state
   const [logo, setLogo] = useState<string | null>(null)
   const [logoSize, setLogoSize] = useState(0.35)
   const [logoMargin, setLogoMargin] = useState(5)
   const [logoInfo, setLogoInfo] = useState<CompressedLogo | null>(null)
+  const [showIconOption, setShowIconOption] = useState(false)
   
   // UI state
   const [activeCategory, setActiveCategory] = useState<string>('core')
@@ -164,6 +168,7 @@ function App() {
       const compressed = await compressLogo(file, 150)
       setLogo(compressed.dataUrl)
       setLogoInfo(compressed)
+      setShowIconOption(true)
     } catch (error) {
       console.error('Failed to compress logo:', error)
     }
@@ -264,30 +269,24 @@ function App() {
   // Render form fields based on QR type
   const renderForm = () => {
     const typeInfo = getQRTypeInfo(qrType)
+    const handle = formData.handle
+    const updateHandle = (v: string) => updateField('handle', v)
+    const updateUrl = (v: string) => updateField('url', v)
     
     switch (qrType) {
       case 'url':
+      case 'website':
         return (
           <div className="form-group">
             <label>Website URL</label>
-            <input 
-              type="url" 
-              value={formData.url} 
-              onChange={(e) => updateField('url', e.target.value)} 
-              placeholder={typeInfo.placeholder} 
-            />
+            <input type="url" value={formData.url} onChange={(e) => updateUrl(e.target.value)} placeholder={typeInfo.placeholder} />
           </div>
         )
       case 'text':
         return (
           <div className="form-group">
             <label>Your Text</label>
-            <textarea 
-              value={formData.text} 
-              onChange={(e) => updateField('text', e.target.value)} 
-              placeholder="Enter any text..." 
-              rows={4} 
-            />
+            <textarea value={formData.text} onChange={(e) => updateField('text', e.target.value)} placeholder="Enter any text..." rows={4} />
           </div>
         )
       case 'wifi':
@@ -429,12 +428,22 @@ function App() {
       case 'linkedin':
       case 'tiktok':
       case 'snapchat':
+      case 'telegram':
+      case 'messenger':
+      case 'discord':
+      case 'threads':
+      case 'pinterest':
+      case 'reddit':
+      case 'twitch':
+      case 'github':
+      case 'medium':
       case 'paypal':
       case 'venmo':
+      case 'cashapp':
         return (
           <div className="form-group">
-            <label>Username</label>
-            <input type="text" value={formData.handle} onChange={(e) => updateField('handle', e.target.value)} placeholder={qrType === 'instagram' ? '@username' : 'username'} />
+            <label>Username / Handle</label>
+            <input type="text" value={formData.handle} onChange={(e) => updateHandle(e.target.value)} placeholder={typeInfo.placeholder} />
           </div>
         )
       case 'bitcoin':
@@ -460,7 +469,7 @@ function App() {
         return (
           <div className="form-group">
             <label>URL</label>
-            <input type="url" value={formData.url} onChange={(e) => updateField('url', e.target.value)} placeholder="https://..." />
+            <input type="url" value={formData.url} onChange={(e) => updateUrl(e.target.value)} placeholder="https://..." />
           </div>
         )
       default:
@@ -483,9 +492,9 @@ function App() {
               <rect x="22" y="6" width="4" height="4" rx="1" fill="white"/>
               <rect x="6" y="22" width="4" height="4" rx="1" fill="white"/>
             </svg>
-            <span className="logo-text">QR Studio</span>
+            <span className="logo-text">QR Code Studio</span>
           </div>
-          <p className="tagline">Create beautiful QR codes in seconds</p>
+          <p className="tagline">No subscription. No strings attached. Your QR works forever.</p>
         </div>
       </header>
 
@@ -669,14 +678,14 @@ function App() {
               )}
             </div>
 
-            {/* Logo */}
+            {/* Center Icon / Logo */}
             <div className="option-group">
-              <label>Logo</label>
+              <label>Center Icon / Logo</label>
               {logo ? (
                 <div className="logo-preview-wrap">
                   <div className="logo-preview">
                     <img src={logo} alt="Logo" />
-                    <button className="remove-logo" onClick={() => { setLogo(null); setLogoInfo(null); }}>×</button>
+                    <button className="remove-logo" onClick={() => { setLogo(null); setLogoInfo(null); setShowIconOption(false); }}>×</button>
                   </div>
                   <div className="logo-controls">
                     {logoInfo?.wasCompressed && (
@@ -704,15 +713,27 @@ function App() {
                     <polyline points="17 8 12 3 7 8"/>
                     <line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
-                  <span>Upload Logo</span>
+                  <span>Add Icon / Logo</span>
                 </label>
               )}
+              <p className="option-hint">Add your logo or brand icon in the center for better identification</p>
             </div>
 
-            {/* Size */}
+            {/* Download Size */}
             <div className="option-group">
-              <label>Download Size: {qrSize}px</label>
-              <input type="range" min="200" max="800" step="50" value={qrSize} onChange={(e) => setQrSize(parseInt(e.target.value))} />
+              <label>Download Size</label>
+              <div className="size-grid">
+                {DOWNLOAD_SIZES.map((size) => (
+                  <button
+                    key={size}
+                    className={`size-btn ${qrSize === size ? 'active' : ''}`}
+                    onClick={() => setQrSize(size)}
+                  >
+                    {size}px
+                  </button>
+                ))}
+              </div>
+              <p className="option-hint">Larger sizes for print, smaller for web</p>
             </div>
           </div>
         </div>
@@ -753,7 +774,7 @@ function App() {
                       <polyline points="21 15 16 10 5 21"/>
                     </svg>
                     <span className="format">PNG</span>
-                    <span className="format-desc">High quality image • {qrSize}×{qrSize}px</span>
+                    <span className="format-desc">High quality • {qrSize}×{qrSize}px</span>
                   </button>
                   
                   <button className="download-option" onClick={() => handleDownload('svg')}>
@@ -763,7 +784,7 @@ function App() {
                       <polyline points="2 12 12 17 22 12"/>
                     </svg>
                     <span className="format">SVG</span>
-                    <span className="format-desc">Vector format • Scalable</span>
+                    <span className="format-desc">Vector • Scalable</span>
                   </button>
                   
                   <button className="download-option" onClick={() => handleDownload('jpeg')}>
@@ -781,7 +802,7 @@ function App() {
               <>
                 <div className="modal-header">
                   <h2>Unlock Your QR Code</h2>
-                  <p>Get your high-quality QR code in multiple formats</p>
+                  <p>One-time payment. Your QR works forever.</p>
                 </div>
 
                 <div className="modal-pricing">
@@ -789,10 +810,10 @@ function App() {
                     <span className="price">${PRICE.toFixed(2)}</span>
                     <span className="price-label">Single QR Code</span>
                     <ul className="price-features">
-                      <li>PNG (high-res)</li>
-                      <li>SVG (vector)</li>
-                      <li>JPEG (web-ready)</li>
+                      <li>PNG, SVG, JPEG formats</li>
+                      <li>Up to {Math.max(...DOWNLOAD_SIZES)}px download</li>
                       <li>No watermark</li>
+                      <li>Works forever</li>
                     </ul>
                   </div>
                 </div>
@@ -843,7 +864,7 @@ function App() {
 
       {/* Footer */}
       <footer>
-        <p>© 2026 QR Studio • Beautiful QR codes, instantly</p>
+        <p>© 2026 QR Code Studio • Beautiful QR codes, instantly. No subscription required.</p>
       </footer>
     </div>
   )
