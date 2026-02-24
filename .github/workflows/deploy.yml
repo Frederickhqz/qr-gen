@@ -29,6 +29,11 @@ jobs:
       - name: Clean FTP state cache
         run: rm -f ./.ftp-deploy-sync-state.json || true
       
+      - name: Clear FTP sync state
+        run: |
+          # Force a fresh deployment by removing any cached sync state
+          rm -f .ftp-deploy-sync-state.json .ftp-deploy-sync-state.json.hash || true
+      
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
@@ -37,7 +42,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: public_html/
-          dangerous-clean-slate: false
+          dangerous-clean-slate: true
           exclude: |
             **/.DS_Store
             **/node_modules/**
