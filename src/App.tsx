@@ -68,12 +68,15 @@ function App() {
   // UI state
   const [activeCategory, setActiveCategory] = useState<string>('core')
   const [showPayment, setShowPayment] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
+
+  // Constants
+  const PREVIEW_SIZE = 280
 
   // Filter QR types by category
   const filteredTypes = qrTypes.filter(t => t.category === activeCategory)
 
-  // Generate QR code
+  // Generate QR code (fixed size for preview)
   const updateQR = useCallback(() => {
     if (!qrRef.current) return
     qrRef.current.innerHTML = ''
@@ -82,8 +85,8 @@ function App() {
     const data = generatePlaceholderData(qrType)
     
     const options = {
-      width: qrSize,
-      height: qrSize,
+      width: PREVIEW_SIZE,
+      height: PREVIEW_SIZE,
       data,
       image: logo || undefined,
       dotsOptions: {
@@ -121,7 +124,7 @@ function App() {
     const newQr = new QRCodeStyling(options)
     newQr.append(qrRef.current)
     setQr(newQr)
-  }, [qrType, dotsStyle, cornersStyle, fgColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType, logo, logoSize, logoMargin, qrSize])
+  }, [qrType, dotsStyle, cornersStyle, fgColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType, logo, logoSize, logoMargin])
 
   useEffect(() => {
     updateQR()
@@ -139,6 +142,60 @@ function App() {
     } catch (error) {
       console.error('Failed to compress logo:', error)
     }
+  }
+
+  // Generate real QR for download (with actual size and data)
+  const generateDownloadQR = (): QRCodeStyling => {
+    const data = generateQRData(qrType, formData as Record<string, string>)
+    
+    return new QRCodeStyling({
+      width: qrSize,
+      height: qrSize,
+      data,
+      image: logo || undefined,
+      dotsOptions: {
+        color: fgColor,
+        type: dotsStyle as any,
+        ...(gradientEnabled && {
+          gradient: {
+            type: gradientType,
+            rotation: 0,
+            colorStops: [
+              { offset: 0, color: gradientColor1 },
+              { offset: 1, color: gradientColor2 }
+            ]
+          }
+        })
+      },
+      backgroundOptions: {
+        color: bgTransparent ? 'transparent' : bgColor,
+      },
+      cornersSquareOptions: {
+        type: cornersStyle as any,
+        color: fgColor,
+      },
+      cornersDotOptions: {
+        type: cornersStyle as any,
+        color: fgColor,
+      },
+      imageOptions: {
+        crossOrigin: 'anonymous',
+        margin: logoMargin,
+        imageSize: logoSize,
+      },
+    })
+  }
+
+  // Handle download after payment
+  const handleDownload = (format: 'png' | 'svg' | 'jpeg') => {
+    const downloadQR = generateDownloadQR()
+    downloadQR.download({ name: 'qr-code', extension: format })
+  }
+
+  // Simulate payment success (replace with actual Stripe integration)
+  const handlePayment = () => {
+    // TODO: Integrate Stripe payment
+    setPaymentSuccess(true)
   }
 
   // Apply preset
@@ -597,8 +654,8 @@ function App() {
           </div>
           
           <div className="preview-info">
-            <h3>Your QR code is ready!</h3>
-            <p>Customize the style above, then unlock your high-quality QR code.</p>
+            <h3>Style your QR code</h3>
+            <p>Adjust colors, patterns, and add your logo. Pay to download.</p>
           </div>
 
           <button className="download-btn" onClick={() => setShowPayment(true)}>
@@ -610,72 +667,129 @@ function App() {
             Download QR Code
           </button>
 
-          <p className="price-note">One-time payment • Instant download</p>
+          <p className="price-note">One-time payment • {qrSize}px download</p>
         </div>
       </main>
 
       {/* Payment Modal */}
       {showPayment && (
-        <div className="modal-overlay" onClick={() => setShowPayment(false)}>
+        <div className="modal-overlay" onClick={() => {
+          if (paymentSuccess) {
+            setShowPayment(false)
+            setPaymentSuccess(false)
+          }
+        }}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowPayment(false)}>×</button>
+            <button className="modal-close" onClick={() => {
+              setShowPayment(false)
+              setPaymentSuccess(false)
+            }}>×</button>
             
-            <div className="modal-header">
-              <h2>Unlock Your QR Code</h2>
-              <p>Get your high-quality QR code in multiple formats</p>
-            </div>
-
-            <div className="modal-pricing">
-              <div className="price-option selected">
-                <span className="price">$0.99</span>
-                <span className="price-label">Single QR Code</span>
-                <ul className="price-features">
-                  <li>PNG (high-res)</li>
-                  <li>SVG (vector)</li>
-                  <li>JPEG (web-ready)</li>
-                  <li>No watermark</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="modal-form">
-              <div className="form-group">
-                <label>Email (for receipt)</label>
-                <input type="email" placeholder="you@example.com" />
-              </div>
-              
-              <div className="form-group">
-                <label>Card Number</label>
-                <input type="text" placeholder="4242 4242 4242 4242" />
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Expiry</label>
-                  <input type="text" placeholder="MM/YY" />
+            {paymentSuccess ? (
+              <>
+                <div className="modal-header success">
+                  <div className="success-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                  </div>
+                  <h2>Your QR code is ready!</h2>
+                  <p>Download in your preferred format</p>
                 </div>
-                <div className="form-group">
-                  <label>CVC</label>
-                  <input type="text" placeholder="123" />
+
+                <div className="download-options">
+                  <button className="download-option" onClick={() => handleDownload('png')}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span className="format">PNG</span>
+                    <span className="format-desc">High quality image • {qrSize}×{qrSize}px</span>
+                  </button>
+                  
+                  <button className="download-option" onClick={() => handleDownload('svg')}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                      <polyline points="2 17 12 22 22 17"/>
+                      <polyline points="2 12 12 17 22 12"/>
+                    </svg>
+                    <span className="format">SVG</span>
+                    <span className="format-desc">Vector format • Scalable</span>
+                  </button>
+                  
+                  <button className="download-option" onClick={() => handleDownload('jpeg')}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span className="format">JPEG</span>
+                    <span className="format-desc">Web ready • {qrSize}×{qrSize}px</span>
+                  </button>
                 </div>
-              </div>
+              </>
+            ) : (
+              <>
+                <div className="modal-header">
+                  <h2>Unlock Your QR Code</h2>
+                  <p>Get your high-quality QR code in multiple formats</p>
+                </div>
 
-              <button className="pay-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                  <line x1="1" y1="10" x2="23" y2="10"/>
-                </svg>
-                Pay $0.99
-              </button>
+                <div className="modal-pricing">
+                  <div className="price-option selected">
+                    <span className="price">$0.99</span>
+                    <span className="price-label">Single QR Code</span>
+                    <ul className="price-features">
+                      <li>PNG (high-res)</li>
+                      <li>SVG (vector)</li>
+                      <li>JPEG (web-ready)</li>
+                      <li>No watermark</li>
+                    </ul>
+                  </div>
+                </div>
 
-              <p className="secure-note">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-                Secured by Stripe
-              </p>
-            </div>
+                <div className="modal-form">
+                  <div className="form-group">
+                    <label>Email (for receipt)</label>
+                    <input type="email" placeholder="you@example.com" />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Card Number</label>
+                    <input type="text" placeholder="4242 4242 4242 4242" />
+                  </div>
+                  
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Expiry</label>
+                      <input type="text" placeholder="MM/YY" />
+                    </div>
+                    <div className="form-group">
+                      <label>CVC</label>
+                      <input type="text" placeholder="123" />
+                    </div>
+                  </div>
+
+                  <button className="pay-btn" onClick={handlePayment}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                      <line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                    Pay $0.99
+                  </button>
+
+                  <p className="secure-note">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    Secured by Stripe
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
