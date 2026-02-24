@@ -695,7 +695,8 @@ function App() {
 
         {/* Right Panel - Preview */}
         <div className="panel preview-panel">
-          <div className="preview-card">
+          <div className="preview-sticky-wrapper">
+            <div className="preview-card">
             <div ref={qrRef} className="qr-container" />
             <div className="preview-badge">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -704,6 +705,7 @@ function App() {
               </svg>
               <span>Preview</span>
             </div>
+          </div>
           </div>
           
           <div className="preview-info">

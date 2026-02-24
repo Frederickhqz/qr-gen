@@ -620,6 +620,19 @@ select {
   padding-right: 2.5rem !important;
 }
 
+/* Sticky Wrapper for Preview */
+.preview-sticky-wrapper {
+  position: sticky;
+  top: 1.5rem;
+  z-index: 10;
+}
+
+@media (min-width: 1024px) {
+  .preview-sticky-wrapper {
+    top: 2rem;
+  }
+}
+
 /* Preview Card */
 .preview-card {
   background: var(--bg-card);
