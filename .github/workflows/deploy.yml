@@ -26,6 +26,9 @@ jobs:
       - name: Build project
         run: npx vite build
       
+      - name: Clean FTP state cache
+        run: rm -f ./.ftp-deploy-sync-state.json || true
+      
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
@@ -35,3 +38,6 @@ jobs:
           local-dir: ./dist/
           server-dir: public_html/
           dangerous-clean-slate: false
+          exclude: |
+            **/.DS_Store
+            **/node_modules/**
