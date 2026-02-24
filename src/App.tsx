@@ -29,7 +29,7 @@ declare global {
 }
 
 // Price constant
-const PRICE = 1.99
+const PRICE = 0.99
 
 // Form data type
 interface FormData {
@@ -96,7 +96,7 @@ function App() {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
 
   // Constants
-  const PREVIEW_SIZE = 280
+  const PREVIEW_SIZE = 240
 
   // Filter QR types by category
   const filteredTypes = qrTypes.filter(t => t.category === activeCategory)
@@ -230,23 +230,19 @@ function App() {
   // Handle payment - Telegram or mock
   const handlePayment = () => {
     if (isTelegram && window.Telegram?.WebApp?.openInvoice) {
-      // Telegram payment URL - you'll need to create a bot and payment link
-      // Format: https://t.me/$YOUR_BOT?start=PAYMENT_INVOICE_ID
-      // or use a deep link: t.me/botname?start=invoice_id
       const telegramPaymentUrl = 'https://t.me/$QRStudioBot?start=qr_payment'
       
       window.Telegram.WebApp.openInvoice(telegramPaymentUrl, (status) => {
         if (status === 'paid') {
           setPaymentSuccess(true)
         } else if (status === 'cancelled') {
-          // User cancelled - do nothing
+          // User cancelled
         } else if (status === 'failed') {
-          // Payment failed - could show error
           console.error('Payment failed')
         }
       })
     } else {
-      // Mock payment for non-Telegram (Stripe integration would go here)
+      // Mock payment for non-Telegram
       setPaymentSuccess(true)
     }
   }
@@ -493,8 +489,36 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content - Desktop: Fixed sidebar layout */}
-      <main className="main desktop-layout">
+      {/* Main Layout */}
+      <main className="main">
+        {/* Fixed Preview Panel - Always visible */}
+        <aside className="preview-panel">
+          <div className="preview-card">
+            <div ref={qrRef} className="qr-container" />
+            <div className="preview-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <span>Preview</span>
+            </div>
+          </div>
+          
+          <div className="preview-info">
+            <h3>Customize your QR</h3>
+            <p>Adjust style options below. Pay to download.</p>
+          </div>
+
+          <button className="download-btn" onClick={() => setShowPayment(true)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download ${PRICE.toFixed(2)}
+          </button>
+        </aside>
+
         {/* Scrollable Content Area */}
         <div className="content-scrollable">
           {/* Category Tabs */}
@@ -579,7 +603,7 @@ function App() {
               </div>
             </div>
 
-            {/* Corner Style */}
+            {/* Corner style */}
             <div className="option-group">
               <label>Corners</label>
               <div className="pattern-grid">
@@ -687,341 +711,10 @@ function App() {
 
             {/* Size */}
             <div className="option-group">
-              <label>Size: {qrSize}px</label>
+              <label>Download Size: {qrSize}px</label>
               <input type="range" min="200" max="800" step="50" value={qrSize} onChange={(e) => setQrSize(parseInt(e.target.value))} />
             </div>
           </div>
-        </div>
-
-        {/* Fixed Sidebar - Desktop Only */}
-        <aside className="preview-sidebar">
-          <div className="preview-card">
-            <div ref={qrRef} className="qr-container" />
-            <div className="preview-badge">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              <span>Preview</span>
-            </div>
-          </div>
-          
-          <div className="preview-info">
-            <h3>Style your QR code</h3>
-            <p>Adjust colors, patterns, and add your logo. Pay to download.</p>
-          </div>
-
-          <button className="download-btn" onClick={() => setShowPayment(true)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Download QR Code
-          </button>
-
-          <p className="price-note">${PRICE.toFixed(2)} one-time • {qrSize}px download</p>
-        </aside>
-      </main>
-
-      {/* Mobile Layout */}
-      <main className="main mobile-layout">
-        {/* Category Tabs */}
-        <div className="category-tabs">
-          {categories.map(cat => (
-            <button
-              key={cat.id}
-              className={`category-tab ${activeCategory === cat.id ? 'active' : ''}`}
-              onClick={() => setActiveCategory(cat.id)}
-            >
-              <span className="tab-label">{cat.label}</span>
-              <span className="tab-desc">{cat.description}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* QR Type Selector */}
-        <div className="section">
-          <div className="type-grid">
-            {filteredTypes.map((type) => {
-              const Icon = type.icon
-              return (
-                <button
-                  key={type.id}
-                  className={`type-btn ${qrType === type.id ? 'active' : ''}`}
-                  onClick={() => setQrType(type.id)}
-                >
-                  <Icon className="type-icon" size={20} />
-                  <span className="type-label">{type.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Mobile Preview */}
-        <div className="panel preview-panel-mobile">
-          <div className="preview-card">
-            <div ref={qrRef} className="qr-container" />
-            <div className="preview-badge">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              <span>Preview</span>
-            </div>
-          </div>
-          
-          <div className="preview-info">
-            <h3>Style your QR code</h3>
-            <p>Adjust colors, patterns, and add your logo. Pay to download.</p>
-          </div>
-
-          <button className="download-btn" onClick={() => setShowPayment(true)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Download QR Code
-          </button>
-
-          <p className="price-note">${PRICE.toFixed(2)} one-time • {qrSize}px download</p>
-        </div>
-
-        {/* Data Form */}
-        <div className="section">
-          <h3>Details</h3>
-          {renderForm()}
-        </div>
-
-        {/* Style Options */}
-        <div className="section">
-          <h3>Style</h3>
-          {/* Category Tabs */}
-          <div className="category-tabs">
-            {categories.map(cat => (
-              <button
-                key={cat.id}
-                className={`category-tab ${activeCategory === cat.id ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat.id)}
-              >
-                <span className="tab-label">{cat.label}</span>
-                <span className="tab-desc">{cat.description}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* QR Type Selector */}
-          <div className="section">
-            <div className="type-grid">
-              {filteredTypes.map((type) => {
-                const Icon = type.icon
-                return (
-                  <button
-                    key={type.id}
-                    className={`type-btn ${qrType === type.id ? 'active' : ''}`}
-                    onClick={() => setQrType(type.id)}
-                  >
-                    <Icon className="type-icon" size={20} />
-                    <span className="type-label">{type.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Data Form */}
-          <div className="section">
-            <h3>Details</h3>
-            {renderForm()}
-          </div>
-
-          {/* Style Options */}
-          <div className="section">
-            <h3>Style</h3>
-            
-            {/* Presets */}
-            <div className="option-group">
-              <label>Presets</label>
-              <div className="preset-grid">
-                {presets.map((preset, i) => (
-                  <button
-                    key={i}
-                    className="preset-btn"
-                    onClick={() => applyPreset(preset)}
-                    title={preset.name}
-                    style={{ 
-                      background: preset.bg === 'transparent' 
-                        ? 'repeating-conic-gradient(#e5e5e5 0 25%, #fff 0 50%) 50% / 8px 8px' 
-                        : preset.bg,
-                      border: preset.bg === '#1c1c1e' ? '1px solid #333' : '1px solid #e5e5e5'
-                    }}
-                  >
-                    <div style={{ background: preset.fg, width: 20, height: 20, borderRadius: 4 }} />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Dot Pattern */}
-            <div className="option-group">
-              <label>Pattern</label>
-              <div className="pattern-grid">
-                {dotStyles.map((style) => (
-                  <button
-                    key={style.id}
-                    className={`pattern-btn ${dotsStyle === style.id ? 'active' : ''}`}
-                    onClick={() => setDotsStyle(style.id as DotStyle)}
-                  >
-                    {style.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Corner Style */}
-            <div className="option-group">
-              <label>Corners</label>
-              <div className="pattern-grid">
-                {cornerStyles.map((style) => (
-                  <button
-                    key={style.id}
-                    className={`pattern-btn ${cornersStyle === style.id ? 'active' : ''}`}
-                    onClick={() => setCornersStyle(style.id as CornerStyle)}
-                  >
-                    {style.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Colors */}
-            <div className="option-group">
-              <label>Colors</label>
-              <div className="color-row">
-                <div className="color-picker-group">
-                  <span>Foreground</span>
-                  <div className="color-input-wrap">
-                    <input type="color" value={fgColor} onChange={(e) => setFgColor(e.target.value)} />
-                    <input type="text" value={fgColor} onChange={(e) => setFgColor(e.target.value)} className="color-hex" />
-                  </div>
-                </div>
-                <div className="color-picker-group">
-                  <span>Background</span>
-                  <div className="color-input-wrap">
-                    <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} disabled={bgTransparent} />
-                    <label className="transparent-check">
-                      <input type="checkbox" checked={bgTransparent} onChange={(e) => setBgTransparent(e.target.checked)} />
-                      <span>Transparent</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Gradient */}
-            <div className="option-group">
-              <label className="toggle-label">
-                <input type="checkbox" checked={gradientEnabled} onChange={(e) => setGradientEnabled(e.target.checked)} />
-                <span>Gradient</span>
-              </label>
-              {gradientEnabled && (
-                <div className="gradient-options">
-                  <div className="color-row">
-                    <div className="color-picker-group">
-                      <span>Start</span>
-                      <input type="color" value={gradientColor1} onChange={(e) => setGradientColor1(e.target.value)} />
-                    </div>
-                    <div className="color-picker-group">
-                      <span>End</span>
-                      <input type="color" value={gradientColor2} onChange={(e) => setGradientColor2(e.target.value)} />
-                    </div>
-                    <select value={gradientType} onChange={(e) => setGradientType(e.target.value as 'linear' | 'radial')}>
-                      <option value="linear">Linear</option>
-                      <option value="radial">Radial</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Logo */}
-            <div className="option-group">
-              <label>Logo</label>
-              {logo ? (
-                <div className="logo-preview-wrap">
-                  <div className="logo-preview">
-                    <img src={logo} alt="Logo" />
-                    <button className="remove-logo" onClick={() => { setLogo(null); setLogoInfo(null); }}>×</button>
-                  </div>
-                  <div className="logo-controls">
-                    {logoInfo?.wasCompressed && (
-                      <p className="logo-info">
-                        Resized from {logoInfo.originalWidth}×{logoInfo.originalHeight} to {logoInfo.newWidth}×{logoInfo.newHeight}
-                      </p>
-                    )}
-                    <div className="logo-sliders">
-                      <label>
-                        <span>Size</span>
-                        <input type="range" min="0.15" max="0.5" step="0.05" value={logoSize} onChange={(e) => setLogoSize(parseFloat(e.target.value))} />
-                      </label>
-                      <label>
-                        <span>Margin</span>
-                        <input type="range" min="0" max="15" step="1" value={logoMargin} onChange={(e) => setLogoMargin(parseInt(e.target.value))} />
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <label className="upload-btn">
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} />
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                  </svg>
-                  <span>Upload Logo</span>
-                </label>
-              )}
-            </div>
-
-            {/* Size */}
-            <div className="option-group">
-              <label>Size: {qrSize}px</label>
-              <input type="range" min="200" max="800" step="50" value={qrSize} onChange={(e) => setQrSize(parseInt(e.target.value))} />
-            </div>
-          </div>
-        </div>
-
-        {/* Right Panel - Preview (Mobile Only - Hidden on Desktop) */}
-        <div className="panel preview-panel-mobile">
-          <div className="preview-card">
-            <div ref={qrRef} className="qr-container" />
-            <div className="preview-badge">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              <span>Preview</span>
-            </div>
-          </div>
-          
-          <div className="preview-info">
-            <h3>Style your QR code</h3>
-            <p>Adjust colors, patterns, and add your logo. Pay to download.</p>
-          </div>
-
-          <button className="download-btn" onClick={() => setShowPayment(true)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Download QR Code
-          </button>
-
-          <p className="price-note">${PRICE.toFixed(2)} one-time • {qrSize}px download</p>
         </div>
       </main>
 
@@ -1131,27 +824,15 @@ function App() {
                       <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                       <line x1="1" y1="10" x2="23" y2="10"/>
                     </svg>
-                    {isTelegram ? `Pay $${PRICE.toFixed(2)}` : `Pay $${PRICE.toFixed(2)}`}
+                    Pay ${PRICE.toFixed(2)}
                   </button>
 
                   <p className="secure-note">
-                    {isTelegram ? (
-                      <>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
-                        Secured by Telegram Payments
-                      </>
-                    ) : (
-                      <>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
-                        Secured by Stripe
-                      </>
-                    )}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    {isTelegram ? 'Secured by Telegram Payments' : 'Secured by Stripe'}
                   </p>
                 </div>
               </>
