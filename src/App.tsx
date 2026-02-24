@@ -495,6 +495,35 @@ function App() {
 
       {/* Main Content */}
       <main className="main">
+        {/* Fixed Preview Panel - Desktop Only */}
+        <div className="preview-panel-fixed">
+          <div className="preview-card">
+            <div ref={qrRef} className="qr-container" />
+            <div className="preview-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <span>Preview</span>
+            </div>
+          </div>
+          
+          <div className="preview-info">
+            <h3>Style your QR code</h3>
+            <p>Adjust colors, patterns, and add your logo. Pay to download.</p>
+          </div>
+
+          <button className="download-btn" onClick={() => setShowPayment(true)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download QR Code
+          </button>
+
+          <p className="price-note">${PRICE.toFixed(2)} one-time • {qrSize}px download</p>
+        </div>
         {/* Left Panel - Form */}
         <div className="panel form-panel">
           {/* Category Tabs */}
@@ -693,8 +722,8 @@ function App() {
           </div>
         </div>
 
-        {/* Right Panel - Preview */}
-        <div className="panel preview-panel">
+        {/* Right Panel - Preview (Mobile Only - Hidden on Desktop) */}
+        <div className="panel preview-panel-mobile">
           <div className="preview-card">
             <div ref={qrRef} className="qr-container" />
             <div className="preview-badge">
