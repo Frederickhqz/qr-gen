@@ -4,7 +4,7 @@ import { qrTypes, categories, getQRTypeInfo, type QRType } from './utils/icons'
 import { generateQRData, generatePlaceholderData } from './utils/qrData'
 import { compressLogo, type CompressedLogo } from './utils/logoCompress'
 import { dotStyles, cornerStyles, presets, type DotStyle, type CornerStyle } from './utils/styling'
-import { getPlatformIcon, hasPlatformIcon } from './utils/platformIcons'
+import { getPlatformIcon, hasPlatformIcon, brandColors } from './utils/platformIcons'
 import './index.css'
 
 // Telegram WebApp type declarations
@@ -102,6 +102,7 @@ function App() {
   const [logoInfo, setLogoInfo] = useState<CompressedLogo | null>(null)
   const [showIconOption, setShowIconOption] = useState(false)
   const [usePlatformIcon, setUsePlatformIcon] = useState(false)
+  const [iconColor, setIconColor] = useState('#000000')
   
   // UI state
   const [activeCategory, setActiveCategory] = useState<string>('core')
@@ -125,7 +126,7 @@ function App() {
     const data = generatePlaceholderData(qrType)
     
     // Determine which logo to use: custom upload, platform icon, or none
-    const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType) : null) || undefined
+    const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType, iconColor) : null) || undefined
     
     const options = {
       width: PREVIEW_SIZE,
@@ -167,7 +168,7 @@ function App() {
     const newQr = new QRCodeStyling(options)
     newQr.append(qrRef.current)
     setQr(newQr)
-  }, [qrType, dotsStyle, cornersStyle, fgColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType, logo, logoSize, logoMargin, usePlatformIcon])
+  }, [qrType, dotsStyle, cornersStyle, fgColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType, logo, logoSize, logoMargin, usePlatformIcon, iconColor])
 
   useEffect(() => {
     updateQR()
@@ -193,7 +194,7 @@ function App() {
     const data = generateQRData(qrType, formData as Record<string, string>)
     
     // Determine which logo to use: custom upload, platform icon, or none
-    const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType) : null) || undefined
+    const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType, iconColor) : null) || undefined
     
     return new QRCodeStyling({
       width: qrSize,
@@ -774,6 +775,28 @@ function App() {
                     />
                     <span>Use {getQRTypeInfo(qrType).label} icon</span>
                   </label>
+                  
+                  {usePlatformIcon && (
+                    <div className="icon-color-row">
+                      <div className="color-picker-group">
+                        <span>Icon Color</span>
+                        <div className="color-input-wrap">
+                          <input type="color" value={iconColor} onChange={(e) => setIconColor(e.target.value)} />
+                          <input type="text" value={iconColor} onChange={(e) => setIconColor(e.target.value)} className="color-hex" />
+                        </div>
+                      </div>
+                      {brandColors[qrType] && (
+                        <button 
+                          className="brand-color-btn"
+                          onClick={() => setIconColor(brandColors[qrType] as string)}
+                          title={`Use ${getQRTypeInfo(qrType).label} brand color`}
+                        >
+                          <span style={{ background: brandColors[qrType], width: 20, height: 20, borderRadius: 4, display: 'inline-block' }}></span>
+                          <span className="brand-label">Brand</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
               
@@ -798,7 +821,7 @@ function App() {
                 </div>
               )}
               
-              {!logo && (
+              {!logo && !usePlatformIcon && (
                 <label className="upload-btn">
                   <input type="file" accept="image/*" onChange={handleLogoUpload} />
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

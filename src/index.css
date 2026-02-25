@@ -1542,3 +1542,44 @@ select:focus-visible {
   height: 18px;
   accent-color: var(--primary);
 }
+
+.icon-color-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.icon-color-row .color-picker-group {
+  flex: 1;
+}
+
+.icon-color-row .color-picker-group span {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.brand-color-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.brand-color-btn:hover {
+  border-color: var(--primary);
+}
+
+.brand-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.logo-controls-inline {
+  margin-top: 0.75rem;
+}
