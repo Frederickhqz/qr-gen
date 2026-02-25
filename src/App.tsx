@@ -303,7 +303,7 @@ function App() {
         })
       } else {
         // Stripe Checkout
-        const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
+        const response = await fetch(`${API_BASE}/create-checkout-session`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
