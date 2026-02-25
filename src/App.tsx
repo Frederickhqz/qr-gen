@@ -25,8 +25,15 @@ declare global {
         version?: string
       }
     }
+    Stripe?: (key: string) => any
   }
 }
+
+// Stripe publishable key
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_51OIlrLFwy1Dp0Oz7e91HFYojV1QCub1Wn9hLcpCqrlOSjGHbbToJk40BC8TN1hb1P1y42jntyVSNVd3RsJ8SZv2o00n01dmBet'
+
+// API base URL for backend
+const API_BASE = 'https://api.qrgen.studio' // Update this to your server URL
 
 // Price constant
 const PRICE = 1.99
@@ -98,6 +105,8 @@ function App() {
   const [activeCategory, setActiveCategory] = useState<string>('core')
   const [showPayment, setShowPayment] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [paymentLoading, setPaymentLoading] = useState(false)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
 
   // Constants
   const PREVIEW_SIZE = 240
@@ -217,9 +226,34 @@ function App() {
   }
 
   // Handle download after payment
-  const handleDownload = (format: 'png' | 'svg' | 'jpeg') => {
+  const handleDownload = async (format: 'png' | 'svg' | 'jpeg') => {
     const downloadQR = generateDownloadQR()
-    downloadQR.download({ name: 'qr-code', extension: format })
+    
+    // For PNG/JPEG with logo, we need to ensure the image is loaded
+    // Create a hidden container and append to DOM temporarily
+    const hiddenContainer = document.createElement('div')
+    hiddenContainer.style.position = 'absolute'
+    hiddenContainer.style.left = '-9999px'
+    hiddenContainer.style.top = '-9999px'
+    hiddenContainer.style.width = `${qrSize}px`
+    hiddenContainer.style.height = `${qrSize}px`
+    document.body.appendChild(hiddenContainer)
+    
+    try {
+      // Append QR to hidden container and wait for render
+      await downloadQR.append(hiddenContainer)
+      
+      // Small delay to ensure logo is loaded if present
+      if (logo) {
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+      
+      // Download
+      await downloadQR.download({ name: 'qr-code', extension: format })
+    } finally {
+      // Clean up
+      document.body.removeChild(hiddenContainer)
+    }
   }
 
   // Check if running in Telegram
@@ -230,25 +264,64 @@ function App() {
     if (isTelegram) {
       window.Telegram!.WebApp!.ready()
     }
+    
+    // Check for payment success from redirect
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('payment') === 'success') {
+      setPaymentSuccess(true)
+      setShowPayment(true)
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname)
+    }
   }, [isTelegram])
 
-  // Handle payment - Telegram or mock
-  const handlePayment = () => {
-    if (isTelegram && window.Telegram?.WebApp?.openInvoice) {
-      const telegramPaymentUrl = 'https://t.me/$QRStudioBot?start=qr_payment'
-      
-      window.Telegram.WebApp.openInvoice(telegramPaymentUrl, (status) => {
-        if (status === 'paid') {
-          setPaymentSuccess(true)
-        } else if (status === 'cancelled') {
-          // User cancelled
-        } else if (status === 'failed') {
-          console.error('Payment failed')
+  // Handle payment - Stripe Checkout or Telegram
+  const handlePayment = async () => {
+    setPaymentLoading(true)
+    setPaymentError(null)
+    
+    try {
+      if (isTelegram && window.Telegram?.WebApp?.openInvoice) {
+        // Telegram Payments
+        const telegramPaymentUrl = 'https://t.me/$QRStudioBot?start=qr_payment'
+        window.Telegram.WebApp.openInvoice(telegramPaymentUrl, (status) => {
+          if (status === 'paid') {
+            setPaymentSuccess(true)
+          } else if (status === 'cancelled') {
+            // User cancelled
+          } else if (status === 'failed') {
+            setPaymentError('Payment failed. Please try again.')
+          }
+        })
+      } else {
+        // Stripe Checkout
+        const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            successUrl: `${window.location.origin}?payment=success`,
+            cancelUrl: `${window.location.origin}?payment=cancelled`,
+          }),
+        })
+        
+        if (!response.ok) {
+          throw new Error('Failed to create checkout session')
         }
-      })
-    } else {
-      // Mock payment for non-Telegram
-      setPaymentSuccess(true)
+        
+        const { url } = await response.json()
+        
+        if (url) {
+          // Redirect to Stripe Checkout
+          window.location.href = url
+        } else {
+          throw new Error('No checkout URL returned')
+        }
+      }
+    } catch (error: any) {
+      console.error('Payment error:', error)
+      setPaymentError(error.message || 'Payment failed. Please try again.')
+    } finally {
+      setPaymentLoading(false)
     }
   }
 
@@ -818,34 +891,33 @@ function App() {
                   </div>
                 </div>
 
-                <div className="modal-form">
-                  <div className="form-group">
-                    <label>Email (for receipt)</label>
-                    <input type="email" placeholder="you@example.com" />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label>Card Number</label>
-                    <input type="text" placeholder="4242 4242 4242 4242" />
-                  </div>
-                  
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Expiry</label>
-                      <input type="text" placeholder="MM/YY" />
-                    </div>
-                    <div className="form-group">
-                      <label>CVC</label>
-                      <input type="text" placeholder="123" />
-                    </div>
-                  </div>
-
-                  <button className="pay-btn" onClick={handlePayment}>
+                {paymentError && (
+                  <div className="payment-error">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                      <line x1="1" y1="10" x2="23" y2="10"/>
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
                     </svg>
-                    Pay ${PRICE.toFixed(2)}
+                    {paymentError}
+                  </div>
+                )}
+
+                <div className="modal-form">
+                  <button className="pay-btn" onClick={handlePayment} disabled={paymentLoading}>
+                    {paymentLoading ? (
+                      <>
+                        <span className="spinner"></span>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                          <line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                        Pay ${PRICE.toFixed(2)}
+                      </>
+                    )}
                   </button>
 
                   <p className="secure-note">
@@ -853,7 +925,7 @@ function App() {
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                       <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
-                    {isTelegram ? 'Secured by Telegram Payments' : 'Secured by Stripe'}
+                    {isTelegram ? 'Secured by Telegram Payments' : 'Secured by Stripe Checkout'}
                   </p>
                 </div>
               </>
