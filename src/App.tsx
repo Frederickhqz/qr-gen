@@ -32,8 +32,9 @@ declare global {
 // Stripe publishable key
 const STRIPE_PUBLISHABLE_KEY = 'pk_live_51OIlrLFwy1Dp0Oz7e91HFYojV1QCub1Wn9hLcpCqrlOSjGHbbToJk40BC8TN1hb1P1y42jntyVSNVd3RsJ8SZv2o00n01dmBet'
 
-// API base URL for backend
-const API_BASE = 'https://api.qrgen.studio' // Update this to your server URL
+// API base URL for backend (n8n webhook)
+// Update this to your n8n instance URL
+const API_BASE = 'https://168.231.69.92:5678/webhook'
 
 // Price constant
 const PRICE = 1.99
