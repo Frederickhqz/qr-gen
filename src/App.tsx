@@ -269,18 +269,33 @@ function App() {
   // Check if running in Telegram
   const isTelegram = typeof window !== 'undefined' && window.Telegram?.WebApp
 
-  // Initialize Telegram WebApp
+  // Initialize Telegram WebApp and parse URL params
   useEffect(() => {
     if (isTelegram) {
       window.Telegram!.WebApp!.ready()
     }
     
-    // Check for payment success from redirect
+    // Parse URL params
     const urlParams = new URLSearchParams(window.location.search)
+    
+    // Check for payment success from redirect
     if (urlParams.get('payment') === 'success') {
       setPaymentSuccess(true)
       setShowPayment(true)
-      // Clean up URL
+    }
+    
+    // Check for QR type in URL (e.g., ?type=whatsapp)
+    const typeParam = urlParams.get('type') as QRType
+    if (typeParam) {
+      const typeInfo = qrTypes.find(t => t.id === typeParam)
+      if (typeInfo) {
+        setQrType(typeParam)
+        setActiveCategory(typeInfo.category)
+      }
+    }
+    
+    // Clean up URL params (keep clean URL for sharing)
+    if (urlParams.get('payment') || urlParams.get('type')) {
       window.history.replaceState({}, '', window.location.pathname)
     }
   }, [isTelegram])
