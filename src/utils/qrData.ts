@@ -83,15 +83,34 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
       return `https://medium.com/@${handle.replace('@', '')}`
     
     // Payment
+    case 'crypto':
     case 'bitcoin':
-      let btc = `bitcoin:${data.address || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'}`
-      const btcParams = []
-      if (data.amount) btcParams.push(`amount=${data.amount}`)
-      return btcParams.length ? `${btc}?${btcParams.join('&')}` : btc
+    case 'ethereum':
+    case 'solana':
+    case 'xrp':
+    case 'bnb':
+    case 'ton':
+      const coinId = data.cryptoCoin || 'bitcoin'
+      const coinSchemes: Record<string, string> = {
+        bitcoin: 'bitcoin',
+        ethereum: 'ethereum',
+        solana: 'solana',
+        xrp: 'ripple',
+        bnb: 'bnb',
+        ton: 'ton'
+      }
+      const scheme = coinSchemes[coinId] || coinId
+      const address = data.cryptoAddress || data.address || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'
+      let cryptoUrl = `${scheme}:${address}`
+      const cryptoParams = []
+      if (data.cryptoAmount || data.amount) cryptoParams.push(`amount=${data.cryptoAmount || data.amount}`)
+      return cryptoParams.length ? `${cryptoUrl}?${cryptoParams.join('&')}` : cryptoUrl
     case 'paypal':
       return data.amount ? `https://paypal.me/${handle}/${data.amount}` : `https://paypal.me/${handle}`
     case 'venmo':
       return data.message ? `https://venmo.com/${handle}?note=${encodeURIComponent(data.message)}` : `https://venmo.com/${handle}`
+    case 'zelle':
+      return `https://enroll.zellepay.com/?email=${encodeURIComponent(data.email || 'user@example.com')}`
     case 'cashapp':
       return `https://cash.app/${handle.replace('$', '')}`
     
@@ -148,8 +167,10 @@ export function generatePlaceholderData(type: QRType): string {
     github: 'https://github.com/sample',
     medium: 'https://medium.com/@sample',
     bitcoin: 'bitcoin:bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    crypto: 'bitcoin:bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
     paypal: 'https://paypal.me/sample',
     venmo: 'https://venmo.com/sample',
+    zelle: 'https://enroll.zellepay.com/?email=user@example.com',
     cashapp: 'https://cash.app/sample',
     appstore: 'https://apps.apple.com',
     googleplay: 'https://play.google.com',

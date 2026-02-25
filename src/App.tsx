@@ -36,6 +36,30 @@ const STRIPE_PUBLISHABLE_KEY = 'pk_live_51OIlrLFwy1Dp0Oz7e91HFYojV1QCub1Wn9hLcpC
 // API base URL for backend (n8n webhook)
 const API_BASE = 'https://n8n.srv796810.hstgr.cloud/webhook'
 
+// Popular cryptocurrencies
+const POPULAR_COINS = [
+  { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', scheme: 'bitcoin' },
+  { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', scheme: 'ethereum' },
+  { id: 'solana', name: 'Solana', symbol: 'SOL', scheme: 'solana' },
+  { id: 'xrp', name: 'XRP', symbol: 'XRP', scheme: 'ripple' },
+  { id: 'bnb', name: 'BNB', symbol: 'BNB', scheme: 'bnb' },
+  { id: 'ton', name: 'Toncoin', symbol: 'TON', scheme: 'ton' },
+  { id: 'cardano', name: 'Cardano', symbol: 'ADA', scheme: 'cardano' },
+  { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', scheme: 'dogecoin' },
+  { id: 'tron', name: 'TRON', symbol: 'TRX', scheme: 'tron' },
+  { id: 'avalanche', name: 'Avalanche', symbol: 'AVAX', scheme: 'avalanche' },
+  { id: 'chainlink', name: 'Chainlink', symbol: 'LINK', scheme: 'ethereum' },
+  { id: 'polygon', name: 'Polygon', symbol: 'MATIC', scheme: 'polygon' },
+  { id: 'litecoin', name: 'Litecoin', symbol: 'LTC', scheme: 'litecoin' },
+  { id: 'polkadot', name: 'Polkadot', symbol: 'DOT', scheme: 'polkadot' },
+  { id: 'uniswap', name: 'Uniswap', symbol: 'UNI', scheme: 'ethereum' },
+  { id: 'shibainu', name: 'Shiba Inu', symbol: 'SHIB', scheme: 'ethereum' },
+  { id: 'cosmos', name: 'Cosmos', symbol: 'ATOM', scheme: 'cosmos' },
+  { id: 'stellar', name: 'Stellar', symbol: 'XLM', scheme: 'stellar' },
+  { id: 'monero', name: 'Monero', symbol: 'XMR', scheme: 'monero' },
+  { id: 'aptos', name: 'Aptos', symbol: 'APT', scheme: 'aptos' },
+]
+
 // Price constant
 const PRICE = 1.99
 
@@ -66,6 +90,9 @@ interface FormData {
   handle: string
   address: string
   amount: string
+  cryptoCoin: string
+  cryptoAddress: string
+  cryptoAmount: string
 }
 
 const initialFormData: FormData = {
@@ -73,7 +100,8 @@ const initialFormData: FormData = {
   email: '', subject: '', body: '', phone: '', message: '',
   firstName: '', lastName: '', company: '', title: '', website: '',
   start: '', end: '', location: '', description: '',
-  handle: '', address: '', amount: ''
+  handle: '', address: '', amount: '',
+  cryptoCoin: 'bitcoin', cryptoAddress: '', cryptoAmount: ''
 }
 
 function App() {
@@ -111,6 +139,10 @@ function App() {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
+  
+  // Crypto state
+  const [cryptoSearch, setCryptoSearch] = useState('')
+  const [showCryptoDropdown, setShowCryptoDropdown] = useState(false)
 
   // Preview size based on screen width
   const [previewSize, setPreviewSize] = useState(240)
@@ -574,15 +606,100 @@ function App() {
           </div>
         )
       case 'bitcoin':
+      case 'ethereum':
+      case 'solana':
+      case 'xrp':
+      case 'bnb':
+      case 'ton':
+      case 'crypto':
+        const selectedCoin = POPULAR_COINS.find(c => c.id === (formData.cryptoCoin || 'bitcoin')) || POPULAR_COINS[0]
+        const filteredCoins = POPULAR_COINS.filter(c => 
+          c.name.toLowerCase().includes(cryptoSearch.toLowerCase()) ||
+          c.symbol.toLowerCase().includes(cryptoSearch.toLowerCase())
+        )
         return (
           <>
-            <div className="form-group">
-              <label>Bitcoin Address</label>
-              <input type="text" value={formData.address} onChange={(e) => updateField('address', e.target.value)} placeholder="bc1q..." />
+            <div className="form-group" style={{ position: 'relative' }}>
+              <label>Select Cryptocurrency</label>
+              <div 
+                className="crypto-selector-trigger"
+                onClick={() => setShowCryptoDropdown(!showCryptoDropdown)}
+              >
+                <span className="crypto-selected">
+                  <span className="crypto-symbol">{selectedCoin.symbol}</span>
+                  <span className="crypto-name">{selectedCoin.name}</span>
+                </span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+              {showCryptoDropdown && (
+                <div className="crypto-dropdown">
+                  <div className="crypto-search">
+                    <input
+                      type="text"
+                      placeholder="Search coin (e.g. BTC, Ethereum)..."
+                      value={cryptoSearch}
+                      onChange={(e) => setCryptoSearch(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  <div className="crypto-list">
+                    {POPULAR_COINS.slice(0, 6).map(coin => (
+                      <button
+                        key={coin.id}
+                        className={`crypto-option ${formData.cryptoCoin === coin.id ? 'active' : ''}`}
+                        onClick={() => {
+                          updateField('cryptoCoin', coin.id)
+                          setShowCryptoDropdown(false)
+                          setCryptoSearch('')
+                        }}
+                      >
+                        <span className="crypto-option-symbol">{coin.symbol}</span>
+                        <span className="crypto-option-name">{coin.name}</span>
+                      </button>
+                    ))}
+                    {cryptoSearch && filteredCoins.length > 0 && (
+                      <>
+                        <div className="crypto-divider">Search Results</div>
+                        {filteredCoins.map(coin => (
+                          <button
+                            key={coin.id}
+                            className={`crypto-option ${formData.cryptoCoin === coin.id ? 'active' : ''}`}
+                            onClick={() => {
+                              updateField('cryptoCoin', coin.id)
+                              setShowCryptoDropdown(false)
+                              setCryptoSearch('')
+                            }}
+                          >
+                            <span className="crypto-option-symbol">{coin.symbol}</span>
+                            <span className="crypto-option-name">{coin.name}</span>
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="form-group">
-              <label>Amount (BTC) - optional</label>
-              <input type="number" value={formData.amount} onChange={(e) => updateField('amount', e.target.value)} placeholder="0.01" step="0.0001" />
+              <label>{selectedCoin.name} Address</label>
+              <input 
+                type="text" 
+                value={formData.cryptoAddress} 
+                onChange={(e) => updateField('cryptoAddress', e.target.value)} 
+                placeholder={`Enter ${selectedCoin.symbol} address...`} 
+              />
+            </div>
+            <div className="form-group">
+              <label>Amount ({selectedCoin.symbol}) - optional</label>
+              <input 
+                type="number" 
+                value={formData.cryptoAmount} 
+                onChange={(e) => updateField('cryptoAmount', e.target.value)} 
+                placeholder="0.01" 
+                step="0.000001" 
+              />
             </div>
           </>
         )
@@ -640,19 +757,21 @@ function App() {
             </div>
           </div>
           
-          <div className="preview-info">
-            <h3>Customize your QR</h3>
-            <p>Adjust style options below. Pay to download.</p>
-          </div>
+          <div className="preview-content">
+            <div className="preview-info">
+              <h3>Customize your QR</h3>
+              <p>Adjust style options below. Pay to download.</p>
+            </div>
 
-          <button className="download-btn" onClick={() => setShowConfirmation(true)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Download ${PRICE.toFixed(2)}
-          </button>
+            <button className="download-btn" onClick={() => setShowConfirmation(true)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Download ${PRICE.toFixed(2)}
+            </button>
+          </div>
         </aside>
 
         {/* Scrollable Content Area */}
@@ -994,7 +1113,7 @@ function App() {
               <button className="btn-secondary" onClick={() => setShowConfirmation(false)}>
                 Go Back
               </button>
-              <button className="pay-btn" onClick={() => { setShowConfirmation(false); setShowPayment(true); }}>
+              <button className="pay-btn" onClick={() => { setShowConfirmation(false); handlePayment(); }}>
                 Continue to Payment
               </button>
             </div>
