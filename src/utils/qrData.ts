@@ -109,8 +109,6 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
       return data.amount ? `https://paypal.me/${handle}/${data.amount}` : `https://paypal.me/${handle}`
     case 'venmo':
       return data.message ? `https://venmo.com/${handle}?note=${encodeURIComponent(data.message)}` : `https://venmo.com/${handle}`
-    case 'zelle':
-      return `https://enroll.zellepay.com/?email=${encodeURIComponent(data.email || 'user@example.com')}`
     case 'cashapp':
       return `https://cash.app/${handle.replace('$', '')}`
     
@@ -170,7 +168,6 @@ export function generatePlaceholderData(type: QRType): string {
     crypto: 'bitcoin:bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
     paypal: 'https://paypal.me/sample',
     venmo: 'https://venmo.com/sample',
-    zelle: 'https://enroll.zellepay.com/?email=user@example.com',
     cashapp: 'https://cash.app/sample',
     appstore: 'https://apps.apple.com',
     googleplay: 'https://play.google.com',

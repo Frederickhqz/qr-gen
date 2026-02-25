@@ -93,7 +93,7 @@ export type QRType =
   | 'instagram' | 'facebook' | 'twitter' | 'linkedin' | 'tiktok' | 'snapchat' 
   | 'youtube' | 'pinterest' | 'reddit' | 'twitch' | 'spotify' | 'medium' | 'github' | 'website'
   | 'crypto' | 'bitcoin' | 'ethereum' | 'solana' | 'xrp' | 'bnb' | 'ton'
-  | 'paypal' | 'venmo' | 'cashapp' | 'zelle'
+  | 'paypal' | 'venmo' | 'cashapp'
   | 'appstore' | 'googleplay' | 'amazon' | 'googlemaps' | 'applemaps'
 
 export interface QRTypeOption {
@@ -152,11 +152,6 @@ export const qrTypes: QRTypeOption[] = [
   { id: 'crypto', label: 'Crypto', icon: Bitcoin, category: 'payment', placeholder: 'Wallet address' },
   { id: 'paypal', label: 'PayPal', icon: CreditCard, category: 'payment', placeholder: '@username' },
   { id: 'venmo', label: 'Venmo', icon: Wallet, category: 'payment', placeholder: '@username' },
-  { id: 'zelle', label: 'Zelle', icon: ({ className, size }) => (
-    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-    </svg>
-  ), category: 'payment', placeholder: 'email@example.com' },
   { id: 'cashapp', label: 'Cash App', icon: ({ className, size }) => (
     <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
       <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.485 16.085c-.315.54-.92.915-1.62.915h-5.73c-.7 0-1.305-.375-1.62-.915l-.165-.285L7.5 12.75V7.5c0-.69.56-1.25 1.25-1.25h6.5c.69 0 1.25.56 1.25 1.25v5.25l-.135.285-.885 1.05z"/>
