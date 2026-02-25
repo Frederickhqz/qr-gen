@@ -792,7 +792,7 @@ function App() {
                           title={`Use ${getQRTypeInfo(qrType).label} brand color`}
                         >
                           <span style={{ background: brandColors[qrType], width: 20, height: 20, borderRadius: 4, display: 'inline-block' }}></span>
-                          <span className="brand-label">Brand</span>
+                          <span className="brand-label">Official</span>
                         </button>
                       )}
                     </div>

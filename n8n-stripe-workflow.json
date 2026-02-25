@@ -69,6 +69,10 @@
               "value": "1"
             },
             {
+              "name": "allow_promotion_codes",
+              "value": "true"
+            },
+            {
               "name": "success_url",
               "value": "={{ $json.body.successUrl || 'https://qrgen.studio?payment=success' }}"
             },
