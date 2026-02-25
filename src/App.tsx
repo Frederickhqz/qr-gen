@@ -112,8 +112,17 @@ function App() {
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
 
-  // Constants
-  const PREVIEW_SIZE = 240
+  // Preview size based on screen width
+  const [previewSize, setPreviewSize] = useState(240)
+  
+  useEffect(() => {
+    const updateSize = () => {
+      setPreviewSize(window.innerWidth < 1024 ? 120 : 240)
+    }
+    updateSize()
+    window.addEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
+  }, [])
 
   // Filter QR types by category
   const filteredTypes = qrTypes.filter(t => t.category === activeCategory)
@@ -130,8 +139,8 @@ function App() {
     const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType, iconColor) : null) || undefined
     
     const options = {
-      width: PREVIEW_SIZE,
-      height: PREVIEW_SIZE,
+      width: previewSize,
+      height: previewSize,
       data,
       image: imageSource,
       dotsOptions: {
@@ -169,7 +178,7 @@ function App() {
     const newQr = new QRCodeStyling(options)
     newQr.append(qrRef.current)
     setQr(newQr)
-  }, [qrType, dotsStyle, cornersStyle, fgColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType, logo, logoSize, logoMargin, usePlatformIcon, iconColor])
+  }, [qrType, dotsStyle, cornersStyle, fgColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType, logo, logoSize, logoMargin, usePlatformIcon, iconColor, previewSize])
 
   useEffect(() => {
     updateQR()
