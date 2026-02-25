@@ -5,7 +5,24 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "create-checkout-session",
-        "options": {}
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization"
+              }
+            ]
+          }
+        }
       },
       "id": "webhook-node",
       "name": "Webhook",
@@ -79,7 +96,16 @@
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ { sessionId: $json.id, url: $json.url } }}",
-        "options": {}
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
       },
       "id": "respond-webhook",
       "name": "Respond to Webhook",
@@ -128,17 +154,6 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [750, 500]
-    },
-    {
-      "parameters": {
-        "content": "### Payment Successful!\n\n**Session ID:** {{ $json.body.data.object.id }}\n**Customer Email:** {{ $json.body.data.object.customer_email }}\n**Amount:** ${{ $json.body.data.object.amount_total / 100 }}",
-        "options": {}
-      },
-      "id": "log-payment",
-      "name": "Log Payment",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [750, 700]
     }
   ],
   "connections": {
@@ -183,13 +198,6 @@
             "type": "main",
             "index": 0
           }
-        ],
-        [
-          {
-            "node": "Log Payment",
-            "type": "main",
-            "index": 0
-          }
         ]
       ]
     }
@@ -201,5 +209,5 @@
   "tags": [],
   "triggerCount": 0,
   "updatedAt": "2026-02-24T00:00:00.000Z",
-  "versionId": "1"
+  "versionId": "2"
 }

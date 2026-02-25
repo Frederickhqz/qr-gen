@@ -4,6 +4,7 @@ import { qrTypes, categories, getQRTypeInfo, type QRType } from './utils/icons'
 import { generateQRData, generatePlaceholderData } from './utils/qrData'
 import { compressLogo, type CompressedLogo } from './utils/logoCompress'
 import { dotStyles, cornerStyles, presets, type DotStyle, type CornerStyle } from './utils/styling'
+import { getPlatformIcon, hasPlatformIcon } from './utils/platformIcons'
 import './index.css'
 
 // Telegram WebApp type declarations
@@ -100,6 +101,7 @@ function App() {
   const [logoMargin, setLogoMargin] = useState(5)
   const [logoInfo, setLogoInfo] = useState<CompressedLogo | null>(null)
   const [showIconOption, setShowIconOption] = useState(false)
+  const [usePlatformIcon, setUsePlatformIcon] = useState(false)
   
   // UI state
   const [activeCategory, setActiveCategory] = useState<string>('core')
@@ -122,11 +124,14 @@ function App() {
     // Use placeholder data for preview
     const data = generatePlaceholderData(qrType)
     
+    // Determine which logo to use: custom upload, platform icon, or none
+    const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType) : null) || undefined
+    
     const options = {
       width: PREVIEW_SIZE,
       height: PREVIEW_SIZE,
       data,
-      image: logo || undefined,
+      image: imageSource,
       dotsOptions: {
         color: fgColor,
         type: dotsStyle as any,
@@ -162,7 +167,7 @@ function App() {
     const newQr = new QRCodeStyling(options)
     newQr.append(qrRef.current)
     setQr(newQr)
-  }, [qrType, dotsStyle, cornersStyle, fgColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType, logo, logoSize, logoMargin])
+  }, [qrType, dotsStyle, cornersStyle, fgColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType, logo, logoSize, logoMargin, usePlatformIcon])
 
   useEffect(() => {
     updateQR()
@@ -187,11 +192,14 @@ function App() {
   const generateDownloadQR = (): QRCodeStyling => {
     const data = generateQRData(qrType, formData as Record<string, string>)
     
+    // Determine which logo to use: custom upload, platform icon, or none
+    const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType) : null) || undefined
+    
     return new QRCodeStyling({
       width: qrSize,
       height: qrSize,
       data,
-      image: logo || undefined,
+      image: imageSource,
       dotsOptions: {
         color: fgColor,
         type: dotsStyle as any,
@@ -754,31 +762,43 @@ function App() {
             {/* Center Icon / Logo */}
             <div className="option-group">
               <label>Center Icon / Logo</label>
-              {logo ? (
-                <div className="logo-preview-wrap">
-                  <div className="logo-preview">
-                    <img src={logo} alt="Logo" />
-                    <button className="remove-logo" onClick={() => { setLogo(null); setLogoInfo(null); setShowIconOption(false); }}>×</button>
-                  </div>
-                  <div className="logo-controls">
-                    {logoInfo?.wasCompressed && (
-                      <p className="logo-info">
-                        Resized from {logoInfo.originalWidth}×{logoInfo.originalHeight} to {logoInfo.newWidth}×{logoInfo.newHeight}
-                      </p>
-                    )}
-                    <div className="logo-sliders">
-                      <label>
-                        <span>Size</span>
-                        <input type="range" min="0.15" max="0.5" step="0.05" value={logoSize} onChange={(e) => setLogoSize(parseFloat(e.target.value))} />
-                      </label>
-                      <label>
-                        <span>Margin</span>
-                        <input type="range" min="0" max="15" step="1" value={logoMargin} onChange={(e) => setLogoMargin(parseInt(e.target.value))} />
-                      </label>
-                    </div>
-                  </div>
+              
+              {/* Platform Icon Option */}
+              {hasPlatformIcon(qrType) && !logo && (
+                <div className="platform-icon-option">
+                  <label className="toggle-label">
+                    <input 
+                      type="checkbox" 
+                      checked={usePlatformIcon} 
+                      onChange={(e) => setUsePlatformIcon(e.target.checked)} 
+                    />
+                    <span>Use {getQRTypeInfo(qrType).label} icon</span>
+                  </label>
                 </div>
-              ) : (
+              )}
+              
+              {(logo || usePlatformIcon) && (
+                <div className="logo-controls-inline">
+                  <div className="logo-sliders">
+                    <label>
+                      <span>Size</span>
+                      <input type="range" min="0.15" max="0.5" step="0.05" value={logoSize} onChange={(e) => setLogoSize(parseFloat(e.target.value))} />
+                    </label>
+                    <label>
+                      <span>Margin</span>
+                      <input type="range" min="0" max="15" step="1" value={logoMargin} onChange={(e) => setLogoMargin(parseInt(e.target.value))} />
+                    </label>
+                  </div>
+                  {logo && (
+                    <div className="logo-preview" style={{ marginTop: '0.5rem' }}>
+                      <img src={logo} alt="Logo" style={{ maxWidth: '60px', maxHeight: '60px' }} />
+                      <button className="remove-logo" onClick={() => { setLogo(null); setLogoInfo(null); }}>×</button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {!logo && (
                 <label className="upload-btn">
                   <input type="file" accept="image/*" onChange={handleLogoUpload} />
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -786,10 +806,14 @@ function App() {
                     <polyline points="17 8 12 3 7 8"/>
                     <line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
-                  <span>Add Icon / Logo</span>
+                  <span>Upload Custom Logo</span>
                 </label>
               )}
-              <p className="option-hint">Add your logo or brand icon in the center for better identification</p>
+              <p className="option-hint">
+                {hasPlatformIcon(qrType) 
+                  ? 'Enable the platform icon or upload your own logo' 
+                  : 'Add your logo or brand icon in the center'}
+              </p>
             </div>
 
             {/* Download Size */}

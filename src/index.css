@@ -1520,3 +1520,25 @@ select:focus-visible {
 .pay-btn:disabled:hover {
   transform: none;
 }
+
+/* Platform Icon Option */
+.platform-icon-option {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: var(--primary-light);
+  border-radius: 8px;
+  border: 1px solid var(--primary);
+}
+
+.platform-icon-option .toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.platform-icon-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
