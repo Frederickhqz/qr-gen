@@ -95,6 +95,7 @@ export type QRType =
   | 'crypto' | 'bitcoin' | 'ethereum' | 'solana' | 'xrp' | 'bnb' | 'ton'
   | 'paypal' | 'venmo' | 'cashapp'
   | 'appstore' | 'googleplay' | 'amazon' | 'googlemaps' | 'applemaps'
+  | 'calendly' | 'zillow' | 'redfin' | 'realtor' | 'apartments' | 'googlereviews'
 
 export interface QRTypeOption {
   id: QRType
@@ -166,6 +167,32 @@ export const qrTypes: QRTypeOption[] = [
   { id: 'applemaps', label: 'Apple Maps', icon: MapPin, category: 'platform', placeholder: 'Location' },
   { id: 'spotify', label: 'Spotify', icon: Music2, category: 'platform', placeholder: 'Track/Playlist URL' },
   { id: 'website', label: 'Website', icon: Globe, category: 'platform', placeholder: 'https://...' },
+  { id: 'calendly', label: 'Calendly', icon: Calendar, category: 'platform', placeholder: 'calendly.com/username' },
+  { id: 'zillow', label: 'Zillow', icon: ({ className, size }) => (
+    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+    </svg>
+  ), category: 'platform', placeholder: 'zillow.com/profile' },
+  { id: 'redfin', label: 'Redfin', icon: ({ className, size }) => (
+    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-6v2h18V3H3z"/>
+    </svg>
+  ), category: 'platform', placeholder: 'redfin.com/agent' },
+  { id: 'realtor', label: 'Realtor.com', icon: ({ className, size }) => (
+    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.08L12 15l5-2.09v3.08z"/>
+    </svg>
+  ), category: 'platform', placeholder: 'realtor.com/profile' },
+  { id: 'apartments', label: 'Apartments.com', icon: ({ className, size }) => (
+    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16H3v2h18v-2h-2zm-2 0H7v-4h10v4zm0-6H7V5h10v10z"/>
+    </svg>
+  ), category: 'platform', placeholder: 'apartments.com/listing' },
+  { id: 'googlereviews', label: 'Google Reviews', icon: ({ className, size }) => (
+    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+    </svg>
+  ), category: 'platform', placeholder: 'Search for your business' },
 ]
 
 export const categories = [

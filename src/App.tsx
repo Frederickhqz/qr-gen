@@ -756,11 +756,53 @@ function App() {
       case 'amazon':
       case 'googlemaps':
       case 'applemaps':
+      case 'zillow':
+      case 'redfin':
+      case 'realtor':
+      case 'apartments':
         return (
           <div className="form-group">
             <label>URL</label>
             <input type="url" value={formData.url} onChange={(e) => updateUrl(e.target.value)} placeholder="https://..." />
           </div>
+        )
+      case 'calendly':
+        return (
+          <div className="form-group">
+            <label>Calendly Link</label>
+            <input 
+              type="text" 
+              value={formData.url} 
+              onChange={(e) => updateUrl(e.target.value)} 
+              placeholder="username or calendly.com/username" 
+            />
+          </div>
+        )
+      case 'googlereviews':
+        return (
+          <>
+            <div className="form-group">
+              <label>Business Name</label>
+              <input 
+                type="text" 
+                value={formData.handle} 
+                onChange={(e) => updateHandle(e.target.value)} 
+                placeholder="Your business name" 
+              />
+            </div>
+            <div className="form-group">
+              <label>Place ID (optional) - for direct app opening</label>
+              <input 
+                type="text" 
+                value={formData.url} 
+                onChange={(e) => updateUrl(e.target.value)} 
+                placeholder="ChIJ... (from Google Places API)" 
+              />
+              <p className="option-hint">
+                With Place ID, the QR opens Google Maps directly to review. Without it, users search for your business.
+              </p>
+            </div>
+          </>
         )
       default:
         return null

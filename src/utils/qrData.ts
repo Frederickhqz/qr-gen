@@ -131,6 +131,28 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
       return url || 'https://spotify.com'
     case 'website':
       return url || 'https://example.com'
+    case 'calendly':
+      const calendlyUrl = data.url || data.handle || 'username'
+      return calendlyUrl.startsWith('http') ? calendlyUrl : `https://calendly.com/${calendlyUrl.replace(/^\//, '')}`
+    case 'zillow':
+      const zillowUrl = data.url || data.handle || 'profile'
+      return zillowUrl.startsWith('http') ? zillowUrl : `https://www.zillow.com/profile/${zillowUrl.replace(/^\//, '')}`
+    case 'redfin':
+      const redfinUrl = data.url || data.handle || 'agent'
+      return redfinUrl.startsWith('http') ? redfinUrl : `https://www.redfin.com/agent/${redfinUrl.replace(/^\//, '')}`
+    case 'realtor':
+      const realtorUrl = data.url || data.handle || 'profile'
+      return realtorUrl.startsWith('http') ? realtorUrl : `https://www.realtor.com/agent/${realtorUrl.replace(/^\//, '')}`
+    case 'apartments':
+      return data.url || 'https://www.apartments.com'
+    case 'googlereviews':
+      // Generate a Google Review link for a business
+      const placeId = data.url?.match(/place_id=([^&]+)/)?.[1]
+      if (placeId) {
+        return `https://search.google.com/local/writereview?placeid=${placeId}`
+      }
+      // Fallback to Google Maps review page
+      return data.url || 'https://search.google.com/local/writereview'
       
     default:
       return 'https://qrgen.studio'
@@ -176,6 +198,12 @@ export function generatePlaceholderData(type: QRType): string {
     applemaps: 'http://maps.apple.com',
     spotify: 'https://spotify.com',
     website: 'https://example.com',
+    calendly: 'https://calendly.com/username',
+    zillow: 'https://www.zillow.com/profile/agent',
+    redfin: 'https://www.redfin.com/agent/12345',
+    realtor: 'https://www.realtor.com/agent/username',
+    apartments: 'https://www.apartments.com/listing',
+    googlereviews: 'https://search.google.com/local/writereview',
   }
   return placeholders[type] || 'https://qrgen.studio'
 }

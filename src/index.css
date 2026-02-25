@@ -254,14 +254,13 @@ body {
 }
 
 .preview-info {
-  text-align: left;
+  text-align: center;
   flex: 1;
   min-width: 0;
 }
 
 @media (min-width: 1024px) {
   .preview-info {
-    text-align: center;
     width: 100%;
   }
 }
