@@ -1319,11 +1319,10 @@ function App() {
                     value={contactFormData.type} 
                     onChange={(e) => setContactFormData({...contactFormData, type: e.target.value})}
                   >
-                    <option value="suggestion">💡 Suggestion</option>
-                    <option value="support">🆘 Support Request</option>
-                    <option value="feature">✨ Feature Request</option>
-                    <option value="bug">🐛 Bug Report</option>
-                    <option value="other">📝 Other</option>
+                    <option value="suggestion">Suggestion</option>
+                    <option value="support">Support</option>
+                    <option value="request">Request</option>
+                    <option value="feedback">Feedback</option>
                   </select>
                 </div>
 
