@@ -107,6 +107,7 @@ function App() {
   // UI state
   const [activeCategory, setActiveCategory] = useState<string>('core')
   const [showPayment, setShowPayment] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
@@ -289,6 +290,25 @@ function App() {
     setPaymentLoading(true)
     setPaymentError(null)
     
+    // Build metadata with all QR details
+    const metadata: Record<string, string> = {
+      qr_type: qrType,
+      qr_data: generateQRData(qrType, formData as Record<string, string>),
+      dots_style: dotsStyle,
+      corners_style: cornersStyle,
+      fg_color: fgColor,
+      bg_color: bgTransparent ? 'transparent' : bgColor,
+      qr_size: qrSize.toString(),
+      has_logo: (logo ? 'true' : 'false'),
+      use_platform_icon: usePlatformIcon.toString(),
+      icon_color: iconColor,
+    }
+    
+    // Add form data to metadata
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value) metadata[`form_${key}`] = value
+    })
+    
     try {
       if (isTelegram && window.Telegram?.WebApp?.openInvoice) {
         // Telegram Payments
@@ -310,6 +330,7 @@ function App() {
           body: JSON.stringify({
             successUrl: `${window.location.origin}?payment=success`,
             cancelUrl: `${window.location.origin}?payment=cancelled`,
+            metadata,
           }),
         })
         
@@ -600,7 +621,7 @@ function App() {
             <p>Adjust style options below. Pay to download.</p>
           </div>
 
-          <button className="download-btn" onClick={() => setShowPayment(true)}>
+          <button className="download-btn" onClick={() => setShowConfirmation(true)}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
@@ -858,6 +879,104 @@ function App() {
           </div>
         </div>
       </main>
+
+      {/* Confirmation Modal */}
+      {showConfirmation && (
+        <div className="modal-overlay" onClick={() => setShowConfirmation(false)}>
+          <div className="modal confirmation-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowConfirmation(false)}>×</button>
+            
+            <div className="modal-header">
+              <h2>Confirm Your QR Code</h2>
+              <p>Please review your details before payment</p>
+            </div>
+
+            <div className="confirmation-content">
+              {/* QR Type */}
+              <div className="confirmation-section">
+                <h4>QR Type</h4>
+                <p className="confirmation-value">{getQRTypeInfo(qrType).label}</p>
+              </div>
+
+              {/* QR Data */}
+              <div className="confirmation-section">
+                <h4>QR Data</h4>
+                <p className="confirmation-value confirmation-data">
+                  {generateQRData(qrType, formData as Record<string, string>)}
+                </p>
+              </div>
+
+              {/* Form Data Summary */}
+              <div className="confirmation-section">
+                <h4>Details</h4>
+                <div className="confirmation-details">
+                  {qrType === 'url' && formData.url && <span>URL: {formData.url}</span>}
+                  {qrType === 'text' && formData.text && <span>Text: {formData.text.substring(0, 50)}{formData.text.length > 50 ? '...' : ''}</span>}
+                  {qrType === 'wifi' && formData.ssid && <span>SSID: {formData.ssid}</span>}
+                  {qrType === 'email' && formData.email && <span>Email: {formData.email}</span>}
+                  {qrType === 'phone' && formData.phone && <span>Phone: {formData.phone}</span>}
+                  {qrType === 'vcard' && formData.firstName && <span>Name: {formData.firstName} {formData.lastName}</span>}
+                  {['instagram', 'facebook', 'twitter', 'linkedin', 'tiktok', 'telegram', 'github', 'paypal', 'venmo', 'cashapp'].includes(qrType) && formData.handle && <span>Handle: {formData.handle}</span>}
+                  {qrType === 'bitcoin' && formData.address && <span>Address: {formData.address.substring(0, 20)}...</span>}
+                </div>
+              </div>
+
+              {/* Style Options */}
+              <div className="confirmation-section">
+                <h4>Style</h4>
+                <div className="confirmation-style">
+                  <div className="style-item">
+                    <span>Pattern:</span>
+                    <span>{dotStyles.find(s => s.id === dotsStyle)?.name}</span>
+                  </div>
+                  <div className="style-item">
+                    <span>Corners:</span>
+                    <span>{cornerStyles.find(s => s.id === cornersStyle)?.name}</span>
+                  </div>
+                  <div className="style-item">
+                    <span>Colors:</span>
+                    <div className="color-swatch">
+                      <span style={{ background: fgColor }} className="swatch"></span>
+                      <span style={{ background: bgTransparent ? 'repeating-conic-gradient(#e5e5e5 0 25%, #fff 0 50%) 50% / 8px 8px' : bgColor }} className="swatch"></span>
+                    </div>
+                  </div>
+                  {usePlatformIcon && (
+                    <div className="style-item">
+                      <span>Icon:</span>
+                      <span style={{ color: iconColor }}>{getQRTypeInfo(qrType).label} icon</span>
+                    </div>
+                  )}
+                  {logo && (
+                    <div className="style-item">
+                      <span>Logo:</span>
+                      <span>Custom logo</span>
+                    </div>
+                  )}
+                  <div className="style-item">
+                    <span>Size:</span>
+                    <span>{qrSize}px</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="confirmation-price">
+                <span className="price-label">Total</span>
+                <span className="price-value">${PRICE.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="confirmation-actions">
+              <button className="btn-secondary" onClick={() => setShowConfirmation(false)}>
+                Go Back
+              </button>
+              <button className="pay-btn" onClick={() => { setShowConfirmation(false); setShowPayment(true); }}>
+                Continue to Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Payment Modal */}
       {showPayment && (

@@ -73,6 +73,30 @@
               "value": "true"
             },
             {
+              "name": "metadata[qr_type]",
+              "value": "={{ $json.body.metadata.qr_type || 'url' }}"
+            },
+            {
+              "name": "metadata[qr_size]",
+              "value": "={{ $json.body.metadata.qr_size || '800' }}"
+            },
+            {
+              "name": "metadata[dots_style]",
+              "value": "={{ $json.body.metadata.dots_style || 'square' }}"
+            },
+            {
+              "name": "metadata[corners_style]",
+              "value": "={{ $json.body.metadata.corners_style || 'square' }}"
+            },
+            {
+              "name": "metadata[fg_color]",
+              "value": "={{ $json.body.metadata.fg_color || '#000000' }}"
+            },
+            {
+              "name": "metadata[bg_color]",
+              "value": "={{ $json.body.metadata.bg_color || '#ffffff' }}"
+            },
+            {
               "name": "success_url",
               "value": "={{ $json.body.successUrl || 'https://qrgen.studio?payment=success' }}"
             },

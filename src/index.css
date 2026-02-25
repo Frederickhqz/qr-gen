@@ -1583,3 +1583,140 @@ select:focus-visible {
 .logo-controls-inline {
   margin-top: 0.75rem;
 }
+
+/* Confirmation Modal */
+.confirmation-modal {
+  max-width: 500px;
+}
+
+.confirmation-content {
+  padding: 0 1.5rem;
+}
+
+.confirmation-section {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.confirmation-section:last-of-type {
+  border-bottom: none;
+}
+
+.confirmation-section h4 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.confirmation-value {
+  font-size: 0.95rem;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.confirmation-data {
+  font-family: monospace;
+  font-size: 0.85rem;
+  background: var(--bg);
+  padding: 0.5rem;
+  border-radius: 4px;
+  max-height: 60px;
+  overflow-y: auto;
+}
+
+.confirmation-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.confirmation-details span {
+  color: var(--text);
+}
+
+.confirmation-style {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.style-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.style-item span:first-child {
+  color: var(--text-secondary);
+}
+
+.style-item span:last-child {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.color-swatch {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.color-swatch .swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.confirmation-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--primary-light);
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.price-label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.price-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  padding-top: 0;
+}
+
+.btn-secondary {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-card);
+  border-color: var(--primary);
+}
+
+.confirmation-actions .pay-btn {
+  flex: 1;
+}
