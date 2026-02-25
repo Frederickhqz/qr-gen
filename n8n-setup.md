@@ -28,14 +28,14 @@
 ### 4. Activate the Workflow
 
 1. Click **Activate** toggle in the top right
-2. The webhook URLs will be generated:
-   - Create session: `https://168.231.69.92:5678/webhook/create-checkout-session`
-   - Stripe webhook: `https://168.231.69.92:5678/webhook/stripe-webhook`
+2. The webhook URLs will be:
+   - Create session: `https://n8n.srv796810.hstgr.cloud/webhook/create-checkout-session`
+   - Stripe webhook: `https://n8n.srv796810.hstgr.cloud/webhook/stripe-webhook`
 
 ### 5. Configure Stripe Webhook (Optional)
 
 1. Go to [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)
-2. Add endpoint: `https://168.231.69.92:5678/webhook/stripe-webhook`
+2. Add endpoint: `https://n8n.srv796810.hstgr.cloud/webhook/stripe-webhook`
 3. Select events: `checkout.session.completed`
 4. Copy the signing secret and add to n8n if needed
 
