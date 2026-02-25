@@ -143,6 +143,16 @@ function App() {
   // Crypto state
   const [cryptoSearch, setCryptoSearch] = useState('')
   const [showCryptoDropdown, setShowCryptoDropdown] = useState(false)
+  
+  // Contact form state
+  const [showContactForm, setShowContactForm] = useState(false)
+  const [contactFormData, setContactFormData] = useState({
+    name: '',
+    email: '',
+    type: 'suggestion',
+    message: ''
+  })
+  const [contactFormStatus, setContactFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
 
   // Preview size based on screen width
   const [previewSize, setPreviewSize] = useState(240)
@@ -418,6 +428,42 @@ function App() {
     setDotsStyle(preset.dots as DotStyle)
     setCornersStyle(preset.corners as CornerStyle)
     setBgTransparent(preset.bg === 'transparent')
+  }
+
+  // Handle contact form submission
+  const submitContactForm = async () => {
+    setContactFormStatus('submitting')
+    
+    try {
+      const response = await fetch(`${API_BASE}/contact-form`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: 'socials@enchantiarealms.com',
+          subject: `[QR Studio] ${contactFormData.type.charAt(0).toUpperCase() + contactFormData.type.slice(1)} from ${contactFormData.name}`,
+          name: contactFormData.name,
+          email: contactFormData.email,
+          type: contactFormData.type,
+          message: contactFormData.message,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString()
+        }),
+      })
+      
+      if (response.ok) {
+        setContactFormStatus('success')
+        setTimeout(() => {
+          setShowContactForm(false)
+          setContactFormStatus('idle')
+          setContactFormData({ name: '', email: '', type: 'suggestion', message: '' })
+        }, 2000)
+      } else {
+        throw new Error('Failed to submit')
+      }
+    } catch (error) {
+      console.error('Contact form error:', error)
+      setContactFormStatus('error')
+    }
   }
 
   // Handle form input
@@ -1243,9 +1289,109 @@ function App() {
         </div>
       )}
 
+      {/* Contact Form Modal */}
+      {showContactForm && (
+        <div className="modal-overlay" onClick={() => setShowContactForm(false)}>
+          <div className="modal contact-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowContactForm(false)}>×</button>
+            
+            <div className="modal-header">
+              <h2>Contact Us</h2>
+              <p>Have a suggestion, need support, or want to request a feature?</p>
+            </div>
+
+            {contactFormStatus === 'success' ? (
+              <div className="contact-success">
+                <div className="success-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                </div>
+                <h3>Message Sent!</h3>
+                <p>Thanks for reaching out. We'll get back to you soon.</p>
+              </div>
+            ) : (
+              <div className="contact-form">
+                <div className="form-group">
+                  <label>Type</label>
+                  <select 
+                    value={contactFormData.type} 
+                    onChange={(e) => setContactFormData({...contactFormData, type: e.target.value})}
+                  >
+                    <option value="suggestion">💡 Suggestion</option>
+                    <option value="support">🆘 Support Request</option>
+                    <option value="feature">✨ Feature Request</option>
+                    <option value="bug">🐛 Bug Report</option>
+                    <option value="other">📝 Other</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Your Name</label>
+                  <input 
+                    type="text" 
+                    value={contactFormData.name}
+                    onChange={(e) => setContactFormData({...contactFormData, name: e.target.value})}
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Your Email</label>
+                  <input 
+                    type="email" 
+                    value={contactFormData.email}
+                    onChange={(e) => setContactFormData({...contactFormData, email: e.target.value})}
+                    placeholder="john@example.com"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Message</label>
+                  <textarea 
+                    value={contactFormData.message}
+                    onChange={(e) => setContactFormData({...contactFormData, message: e.target.value})}
+                    placeholder="Tell us what's on your mind..."
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                {contactFormStatus === 'error' && (
+                  <div className="contact-error">
+                    Failed to send message. Please try again or email us directly at socials@enchantiarealms.com
+                  </div>
+                )}
+
+                <button 
+                  className="pay-btn" 
+                  onClick={submitContactForm}
+                  disabled={contactFormStatus === 'submitting' || !contactFormData.name || !contactFormData.email || !contactFormData.message}
+                >
+                  {contactFormStatus === 'submitting' ? (
+                    <>
+                      <span className="spinner"></span>
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Message'
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <footer>
-        <p>© 2026 QR Code Studio • Beautiful QR codes, instantly. No subscription required.</p>
+        <p>
+          © 2026 QR Code Studio • Beautiful QR codes, instantly. No subscription required.
+          {' '}<button className="footer-link" onClick={() => setShowContactForm(true)}>Contact & Support</button>
+        </p>
       </footer>
     </div>
   )
