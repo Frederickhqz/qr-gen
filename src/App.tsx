@@ -430,20 +430,38 @@ function App() {
     setBgTransparent(preset.bg === 'transparent')
   }
 
+// Telegram Bot Token (for server-side use via n8n webhook)
+// Bot: @MilderyBot
+// To send to Telegram channel, set up n8n workflow at /contact-form endpoint
+// that sends message to channel: -100... (get ID by forwarding message to @userinfobot)
+const TELEGRAM_BOT_TOKEN = '8557150390:AAGaLqQdrV_RvEeZK9Xk1HOH2AbziqLEzg8'
+
   // Handle contact form submission
   const submitContactForm = async () => {
     setContactFormStatus('submitting')
+    
+    // Format message for Telegram
+    const telegramMessage = `📩 *New QR Studio Contact Form*
+
+*Type:* ${contactFormData.type.charAt(0).toUpperCase() + contactFormData.type.slice(1)}
+*From:* ${contactFormData.name}
+*Email:* ${contactFormData.email}
+
+*Message:*
+${contactFormData.message}
+
+---
+🕐 ${new Date().toLocaleString()}`
     
     try {
       const response = await fetch(`${API_BASE}/contact-form`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          to: 'socials@enchantiarealms.com',
-          subject: `[QR Studio] ${contactFormData.type.charAt(0).toUpperCase() + contactFormData.type.slice(1)} from ${contactFormData.name}`,
+          telegramMessage,
+          messageType: contactFormData.type,
           name: contactFormData.name,
           email: contactFormData.email,
-          type: contactFormData.type,
           message: contactFormData.message,
           userAgent: navigator.userAgent,
           timestamp: new Date().toISOString()
@@ -1405,7 +1423,7 @@ function App() {
 
                 {contactFormStatus === 'error' && (
                   <div className="contact-error">
-                    Failed to send message. Please try again or email us directly at socials@enchantiarealms.com
+                    Failed to send message. Please try again or contact us directly.
                   </div>
                 )}
 
