@@ -5,7 +5,7 @@ import { generateQRData, generatePlaceholderData } from './utils/qrData'
 import { compressLogo, type CompressedLogo } from './utils/logoCompress'
 import { dotStyles, cornerStyles, presets, type DotStyle, type CornerStyle } from './utils/styling'
 import { getPlatformIcon, hasPlatformIcon, brandColors } from './utils/platformIcons'
-import { EmailCapture } from './components/EmailCapture'
+import { AuthModal } from './components/AuthModal'
 import { QRHistory } from './components/QRHistory'
 import { supabase } from './lib/supabase'
 import './index.css'
@@ -147,9 +147,10 @@ function App() {
   const [cryptoSearch, setCryptoSearch] = useState('')
   const [showCryptoDropdown, setShowCryptoDropdown] = useState(false)
 
-  // Email capture state
-  const [showEmailCapture, setShowEmailCapture] = useState(false)
-  const [lastDownloadedQR, setLastDownloadedQR] = useState<{ type: string; data: Record<string, string>; styles: any } | null>(null)
+  // Auth modal state
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [pendingDownloadQR, setPendingDownloadQR] = useState<{ type: string; data: Record<string, string>; styles: any } | null>(null)
+  const [pendingDownloadFormat, setPendingDownloadFormat] = useState<'png' | 'svg' | 'jpeg'>('png')
   const [user, setUser] = useState<any>(null)
 
   // Preview size based on screen width
@@ -297,12 +298,10 @@ function App() {
     })
   }
 
-  // Handle download after payment
-  const handleDownload = async (format: 'png' | 'svg' | 'jpeg') => {
+  // Actually perform the download
+  const performDownload = async (format: 'png' | 'svg' | 'jpeg') => {
     const downloadQR = generateDownloadQR()
-
-    // For PNG/JPEG with logo, we need to ensure the image is loaded
-    // Create a hidden container and append to DOM temporarily
+    
     const hiddenContainer = document.createElement('div')
     hiddenContainer.style.position = 'absolute'
     hiddenContainer.style.left = '-9999px'
@@ -310,64 +309,68 @@ function App() {
     hiddenContainer.style.width = `${qrSize}px`
     hiddenContainer.style.height = `${qrSize}px`
     document.body.appendChild(hiddenContainer)
-
+    
     try {
-      // Append QR to hidden container and wait for render
       await downloadQR.append(hiddenContainer)
-
-      // Small delay to ensure logo is loaded if present
+      
       if (logo) {
         await new Promise(resolve => setTimeout(resolve, 100))
       }
-
-      // Download
+      
       await downloadQR.download({ name: 'qr-code', extension: format })
+    } finally {
+      document.body.removeChild(hiddenContainer)
+    }
+  }
+
+  // Handle download - shows auth modal first for non-logged-in users
+  const handleDownload = async (format: 'png' | 'svg' | 'jpeg') => {
+    // Store QR data for saving
+    const qrDataToSave = {
+      type: qrType,
+      data: { ...formData },
+      styles: {
+        fgColor,
+        bgColor,
+        dotsStyle,
+        cornersStyle,
+        gradientEnabled,
+        gradientColor1,
+        gradientColor2,
+        gradientType,
+        logo: logo || undefined,
+        logoSize,
+        logoMargin,
+        usePlatformIcon,
+        iconColor
+      }
+    }
+    
+    // If logged in, save and download immediately
+    if (user) {
+      await performDownload(format)
       
-      // Save QR data for potential email capture
-      const qrDataToSave = {
+      // Save to Supabase
+      await supabase.from('qr_codes').insert({
+        user_id: user.id,
         type: qrType,
-        data: { ...formData },
-        styles: {
-          fgColor,
-          bgColor,
-          dotsStyle,
-          cornersStyle,
-          gradientEnabled,
-          gradientColor1,
-          gradientColor2,
-          gradientType,
-          logo: logo || undefined,
-          logoSize,
-          logoMargin,
-          usePlatformIcon,
-          iconColor
-        }
-      }
-      
-      // Save to history if logged in
-      if (user) {
-        await supabase.from('qr_codes').insert({
-          user_id: user.id,
-          type: qrType,
-          data: qrDataToSave.data,
-          styles: qrDataToSave.styles
-        })
-      } else {
-        // Store for email capture prompt
-        setLastDownloadedQR(qrDataToSave)
-        setShowEmailCapture(true)
-      }
+        data: qrDataToSave.data,
+        styles: qrDataToSave.styles
+      })
       
       // Track event
       await supabase.from('events').insert({
-        user_id: user?.id || null,
+        user_id: user.id,
         event_type: 'qr_downloaded',
         event_data: { format, qr_type: qrType }
       })
-    } finally {
-      // Clean up
-      document.body.removeChild(hiddenContainer)
+      return
     }
+    
+    // Not logged in - show auth modal first
+    setPendingDownloadQR(qrDataToSave)
+    setPendingDownloadFormat(format)
+    setShowAuthModal(true)
   }
 
   // Check if running in Telegram
@@ -1350,17 +1353,22 @@ function App() {
         </div>
       )}
 
-      {showEmailCapture && lastDownloadedQR && (
-        <EmailCapture
-          qrData={lastDownloadedQR}
+      {showAuthModal && pendingDownloadQR && (
+        <AuthModal
+          qrData={pendingDownloadQR}
           onClose={() => {
-            setShowEmailCapture(false)
-            setLastDownloadedQR(null)
+            setShowAuthModal(false)
+            setPendingDownloadQR(null)
           }}
           onSuccess={() => {
-            setShowEmailCapture(false)
-            setLastDownloadedQR(null)
+            setShowAuthModal(false)
+            setPendingDownloadQR(null)
+            // Refresh user session
+            supabase.auth.getSession().then(({ data: { session } }) => {
+              setUser(session?.user || null)
+            })
           }}
+          onDownload={() => performDownload(pendingDownloadFormat)}
         />
       )}
 
