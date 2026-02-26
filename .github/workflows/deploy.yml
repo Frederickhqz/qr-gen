@@ -26,6 +26,8 @@ jobs:
       - name: Build project
         run: npx vite build
       
+      # Option 1: FTP (port 21) - if Hostinger blocks GitHub IPs, use manual deploy
+      # Option 2: SFTP (port 22) - more reliable but requires SSH access
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
@@ -34,6 +36,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
           protocol: ftp
+          timeout: 120000
+          log-level: verbose
           local-dir: ./dist/
           server-dir: /public_html/
           dangerous-clean-slate: false
