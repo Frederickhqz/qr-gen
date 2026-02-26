@@ -266,7 +266,7 @@ body {
 }
 
 .preview-info h3 {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 0.125rem;
@@ -274,7 +274,7 @@ body {
 
 @media (min-width: 1024px) {
   .preview-info h3 {
-    font-size: 1rem;
+    font-size: 1.125rem;
     margin-bottom: 0.25rem;
   }
 }
@@ -288,6 +288,17 @@ body {
 @media (min-width: 1024px) {
   .preview-info p {
     font-size: 0.85rem;
+  }
+}
+
+/* Preview Subtitle - Desktop only */
+.preview-subtitle {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .preview-subtitle {
+    display: block;
   }
 }
 

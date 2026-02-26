@@ -848,7 +848,7 @@ function App() {
           <div className="preview-content">
             <div className="preview-info">
               <h3>Customize your QR</h3>
-              <p>Adjust style options below. Pay to download.</p>
+              <p className="preview-subtitle">Adjust style options below. Pay to download.</p>
             </div>
 
             <p className="preview-tagline">No subscription. No strings attached. Your QR works forever.</p>
