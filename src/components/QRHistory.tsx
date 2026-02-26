@@ -1,25 +1,33 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import QRCodeStyling from 'qr-code-styling'
 import { supabase } from '../lib/supabase'
-import type { QRCode } from '../lib/supabase'
+import type { QRCode, QRStyles } from '../lib/supabase'
 
-export function QRHistory() {
+interface QRHistoryModalProps {
+  user: any
+  onClose: () => void
+}
+
+export function QRHistoryModal({ user, onClose }: QRHistoryModalProps) {
   const [codes, setCodes] = useState<QRCode[]>([])
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
+  const qrRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
   useEffect(() => {
-    checkSession()
-  }, [])
-
-  const checkSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session?.user) {
-      setUser(session.user)
-      loadHistory(session.user.id)
-    } else {
-      setLoading(false)
+    if (user) {
+      loadHistory(user.id)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    // Render QR codes after loading
+    codes.forEach((qr) => {
+      const container = qrRefs.current.get(qr.id)
+      if (container) {
+        renderQR(qr, container)
+      }
+    })
+  }, [codes])
 
   const loadHistory = async (userId: string) => {
     const { data, error } = await supabase
@@ -36,52 +44,210 @@ export function QRHistory() {
     setLoading(false)
   }
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    setCodes([])
+  const renderQR = (qr: QRCode, container: HTMLDivElement) => {
+    container.innerHTML = ''
+    
+    const styles: QRStyles = qr.styles as QRStyles
+    
+    // Generate the actual QR data from stored data
+    let qrData = ''
+    if (qr.type === 'url') qrData = qr.data.url || 'https://example.com'
+    else if (qr.type === 'wifi') qrData = `WIFI:T:${qr.data.encryption || 'WPA'};S:${qr.data.ssid};P:${qr.data.password};;`
+    else if (qr.type === 'email') qrData = `mailto:${qr.data.email}?subject=${encodeURIComponent(qr.data.subject || '')}&body=${encodeURIComponent(qr.data.body || '')}`
+    else if (qr.type === 'phone') qrData = `tel:${qr.data.phone}`
+    else if (qr.type === 'sms') qrData = `sms:${qr.data.phone}?body=${encodeURIComponent(qr.data.message || '')}`
+    else if (qr.type === 'vcard') qrData = `BEGIN:VCARD\nVERSION:3.0\nFN:${qr.data.name}\nTEL:${qr.data.phone}\nEMAIL:${qr.data.email}\nEND:VCARD`
+    else if (qr.type === 'text') qrData = qr.data.text || ''
+    else qrData = JSON.stringify(qr.data)
+
+    const qrCode = new QRCodeStyling({
+      width: 120,
+      height: 120,
+      data: qrData,
+      dotsOptions: {
+        color: styles.fgColor,
+        type: styles.dotsStyle as any,
+        ...(styles.gradientEnabled && {
+          gradient: {
+            type: styles.gradientType || 'linear',
+            rotation: 0,
+            colorStops: [
+              { offset: 0, color: styles.gradientColor1 || styles.fgColor },
+              { offset: 1, color: styles.gradientColor2 || styles.fgColor }
+            ]
+          }
+        })
+      },
+      backgroundOptions: {
+        color: styles.bgColor === 'transparent' ? '#ffffff' : styles.bgColor,
+      },
+      cornersSquareOptions: {
+        type: styles.cornersStyle as any,
+        color: styles.fgColor,
+      },
+      cornersDotOptions: {
+        type: styles.cornersStyle as any,
+        color: styles.fgColor,
+      },
+      imageOptions: {
+        crossOrigin: 'anonymous',
+        margin: styles.logoMargin || 5,
+        imageSize: styles.logoSize || 0.35,
+      },
+    })
+
+    qrCode.append(container)
   }
 
-  if (!user) {
-    return (
-      <div className="qr-history-empty">
-        <p>Sign in to see your saved QR codes</p>
-      </div>
-    )
+  const handleDownload = async (qr: QRCode) => {
+    // Track download
+    await supabase.from('qr_codes')
+      .update({ 
+        download_count: (qr.download_count || 0) + 1,
+        last_downloaded_at: new Date().toISOString()
+      })
+      .eq('id', qr.id)
+
+    // Generate full-size QR for download
+    const container = qrRefs.current.get(qr.id)
+    if (!container) return
+
+    const styles: QRStyles = qr.styles as QRStyles
+    
+    let qrData = ''
+    if (qr.type === 'url') qrData = qr.data.url || 'https://example.com'
+    else if (qr.type === 'wifi') qrData = `WIFI:T:${qr.data.encryption || 'WPA'};S:${qr.data.ssid};P:${qr.data.password};;`
+    else if (qr.type === 'email') qrData = `mailto:${qr.data.email}?subject=${encodeURIComponent(qr.data.subject || '')}&body=${encodeURIComponent(qr.data.body || '')}`
+    else if (qr.type === 'phone') qrData = `tel:${qr.data.phone}`
+    else if (qr.type === 'sms') qrData = `sms:${qr.data.phone}?body=${encodeURIComponent(qr.data.message || '')}`
+    else if (qr.type === 'vcard') qrData = `BEGIN:VCARD\nVERSION:3.0\nFN:${qr.data.name}\nTEL:${qr.data.phone}\nEMAIL:${qr.data.email}\nEND:VCARD`
+    else if (qr.type === 'text') qrData = qr.data.text || ''
+    else qrData = JSON.stringify(qr.data)
+
+    const downloadQR = new QRCodeStyling({
+      width: 800,
+      height: 800,
+      data: qrData,
+      dotsOptions: {
+        color: styles.fgColor,
+        type: styles.dotsStyle as any,
+        ...(styles.gradientEnabled && {
+          gradient: {
+            type: styles.gradientType || 'linear',
+            rotation: 0,
+            colorStops: [
+              { offset: 0, color: styles.gradientColor1 || styles.fgColor },
+              { offset: 1, color: styles.gradientColor2 || styles.fgColor }
+            ]
+          }
+        })
+      },
+      backgroundOptions: {
+        color: styles.bgColor === 'transparent' ? '#ffffff' : styles.bgColor,
+      },
+      cornersSquareOptions: {
+        type: styles.cornersStyle as any,
+        color: styles.fgColor,
+      },
+      cornersDotOptions: {
+        type: styles.cornersStyle as any,
+        color: styles.fgColor,
+      },
+      imageOptions: {
+        crossOrigin: 'anonymous',
+        margin: styles.logoMargin || 5,
+        imageSize: styles.logoSize || 0.35,
+      },
+    })
+
+    const hiddenContainer = document.createElement('div')
+    hiddenContainer.style.position = 'absolute'
+    hiddenContainer.style.left = '-9999px'
+    document.body.appendChild(hiddenContainer)
+    
+    try {
+      await downloadQR.append(hiddenContainer)
+      await downloadQR.download({ name: `qr-${qr.type}`, extension: 'png' })
+    } finally {
+      document.body.removeChild(hiddenContainer)
+    }
+
+    // Refresh to show updated count
+    loadHistory(user.id)
   }
 
-  if (loading) {
-    return <div className="qr-history-loading">Loading...</div>
-  }
+  const handleDelete = async (qrId: string) => {
+    const confirmed = confirm('Delete this QR code? This cannot be undone.')
+    if (!confirmed) return
 
-  if (codes.length === 0) {
-    return (
-      <div className="qr-history-empty">
-        <p>No saved QR codes yet.</p>
-        <p>Generate and download a QR code to get started!</p>
-      </div>
-    )
+    await supabase.from('qr_codes').delete().eq('id', qrId)
+    loadHistory(user.id)
   }
 
   return (
-    <div className="qr-history">
-      <div className="qr-history-header">
-        <h3>Your QR Codes ({codes.length})</h3>
-        <button className="btn-text" onClick={handleSignOut}>Sign out</button>
-      </div>
-      
-      <div className="qr-history-list">
-        {codes.map((qr) => (
-          <div key={qr.id} className="qr-history-item">
-            <div className="qr-info">
-              <span className="qr-type">{qr.type}</span>
-              <span className="qr-date">{new Date(qr.created_at).toLocaleDateString()}</span>
-            </div>
-            <div className="qr-stats">
-              <span>{qr.download_count} downloads</span>
-            </div>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal history-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>×</button>
+        
+        <div className="history-header">
+          <h2>My QR Codes</h2>
+          <p>Your saved QR codes are stored here</p>
+        </div>
+
+        {loading ? (
+          <div className="history-loading">Loading...</div>
+        ) : codes.length === 0 ? (
+          <div className="history-empty">
+            <div className="empty-icon">📱</div>
+            <h3>No saved QR codes yet</h3>
+            <p>Generate and download a QR code to save it here.</p>
           </div>
-        ))}
+        ) : (
+          <div className="history-list">
+            {codes.map((qr) => (
+              <div key={qr.id} className="history-item">
+                <div 
+                  className="history-qr-preview"
+                  ref={(el) => {
+                    if (el) qrRefs.current.set(qr.id, el)
+                  }}
+                />
+                
+                <div className="history-info">
+                  <div className="history-type">{qr.type}</div>
+                  <div className="history-meta">
+                    {new Date(qr.created_at).toLocaleDateString()} • {qr.download_count} downloads
+                  </div>
+                </div>
+                
+                <div className="history-actions">
+                  <button 
+                    className="history-btn download"
+                    onClick={() => handleDownload(qr)}
+                    title="Download"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </button>
+                  
+                  <button 
+                    className="history-btn delete"
+                    onClick={() => handleDelete(qr.id)}
+                    title="Delete"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

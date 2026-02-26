@@ -6,7 +6,8 @@ import { compressLogo, type CompressedLogo } from './utils/logoCompress'
 import { dotStyles, cornerStyles, presets, type DotStyle, type CornerStyle } from './utils/styling'
 import { getPlatformIcon, hasPlatformIcon, brandColors } from './utils/platformIcons'
 import { AuthModal } from './components/AuthModal'
-import { QRHistory } from './components/QRHistory'
+import { UserMenu } from './components/UserMenu'
+import { QRHistoryModal } from './components/QRHistory'
 import { supabase } from './lib/supabase'
 import './index.css'
 
@@ -152,6 +153,9 @@ function App() {
   const [pendingDownloadQR, setPendingDownloadQR] = useState<{ type: string; data: Record<string, string>; styles: any } | null>(null)
   const [pendingDownloadFormat, setPendingDownloadFormat] = useState<'png' | 'svg' | 'jpeg'>('png')
   const [user, setUser] = useState<any>(null)
+  
+  // History modal state
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
 
   // Preview size based on screen width
   const [previewSize, setPreviewSize] = useState(240)
@@ -846,7 +850,25 @@ function App() {
             </svg>
             <span className="logo-text">QR Code Studio</span>
           </div>
-          <p className="tagline">No subscription. No strings attached. Your QR works forever.</p>
+          
+          <div className="header-right">
+            <p className="tagline">No subscription. No strings attached.</p>
+            
+            {user ? (
+              <UserMenu 
+                user={user}
+                onShowHistory={() => setShowHistoryModal(true)}
+                onSignOut={() => setUser(null)}
+              />
+            ) : (
+              <button 
+                className="header-signin-btn"
+                onClick={() => setShowAuthModal(true)}
+              >
+                Sign In
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -1372,6 +1394,13 @@ function App() {
         />
       )}
 
+      {showHistoryModal && user && (
+        <QRHistoryModal
+          user={user}
+          onClose={() => setShowHistoryModal(false)}
+        />
+      )}
+
       {/* Footer */}
       <footer>
         <p>
@@ -1379,8 +1408,11 @@ function App() {
           {' '}<a className="footer-link" href="mailto:socials@enchantiarealms.com?subject=QR%20Studio%20Support">Contact & Support</a>
           {' | '}
           <button className="footer-link" onClick={() => {
-            // Show history - could be a modal or new route
-            alert('QR History feature coming soon! Sign in to see your saved codes.')
+            if (user) {
+              setShowHistoryModal(true)
+            } else {
+              setShowAuthModal(true)
+            }
           }}>My QR Codes</button>
         </p>
       </footer>
