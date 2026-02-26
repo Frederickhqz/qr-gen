@@ -15,7 +15,7 @@
     },
     {
       "parameters": {
-        "chatId": "={{ $json.body.channelId || '-100YOUR_CHANNEL_ID' }}",
+        "chatId": "=-1003834389414",
         "text": "={{ $json.body.telegramMessage }}",
         "parseMode": "markdown",
         "disableWebPagePreview": true
