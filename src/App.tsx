@@ -5,6 +5,9 @@ import { generateQRData, generatePlaceholderData } from './utils/qrData'
 import { compressLogo, type CompressedLogo } from './utils/logoCompress'
 import { dotStyles, cornerStyles, presets, type DotStyle, type CornerStyle } from './utils/styling'
 import { getPlatformIcon, hasPlatformIcon, brandColors } from './utils/platformIcons'
+import { EmailCapture } from './components/EmailCapture'
+import { QRHistory } from './components/QRHistory'
+import { supabase } from './lib/supabase'
 import './index.css'
 
 // Telegram WebApp type declarations
@@ -110,7 +113,7 @@ function App() {
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [qr, setQr] = useState<QRCodeStyling | null>(null)
   const qrRef = useRef<HTMLDivElement>(null)
-  
+
   // Style state
   const [dotsStyle, setDotsStyle] = useState<DotStyle>('square')
   const [cornersStyle, setCornersStyle] = useState<CornerStyle>('square')
@@ -122,7 +125,7 @@ function App() {
   const [gradientColor2, setGradientColor2] = useState('#5856D6')
   const [gradientType, setGradientType] = useState<'linear' | 'radial'>('linear')
   const [qrSize, setQrSize] = useState(800)
-  
+
   // Logo/Icon state
   const [logo, setLogo] = useState<string | null>(null)
   const [logoSize, setLogoSize] = useState(0.35)
@@ -131,7 +134,7 @@ function App() {
   const [showIconOption, setShowIconOption] = useState(false)
   const [usePlatformIcon, setUsePlatformIcon] = useState(false)
   const [iconColor, setIconColor] = useState('#000000')
-  
+
   // UI state
   const [activeCategory, setActiveCategory] = useState<string>('core')
   const [showPayment, setShowPayment] = useState(false)
@@ -139,14 +142,19 @@ function App() {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
-  
+
   // Crypto state
   const [cryptoSearch, setCryptoSearch] = useState('')
   const [showCryptoDropdown, setShowCryptoDropdown] = useState(false)
-  
+
+  // Email capture state
+  const [showEmailCapture, setShowEmailCapture] = useState(false)
+  const [lastDownloadedQR, setLastDownloadedQR] = useState<{ type: string; data: Record<string, string>; styles: any } | null>(null)
+  const [user, setUser] = useState<any>(null)
+
   // Preview size based on screen width
   const [previewSize, setPreviewSize] = useState(240)
-  
+
   useEffect(() => {
     const updateSize = () => {
       setPreviewSize(window.innerWidth < 1024 ? 120 : 240)
@@ -156,6 +164,19 @@ function App() {
     return () => window.removeEventListener('resize', updateSize)
   }, [])
 
+  // Check for user session
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
   // Filter QR types by category
   const filteredTypes = qrTypes.filter(t => t.category === activeCategory)
 
@@ -163,13 +184,13 @@ function App() {
   const updateQR = useCallback(() => {
     if (!qrRef.current) return
     qrRef.current.innerHTML = ''
-    
+
     // Use placeholder data for preview
     const data = generatePlaceholderData(qrType)
-    
+
     // Determine which logo to use: custom upload, platform icon, or none
     const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType, iconColor) : null) || undefined
-    
+
     const options = {
       width: previewSize,
       height: previewSize,
@@ -206,7 +227,7 @@ function App() {
         imageSize: logoSize,
       },
     }
-    
+
     const newQr = new QRCodeStyling(options)
     newQr.append(qrRef.current)
     setQr(newQr)
@@ -220,7 +241,7 @@ function App() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    
+
     try {
       const compressed = await compressLogo(file, 150)
       setLogo(compressed.dataUrl)
@@ -234,10 +255,10 @@ function App() {
   // Generate real QR for download (with actual size and data)
   const generateDownloadQR = (): QRCodeStyling => {
     const data = generateQRData(qrType, formData as Record<string, string>)
-    
+
     // Determine which logo to use: custom upload, platform icon, or none
     const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType, iconColor) : null) || undefined
-    
+
     return new QRCodeStyling({
       width: qrSize,
       height: qrSize,
@@ -279,7 +300,7 @@ function App() {
   // Handle download after payment
   const handleDownload = async (format: 'png' | 'svg' | 'jpeg') => {
     const downloadQR = generateDownloadQR()
-    
+
     // For PNG/JPEG with logo, we need to ensure the image is loaded
     // Create a hidden container and append to DOM temporarily
     const hiddenContainer = document.createElement('div')
@@ -289,18 +310,60 @@ function App() {
     hiddenContainer.style.width = `${qrSize}px`
     hiddenContainer.style.height = `${qrSize}px`
     document.body.appendChild(hiddenContainer)
-    
+
     try {
       // Append QR to hidden container and wait for render
       await downloadQR.append(hiddenContainer)
-      
+
       // Small delay to ensure logo is loaded if present
       if (logo) {
         await new Promise(resolve => setTimeout(resolve, 100))
       }
-      
+
       // Download
       await downloadQR.download({ name: 'qr-code', extension: format })
+      
+      // Save QR data for potential email capture
+      const qrDataToSave = {
+        type: qrType,
+        data: { ...formData },
+        styles: {
+          fgColor,
+          bgColor,
+          dotsStyle,
+          cornersStyle,
+          gradientEnabled,
+          gradientColor1,
+          gradientColor2,
+          gradientType,
+          logo: logo || undefined,
+          logoSize,
+          logoMargin,
+          usePlatformIcon,
+          iconColor
+        }
+      }
+      
+      // Save to history if logged in
+      if (user) {
+        await supabase.from('qr_codes').insert({
+          user_id: user.id,
+          type: qrType,
+          data: qrDataToSave.data,
+          styles: qrDataToSave.styles
+        })
+      } else {
+        // Store for email capture prompt
+        setLastDownloadedQR(qrDataToSave)
+        setShowEmailCapture(true)
+      }
+      
+      // Track event
+      await supabase.from('events').insert({
+        user_id: user?.id || null,
+        event_type: 'qr_downloaded',
+        event_data: { format, qr_type: qrType }
+      })
     } finally {
       // Clean up
       document.body.removeChild(hiddenContainer)
@@ -315,16 +378,16 @@ function App() {
     if (isTelegram) {
       window.Telegram!.WebApp!.ready()
     }
-    
+
     // Parse URL params
     const urlParams = new URLSearchParams(window.location.search)
-    
+
     // Check for payment success from redirect
     if (urlParams.get('payment') === 'success') {
       setPaymentSuccess(true)
       setShowPayment(true)
     }
-    
+
     // Check for QR type in URL (e.g., ?type=whatsapp)
     const typeParam = urlParams.get('type') as QRType
     if (typeParam) {
@@ -334,7 +397,7 @@ function App() {
         setActiveCategory(typeInfo.category)
       }
     }
-    
+
     // Clean up URL params (keep clean URL for sharing)
     if (urlParams.get('payment') || urlParams.get('type')) {
       window.history.replaceState({}, '', window.location.pathname)
@@ -345,7 +408,7 @@ function App() {
   const handlePayment = async () => {
     setPaymentLoading(true)
     setPaymentError(null)
-    
+
     // Build metadata with all QR details
     const metadata: Record<string, string> = {
       qr_type: qrType,
@@ -359,12 +422,12 @@ function App() {
       use_platform_icon: usePlatformIcon.toString(),
       icon_color: iconColor,
     }
-    
+
     // Add form data to metadata
     Object.entries(formData).forEach(([key, value]) => {
       if (value) metadata[`form_${key}`] = value
     })
-    
+
     try {
       if (isTelegram && window.Telegram?.WebApp?.openInvoice) {
         // Telegram Payments
@@ -389,13 +452,13 @@ function App() {
             metadata,
           }),
         })
-        
+
         if (!response.ok) {
           throw new Error('Failed to create checkout session')
         }
-        
+
         const { url } = await response.json()
-        
+
         if (url) {
           // Redirect to Stripe Checkout
           window.location.href = url
@@ -431,7 +494,7 @@ function App() {
     const handle = formData.handle
     const updateHandle = (v: string) => updateField('handle', v)
     const updateUrl = (v: string) => updateField('url', v)
-    
+
     switch (qrType) {
       case 'url':
       case 'website':
@@ -613,7 +676,7 @@ function App() {
       case 'ton':
       case 'crypto':
         const selectedCoin = POPULAR_COINS.find(c => c.id === (formData.cryptoCoin || 'bitcoin')) || POPULAR_COINS[0]
-        const filteredCoins = POPULAR_COINS.filter(c => 
+        const filteredCoins = POPULAR_COINS.filter(c =>
           c.name.toLowerCase().includes(cryptoSearch.toLowerCase()) ||
           c.symbol.toLowerCase().includes(cryptoSearch.toLowerCase())
         )
@@ -621,7 +684,7 @@ function App() {
           <>
             <div className="form-group" style={{ position: 'relative' }}>
               <label>Select Cryptocurrency</label>
-              <div 
+              <div
                 className="crypto-selector-trigger"
                 onClick={() => setShowCryptoDropdown(!showCryptoDropdown)}
               >
@@ -684,21 +747,21 @@ function App() {
             </div>
             <div className="form-group">
               <label>{selectedCoin.name} Address</label>
-              <input 
-                type="text" 
-                value={formData.cryptoAddress} 
-                onChange={(e) => updateField('cryptoAddress', e.target.value)} 
-                placeholder={`Enter ${selectedCoin.symbol} address...`} 
+              <input
+                type="text"
+                value={formData.cryptoAddress}
+                onChange={(e) => updateField('cryptoAddress', e.target.value)}
+                placeholder={`Enter ${selectedCoin.symbol} address...`}
               />
             </div>
             <div className="form-group">
               <label>Amount ({selectedCoin.symbol}) - optional</label>
-              <input 
-                type="number" 
-                value={formData.cryptoAmount} 
-                onChange={(e) => updateField('cryptoAmount', e.target.value)} 
-                placeholder="0.01" 
-                step="0.000001" 
+              <input
+                type="number"
+                value={formData.cryptoAmount}
+                onChange={(e) => updateField('cryptoAmount', e.target.value)}
+                placeholder="0.01"
+                step="0.000001"
               />
             </div>
           </>
@@ -724,11 +787,11 @@ function App() {
         return (
           <div className="form-group">
             <label>Calendly Link</label>
-            <input 
-              type="text" 
-              value={formData.url} 
-              onChange={(e) => updateUrl(e.target.value)} 
-              placeholder="username or calendly.com/username" 
+            <input
+              type="text"
+              value={formData.url}
+              onChange={(e) => updateUrl(e.target.value)}
+              placeholder="username or calendly.com/username"
             />
           </div>
         )
@@ -737,20 +800,20 @@ function App() {
           <>
             <div className="form-group">
               <label>Business Name</label>
-              <input 
-                type="text" 
-                value={formData.handle} 
-                onChange={(e) => updateHandle(e.target.value)} 
-                placeholder="Your business name" 
+              <input
+                type="text"
+                value={formData.handle}
+                onChange={(e) => updateHandle(e.target.value)}
+                placeholder="Your business name"
               />
             </div>
             <div className="form-group">
               <label>Place ID (optional) - for direct app opening</label>
-              <input 
-                type="text" 
-                value={formData.url} 
-                onChange={(e) => updateUrl(e.target.value)} 
-                placeholder="ChIJ... (from Google Places API)" 
+              <input
+                type="text"
+                value={formData.url}
+                onChange={(e) => updateUrl(e.target.value)}
+                placeholder="ChIJ... (from Google Places API)"
               />
               <p className="option-hint">
                 With Place ID, the QR opens Google Maps directly to review. Without it, users search for your business.
@@ -798,7 +861,7 @@ function App() {
               <span>Preview</span>
             </div>
           </div>
-          
+
           <div className="preview-content">
             <div className="preview-info">
               <h3>Customize your QR</h3>
@@ -862,7 +925,7 @@ function App() {
           {/* Style Options */}
           <div className="section">
             <h3>Style</h3>
-            
+
             {/* Presets */}
             <div className="option-group">
               <label>Presets</label>
@@ -873,9 +936,9 @@ function App() {
                     className="preset-btn"
                     onClick={() => applyPreset(preset)}
                     title={preset.name}
-                    style={{ 
-                      background: preset.bg === 'transparent' 
-                        ? 'repeating-conic-gradient(#e5e5e5 0 25%, #fff 0 50%) 50% / 8px 8px' 
+                    style={{
+                      background: preset.bg === 'transparent'
+                        ? 'repeating-conic-gradient(#e5e5e5 0 25%, #fff 0 50%) 50% / 8px 8px'
                         : preset.bg,
                       border: preset.bg === '#1c1c1e' ? '1px solid #333' : '1px solid #e5e5e5'
                     }}
@@ -971,19 +1034,19 @@ function App() {
             {/* Center Icon / Logo */}
             <div className="option-group">
               <label>Center Icon / Logo</label>
-              
+
               {/* Platform Icon Option */}
               {hasPlatformIcon(qrType) && !logo && (
                 <div className="platform-icon-option">
                   <label className="toggle-label">
-                    <input 
-                      type="checkbox" 
-                      checked={usePlatformIcon} 
-                      onChange={(e) => setUsePlatformIcon(e.target.checked)} 
+                    <input
+                      type="checkbox"
+                      checked={usePlatformIcon}
+                      onChange={(e) => setUsePlatformIcon(e.target.checked)}
                     />
                     <span>Use {getQRTypeInfo(qrType).label} icon</span>
                   </label>
-                  
+
                   {usePlatformIcon && (
                     <div className="icon-color-row">
                       <div className="color-picker-group">
@@ -994,7 +1057,7 @@ function App() {
                         </div>
                       </div>
                       {brandColors[qrType] && (
-                        <button 
+                        <button
                           className="brand-color-btn"
                           onClick={() => setIconColor(brandColors[qrType] as string)}
                           title={`Use ${getQRTypeInfo(qrType).label} brand color`}
@@ -1007,7 +1070,7 @@ function App() {
                   )}
                 </div>
               )}
-              
+
               {(logo || usePlatformIcon) && (
                 <div className="logo-controls-inline">
                   <div className="logo-sliders">
@@ -1028,7 +1091,7 @@ function App() {
                   )}
                 </div>
               )}
-              
+
               {!logo && !usePlatformIcon && (
                 <label className="upload-btn">
                   <input type="file" accept="image/*" onChange={handleLogoUpload} />
@@ -1041,8 +1104,8 @@ function App() {
                 </label>
               )}
               <p className="option-hint">
-                {hasPlatformIcon(qrType) 
-                  ? 'Enable the platform icon or upload your own logo' 
+                {hasPlatformIcon(qrType)
+                  ? 'Enable the platform icon or upload your own logo'
                   : 'Add your logo or brand icon in the center'}
               </p>
             </div>
@@ -1072,7 +1135,7 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowConfirmation(false)}>
           <div className="modal confirmation-modal" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowConfirmation(false)}>×</button>
-            
+
             <div className="modal-header">
               <h2>Confirm Your QR Code</h2>
               <p>Please review your details before payment</p>
@@ -1178,7 +1241,7 @@ function App() {
               setShowPayment(false)
               setPaymentSuccess(false)
             }}>×</button>
-            
+
             {paymentSuccess ? (
               <>
                 <div className="modal-header success">
@@ -1202,7 +1265,7 @@ function App() {
                     <span className="format">PNG</span>
                     <span className="format-desc">High quality • {qrSize}×{qrSize}px</span>
                   </button>
-                  
+
                   <button className="download-option" onClick={() => handleDownload('svg')}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polygon points="12 2 2 7 12 12 22 7 12 2"/>
@@ -1212,7 +1275,7 @@ function App() {
                     <span className="format">SVG</span>
                     <span className="format-desc">Vector • Scalable</span>
                   </button>
-                  
+
                   <button className="download-option" onClick={() => handleDownload('jpeg')}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -1287,11 +1350,30 @@ function App() {
         </div>
       )}
 
+      {showEmailCapture && lastDownloadedQR && (
+        <EmailCapture
+          qrData={lastDownloadedQR}
+          onClose={() => {
+            setShowEmailCapture(false)
+            setLastDownloadedQR(null)
+          }}
+          onSuccess={() => {
+            setShowEmailCapture(false)
+            setLastDownloadedQR(null)
+          }}
+        />
+      )}
+
       {/* Footer */}
       <footer>
         <p>
           © 2026 QR Code Studio • Beautiful QR codes, instantly. No subscription required.
           {' '}<a className="footer-link" href="mailto:socials@enchantiarealms.com?subject=QR%20Studio%20Support">Contact & Support</a>
+          {' | '}
+          <button className="footer-link" onClick={() => {
+            // Show history - could be a modal or new route
+            alert('QR History feature coming soon! Sign in to see your saved codes.')
+          }}>My QR Codes</button>
         </p>
       </footer>
     </div>
