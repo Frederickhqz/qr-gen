@@ -43,7 +43,7 @@ export function EmailCapture({ qrData, onClose, onSuccess }: EmailCaptureProps) 
       const { error: authError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?session_id=${session.id}`,
+          emailRedirectTo: `${window.location.origin}/#/auth/callback?session_id=${session.id}`,
           data: {
             qr_session_id: session.id
           }
