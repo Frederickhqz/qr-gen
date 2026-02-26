@@ -395,6 +395,8 @@ body {
   .content-scrollable {
     padding: 1.5rem 2rem;
     gap: 1.25rem;
+    height: 100%;
+    max-height: calc(100vh - 4.5rem);
   }
 }
 
@@ -2474,4 +2476,31 @@ select:focus-visible {
   .user-email {
     display: none;
   }
+}
+
+/* Checkbox styles for Auth Modal */
+.checkbox-group {
+  margin: 1rem 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.125rem;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.checkbox-label span {
+  flex: 1;
 }

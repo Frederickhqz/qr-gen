@@ -3,21 +3,23 @@ import { supabase } from '../lib/supabase'
 import type { QRStyles } from '../lib/supabase'
 
 interface AuthModalProps {
-  qrData: {
+  qrData?: {
     type: string
     data: Record<string, string>
     styles: QRStyles
   }
   onClose: () => void
   onSuccess: () => void
-  onDownload: () => void
+  onDownload?: () => void
+  mode?: 'save' | 'login'
 }
 
-export function AuthModal({ qrData, onClose, onSuccess, onDownload }: AuthModalProps) {
-  const [mode, setMode] = useState<'save' | 'login'>('save')
+export function AuthModal({ qrData, onClose, onSuccess, onDownload, mode: initialMode = 'save' }: AuthModalProps) {
+  const [mode, setMode] = useState<'save' | 'login'>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [marketingConsent, setMarketingConsent] = useState(false)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -48,34 +50,57 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload }: AuthModalP
         return
       }
 
-      // 2. Save QR code to their account
-      const { error: qrError } = await supabase
-        .from('qr_codes')
-        .insert({
-          user_id: authData.user.id,
-          type: qrData.type,
-          data: qrData.data,
-          styles: qrData.styles
-        })
+      // 2. Sign in the user immediately after signup
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
 
-      if (qrError) {
-        console.error('QR save error:', qrError)
+      if (signInError) {
+        console.error('Auto sign-in error:', signInError)
+        // Continue anyway - user can manually sign in
       }
 
-      // 3. Track event
+      // 3. Update profile with marketing consent
+      await supabase.from('profiles').update({
+        marketing_consent: marketingConsent
+      }).eq('id', authData.user.id)
+
+      // 4. Save QR code to their account (if exists)
+      if (qrData) {
+        const { error: qrError } = await supabase
+          .from('qr_codes')
+          .insert({
+            user_id: authData.user.id,
+            type: qrData.type,
+            data: qrData.data,
+            styles: qrData.styles
+          })
+
+        if (qrError) {
+          console.error('QR save error:', qrError)
+        }
+      }
+
+      // 5. Track event
       await supabase.from('events').insert({
         user_id: authData.user.id,
         event_type: 'user_signed_up',
-        event_data: { qr_type: qrData.type }
+        event_data: { 
+          qr_type: qrData?.type,
+          marketing_consent: marketingConsent
+        }
       })
 
       setStatus('success')
       
-      // Trigger download and close after short delay
+      // Trigger download (if exists) and close after short delay
       setTimeout(() => {
-        onDownload()
+        if (onDownload && qrData) {
+          onDownload()
+        }
         onSuccess()
-      }, 1000)
+      }, 1500)
       
     } catch (err) {
       console.error('Signup error:', err)
@@ -107,31 +132,35 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload }: AuthModalP
         return
       }
 
-      // Save QR to their account
-      const { error: qrError } = await supabase
-        .from('qr_codes')
-        .insert({
-          user_id: authData.user.id,
-          type: qrData.type,
-          data: qrData.data,
-          styles: qrData.styles
-        })
+      // Save QR to their account (if exists)
+      if (qrData) {
+        const { error: qrError } = await supabase
+          .from('qr_codes')
+          .insert({
+            user_id: authData.user.id,
+            type: qrData.type,
+            data: qrData.data,
+            styles: qrData.styles
+          })
 
-      if (qrError) {
-        console.error('QR save error:', qrError)
+        if (qrError) {
+          console.error('QR save error:', qrError)
+        }
       }
 
       // Track event
       await supabase.from('events').insert({
         user_id: authData.user.id,
         event_type: 'user_logged_in',
-        event_data: { qr_type: qrData.type }
+        event_data: { qr_type: qrData?.type }
       })
 
       setStatus('success')
       
       setTimeout(() => {
-        onDownload()
+        if (onDownload && qrData) {
+          onDownload()
+        }
         onSuccess()
       }, 1000)
       
@@ -143,7 +172,9 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload }: AuthModalP
   }
 
   const handleJustDownload = () => {
-    onDownload()
+    if (onDownload) {
+      onDownload()
+    }
     onClose()
   }
 
@@ -153,8 +184,8 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload }: AuthModalP
         <div className="modal auth-modal" onClick={(e) => e.stopPropagation()}>
           <div className="auth-success">
             <div className="success-icon">✅</div>
-            <h3>Welcome!</h3>
-            <p>Your QR code is being downloaded...</p>
+            <h3>Welcome{mode === 'save' ? '!' : ' back!'}</h3>
+            <p>{qrData ? 'Your QR code is being downloaded...' : 'You\'re now signed in.'}</p>
           </div>
         </div>
       </div>
@@ -167,11 +198,11 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload }: AuthModalP
         <button className="modal-close" onClick={onClose}>×</button>
         
         <div className="auth-header">
-          <h3>{mode === 'save' ? 'Save your QR code' : 'Welcome back'}</h3>
+          <h3>{mode === 'save' ? 'Create your account' : 'Welcome back'}</h3>
           <p>
             {mode === 'save' 
-              ? 'Create an account to save your QR codes and access them anytime.'
-              : 'Sign in to save this QR code to your account.'}
+              ? 'Save your QR codes and access them anytime.'
+              : 'Sign in to access your saved QR codes.'}
           </p>
         </div>
 
@@ -231,6 +262,19 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload }: AuthModalP
             />
           </div>
 
+          {mode === 'save' && (
+            <div className="form-group checkbox-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={marketingConsent}
+                  onChange={(e) => setMarketingConsent(e.target.checked)}
+                />
+                <span>Send me updates about new features</span>
+              </label>
+            </div>
+          )}
+
           {errorMsg && (
             <div className="auth-error">{errorMsg}</div>
           )}
@@ -246,18 +290,22 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload }: AuthModalP
                 {mode === 'save' ? 'Creating account...' : 'Signing in...'}
               </>
             ) : (
-              mode === 'save' ? 'Create Account & Download' : 'Sign In & Download'
+              mode === 'save' ? 'Create Account' : 'Sign In'
             )}
           </button>
         </form>
 
-        <div className="auth-divider">
-          <span>or</span>
-        </div>
+        {qrData && (
+          <>
+            <div className="auth-divider">
+              <span>or</span>
+            </div>
 
-        <button className="auth-skip-btn" onClick={handleJustDownload}>
-          Just download, don't save
-        </button>
+            <button className="auth-skip-btn" onClick={handleJustDownload}>
+              Just download, don't save
+            </button>
+          </>
+        )}
       </div>
     </div>
   )

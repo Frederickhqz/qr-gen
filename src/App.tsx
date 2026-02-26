@@ -150,6 +150,7 @@ function App() {
 
   // Auth modal state
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authModalMode, setAuthModalMode] = useState<'save' | 'login'>('save')
   const [pendingDownloadQR, setPendingDownloadQR] = useState<{ type: string; data: Record<string, string>; styles: any } | null>(null)
   const [pendingDownloadFormat, setPendingDownloadFormat] = useState<'png' | 'svg' | 'jpeg'>('png')
   const [user, setUser] = useState<any>(null)
@@ -863,7 +864,10 @@ function App() {
             ) : (
               <button 
                 className="header-signin-btn"
-                onClick={() => setShowAuthModal(true)}
+                onClick={() => {
+                  setAuthModalMode('login')
+                  setShowAuthModal(true)
+                }}
               >
                 Sign In
               </button>
@@ -1375,9 +1379,10 @@ function App() {
         </div>
       )}
 
-      {showAuthModal && pendingDownloadQR && (
+      {showAuthModal && (
         <AuthModal
-          qrData={pendingDownloadQR}
+          qrData={pendingDownloadQR || undefined}
+          mode={authModalMode}
           onClose={() => {
             setShowAuthModal(false)
             setPendingDownloadQR(null)
@@ -1390,7 +1395,7 @@ function App() {
               setUser(session?.user || null)
             })
           }}
-          onDownload={() => performDownload(pendingDownloadFormat)}
+          onDownload={pendingDownloadQR ? () => performDownload(pendingDownloadFormat) : undefined}
         />
       )}
 
@@ -1411,6 +1416,7 @@ function App() {
             if (user) {
               setShowHistoryModal(true)
             } else {
+              setAuthModalMode('login')
               setShowAuthModal(true)
             }
           }}>My QR Codes</button>
