@@ -96,6 +96,7 @@ function App() {
   const [showIconOption, setShowIconOption] = useState(false)
   const [usePlatformIcon, setUsePlatformIcon] = useState(false)
   const [iconColor, setIconColor] = useState('#000000')
+  const [useOfficialColor, setUseOfficialColor] = useState(true)
   
   // UI state
   const [activeCategory, setActiveCategory] = useState<string>('core')
