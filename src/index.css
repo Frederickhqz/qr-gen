@@ -587,8 +587,8 @@ body {
   justify-content: center;
   gap: 0.375rem;
   padding: 0.75rem 0.5rem;
-  background: var(--bg);
-  border: 1px solid transparent;
+  background: rgba(0, 102, 255, 0.08);
+  border: 2px solid rgba(0, 102, 255, 0.15);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -602,7 +602,7 @@ body {
 }
 
 .type-btn:hover {
-  background: var(--primary-light);
+  background: rgba(0, 102, 255, 0.15);
   border-color: var(--primary);
 }
 
@@ -627,8 +627,8 @@ body {
   justify-content: center;
   gap: 0.375rem;
   padding: 0.75rem 0.5rem;
-  background: var(--bg);
-  border: 2px solid transparent;
+  background: rgba(0, 102, 255, 0.08);
+  border: 2px solid rgba(0, 102, 255, 0.15);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -645,7 +645,7 @@ body {
 }
 
 .type-card:hover {
-  background: var(--primary-light);
+  background: rgba(0, 102, 255, 0.15);
   border-color: var(--primary);
   transform: translateY(-2px);
 }
@@ -845,7 +845,8 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 6px;
-  border: 1px solid var(--border);
+  border: 2px solid rgba(0, 102, 255, 0.15);
+  background: rgba(0, 102, 255, 0.08);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -862,8 +863,10 @@ body {
 }
 
 .preset-btn:hover {
+  background: rgba(0, 102, 255, 0.15);
+  border-color: var(--primary);
   transform: scale(1.08);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.15);
 }
 
 /* Pattern Grid */
@@ -881,8 +884,8 @@ body {
 
 .pattern-btn {
   padding: 0.375rem 0.625rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: rgba(0, 102, 255, 0.08);
+  border: 2px solid rgba(0, 102, 255, 0.15);
   border-radius: 5px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -900,6 +903,7 @@ body {
 }
 
 .pattern-btn:hover {
+  background: rgba(0, 102, 255, 0.15);
   border-color: var(--primary);
   color: var(--primary);
 }
