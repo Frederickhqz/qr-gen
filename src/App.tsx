@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import QRCodeStyling from 'qr-code-styling'
+// NOTE: Use dynamic import for qr-code-styling to avoid SSR/build-time issues
+// import QRCodeStyling from 'qr-code-styling'
 import { qrTypes, categories, getQRTypeInfo, type QRType } from './utils/icons'
 import { generateQRData, generatePlaceholderData } from './utils/qrData'
 import { compressLogo, type CompressedLogo } from './utils/logoCompress'
@@ -71,7 +72,9 @@ function App() {
   // Core state
   const [qrType, setQrType] = useState<QRType>('url')
   const [formData, setFormData] = useState<Record<string, string>>({})
-  const [qr, setQr] = useState<QRCodeStyling | null>(null)
+  const [qr, setQr] = useState<any>(null)
+  const [qrInitError, setQrInitError] = useState<string | null>(null)
+  const [isInitializingQR, setIsInitializingQR] = useState<boolean>(true)
   
   // Styling state
   const [dotsStyle, setDotsStyle] = useState<DotStyle>('square')
@@ -147,56 +150,70 @@ function App() {
   const filteredTypes = qrTypes.filter(t => t.category === activeCategory)
 
   // Generate QR code (fixed size for preview)
-  const updateQR = useCallback(() => {
+  const updateQR = useCallback(async () => {
     if (!qrRef.current) return
+    setIsInitializingQR(true)
     qrRef.current.innerHTML = ''
-    
-    // Use placeholder data for preview
-    const data = generatePlaceholderData(qrType)
-    
-    // Determine which logo to use: custom upload, platform icon, or none
-    const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType, iconColor) : null) || undefined
-    
-    const options = {
-      width: previewSize,
-      height: previewSize,
-      data,
-      image: imageSource,
-      dotsOptions: {
-        color: fgColor,
-        type: dotsStyle as any,
-        ...(gradientEnabled && {
-          gradient: {
-            type: gradientType,
-            rotation: 0,
-            colorStops: [
-              { offset: 0, color: gradientColor1 },
-              { offset: 1, color: gradientColor2 }
-            ]
-          }
-        })
-      },
-      backgroundOptions: {
-        color: bgTransparent ? 'transparent' : bgColor,
-      },
-      cornersSquareOptions: {
-        type: cornersStyle as any,
-        color: fgColor,
-      },
-      cornersDotOptions: {
-        type: cornersStyle as any,
-        color: fgColor,
-      },
-      imageOptions: {
-        crossOrigin: 'anonymous',
-        margin: logoMargin,
-        imageSize: logoSize,
-      },
+
+    try {
+      // Dynamic import to ensure correct constructor and avoid SSR issues
+      const mod = await import('qr-code-styling')
+      const QRCodeStyling = (mod as any).default || (mod as any)
+
+      // Use placeholder data for preview
+      const data = generatePlaceholderData(qrType)
+
+      // Determine which logo to use: custom upload, platform icon, or none
+      const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType, iconColor) : null) || undefined
+
+      const options = {
+        width: previewSize,
+        height: previewSize,
+        data,
+        image: imageSource,
+        dotsOptions: {
+          color: fgColor,
+          type: dotsStyle as any,
+          ...(gradientEnabled && {
+            gradient: {
+              type: gradientType,
+              rotation: 0,
+              colorStops: [
+                { offset: 0, color: gradientColor1 },
+                { offset: 1, color: gradientColor2 }
+              ]
+            }
+          })
+        },
+        backgroundOptions: {
+          color: bgTransparent ? 'transparent' : bgColor,
+        },
+        cornersSquareOptions: {
+          type: cornersStyle as any,
+          color: fgColor,
+        },
+        cornersDotOptions: {
+          type: cornersStyle as any,
+          color: fgColor,
+        },
+        imageOptions: {
+          crossOrigin: 'anonymous',
+          margin: logoMargin,
+          imageSize: logoSize,
+        },
+      }
+
+      const newQr = new QRCodeStyling(options)
+      await newQr.append(qrRef.current)
+      setQr(newQr)
+      setQrInitError(null)
+    } catch (err) {
+      console.error('Failed to initialize QR preview:', err)
+      setQr(null)
+      setQrInitError('Failed to initialize QR preview')
+    } finally {
+      setIsInitializingQR(false)
     }
-    
-    const newQr = new QRCodeStyling(options)
-    newQr.append(qrRef.current)
-    setQr(newQr)
   }, [qrType, dotsStyle, cornersStyle, fgColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType, logo, logoSize, logoMargin, usePlatformIcon, iconColor, previewSize])
 
   useEffect(() => {
@@ -219,7 +236,10 @@ function App() {
   }
 
   // Generate real QR for download (with actual size and data)
-  const generateDownloadQR = (): QRCodeStyling => {
+  const generateDownloadQR = async (): Promise<any> => {
+    const mod = await import('qr-code-styling')
+    const QRCodeStyling = (mod as any).default || (mod as any)
+
     const data = generateQRData(qrType, formData as Record<string, string>)
     
     // Determine which logo to use: custom upload, platform icon, or none
@@ -265,7 +285,7 @@ function App() {
 
   // Actually perform the download
   const performDownload = async (format: 'png' | 'svg' | 'jpeg') => {
-    const downloadQR = generateDownloadQR()
+    const downloadQR = await generateDownloadQR()
     
     const hiddenContainer = document.createElement('div')
     hiddenContainer.style.position = 'absolute'
@@ -400,11 +420,6 @@ function App() {
         </div>
       </div>
     )
-  }
-
-  // Loading state
-  if (!qr) {
-    return <div className="loading">Loading...</div>
   }
 
   return (
@@ -557,8 +572,14 @@ function App() {
               <div ref={(el) => {
                 if (el) {
                   el.innerHTML = ''
-                  const qr = generateDownloadQR()
-                  qr.append(el)
+                  ;(async () => {
+                    try {
+                      const qr = await generateDownloadQR()
+                      await qr.append(el)
+                    } catch (e) {
+                      console.error('Failed to render confirmation QR:', e)
+                    }
+                  })()
                 }
               }} />
             </div>
