@@ -10,9 +10,13 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
     case 'text':
       return data.text?.trim() || 'Sample text'
     case 'wifi':
-      return data.ssid ? `WIFI:T:${data.security || 'WPA'};S:${data.ssid};P:${data.password};;` : 'WIFI:T:WPA;S:Network;P:password;;'
+      if (!data.ssid) return 'WIFI:T:WPA;S:Network;P:password;;'
+      let wifiQr = `WIFI:T:${data.security || 'WPA'};S:${data.ssid};P:${data.password || ''};`
+      if (data.hidden === 'true') wifiQr += 'H:true;'
+      wifiQr += ';'
+      return wifiQr
     case 'email':
-      let mailto = `mailto:${data.email || 'hello@example.com'}`
+      let mailto = `mailto:${data.to || 'hello@example.com'}`
       const params = []
       if (data.subject) params.push(`subject=${encodeURIComponent(data.subject)}`)
       if (data.body) params.push(`body=${encodeURIComponent(data.body)}`)

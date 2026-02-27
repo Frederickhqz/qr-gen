@@ -418,18 +418,302 @@ function App() {
     if (!typeInfo.fields || typeInfo.fields.length === 0) {
       return <div className="form-fields"><p>No form fields for this type</p></div>
     }
-    const handle = formData.handle
-    const updateHandle = (v: string) => updateField('handle', v)
-    const updateUrl = (v: string) => updateField('url', v)
-    
+
+    // WiFi Form
+    if (qrType === 'wifi') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>Network Name (SSID)</label>
+            <input
+              type="text"
+              value={formData.ssid || ''}
+              onChange={(e) => updateField('ssid', e.target.value)}
+              placeholder="MyWiFiNetwork"
+            />
+          </div>
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="text"
+              value={formData.password || ''}
+              onChange={(e) => updateField('password', e.target.value)}
+              placeholder="Leave blank for open network"
+            />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Security</label>
+              <select value={formData.security || 'WPA'} onChange={(e) => updateField('security', e.target.value)}>
+                <option value="WPA">WPA/WPA2</option>
+                <option value="WEP">WEP</option>
+                <option value="nopass">None</option>
+              </select>
+            </div>
+            <div className="form-group checkbox-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={formData.hidden === 'true'}
+                  onChange={(e) => updateField('hidden', e.target.checked ? 'true' : 'false')}
+                />
+                <span>Hidden network</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Email Form
+    if (qrType === 'email') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>To</label>
+            <input
+              type="email"
+              value={formData.to || ''}
+              onChange={(e) => updateField('to', e.target.value)}
+              placeholder="recipient@example.com"
+            />
+          </div>
+          <div className="form-group">
+            <label>Subject</label>
+            <input
+              type="text"
+              value={formData.subject || ''}
+              onChange={(e) => updateField('subject', e.target.value)}
+              placeholder="Email subject"
+            />
+          </div>
+          <div className="form-group">
+            <label>Message</label>
+            <textarea
+              value={formData.body || ''}
+              onChange={(e) => updateField('body', e.target.value)}
+              placeholder="Your message..."
+              rows={3}
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // vCard Form
+    if (qrType === 'vcard') {
+      return (
+        <div className="form-fields">
+          <div className="form-row">
+            <div className="form-group">
+              <label>First Name</label>
+              <input
+                type="text"
+                value={formData.firstName || ''}
+                onChange={(e) => updateField('firstName', e.target.value)}
+                placeholder="John"
+              />
+            </div>
+            <div className="form-group">
+              <label>Last Name</label>
+              <input
+                type="text"
+                value={formData.lastName || ''}
+                onChange={(e) => updateField('lastName', e.target.value)}
+                placeholder="Doe"
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Phone</label>
+            <input
+              type="tel"
+              value={formData.phone || ''}
+              onChange={(e) => updateField('phone', e.target.value)}
+              placeholder="+1 555 123 4567"
+            />
+          </div>
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              value={formData.email || ''}
+              onChange={(e) => updateField('email', e.target.value)}
+              placeholder="john@example.com"
+            />
+          </div>
+          <div className="form-group">
+            <label>Company</label>
+            <input
+              type="text"
+              value={formData.company || ''}
+              onChange={(e) => updateField('company', e.target.value)}
+              placeholder="Company Name"
+            />
+          </div>
+          <div className="form-group">
+            <label>Job Title</label>
+            <input
+              type="text"
+              value={formData.title || ''}
+              onChange={(e) => updateField('title', e.target.value)}
+              placeholder="Software Engineer"
+            />
+          </div>
+          <div className="form-group">
+            <label>Website</label>
+            <input
+              type="url"
+              value={formData.website || ''}
+              onChange={(e) => updateField('website', e.target.value)}
+              placeholder="https://example.com"
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // Event Form
+    if (qrType === 'event') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>Event Title</label>
+            <input
+              type="text"
+              value={formData.title || ''}
+              onChange={(e) => updateField('title', e.target.value)}
+              placeholder="Meeting with Team"
+            />
+          </div>
+          <div className="form-group">
+            <label>Location</label>
+            <input
+              type="text"
+              value={formData.location || ''}
+              onChange={(e) => updateField('location', e.target.value)}
+              placeholder="Conference Room A"
+            />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Start</label>
+              <input
+                type="datetime-local"
+                value={formData.start || ''}
+                onChange={(e) => updateField('start', e.target.value)}
+              />
+            </div>
+            <div className="form-group">
+              <label>End</label>
+              <input
+                type="datetime-local"
+                value={formData.end || ''}
+              onChange={(e) => updateField('end', e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Description</label>
+            <textarea
+              value={formData.description || ''}
+              onChange={(e) => updateField('description', e.target.value)}
+              placeholder="Event description..."
+              rows={3}
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // SMS Form
+    if (qrType === 'sms') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>Phone Number</label>
+            <input
+              type="tel"
+              value={formData.phone || ''}
+              onChange={(e) => updateField('phone', e.target.value)}
+              placeholder="+1 555 123 4567"
+            />
+          </div>
+          <div className="form-group">
+            <label>Message</label>
+            <textarea
+              value={formData.message || ''}
+              onChange={(e) => updateField('message', e.target.value)}
+              placeholder="Your message..."
+              rows={3}
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // Crypto Form
+    if (qrType === 'crypto') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>Cryptocurrency</label>
+            <select 
+              value={formData.symbol || 'BTC'} 
+              onChange={(e) => updateField('symbol', e.target.value)}
+            >
+              {popularCryptos.map(crypto => (
+                <option key={crypto.symbol} value={crypto.symbol}>
+                  {crypto.name} ({crypto.symbol})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Wallet Address</label>
+            <input
+              type="text"
+              value={formData.address || ''}
+              onChange={(e) => updateField('address', e.target.value)}
+              placeholder="Enter wallet address"
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // Default single field form for URL, text, phone, social, etc.
+    const fieldLabels: Record<string, string> = {
+      url: 'URL',
+      text: 'Text',
+      phone: 'Phone Number',
+      handle: typeInfo.label + ' Username',
+      location: 'Location',
+      query: 'Search Query'
+    }
+
+    const inputTypes: Record<string, string> = {
+      url: 'url',
+      phone: 'tel',
+      email: 'email',
+      text: 'text',
+      handle: 'text',
+      location: 'text',
+      query: 'text'
+    }
+
+    const fieldName = typeInfo.fields[0]
+    const label = fieldLabels[fieldName] || typeInfo.label
+    const inputType = inputTypes[fieldName] || 'text'
+
     return (
       <div className="form-fields">
         <div className="form-group">
-          <label>{typeInfo.label}</label>
+          <label>{label}</label>
           <input
-            type="text"
-            value={formData[typeInfo.fields[0]] || ''}
-            onChange={(e) => updateField(typeInfo.fields[0], e.target.value)}
+            type={inputType}
+            value={formData[fieldName] || ''}
+            onChange={(e) => updateField(fieldName, e.target.value)}
             placeholder={typeInfo.placeholder}
           />
         </div>
