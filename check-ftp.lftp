@@ -1,5 +1,0 @@
-set ssl:verify-certificate no
-set ftp:charset utf8
-open ftp://u811644574.qrgen.studio:%2BEd2ajqV%5BtEPLoEX@86.38.202.68:21
-ls -la
-bye
