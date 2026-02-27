@@ -25,6 +25,9 @@ jobs:
       
       - name: Build project
         run: npx vite build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       
       # Option 1: FTP (port 21) - if Hostinger blocks GitHub IPs, use manual deploy
       # Option 2: SFTP (port 22) - more reliable but requires SSH access
@@ -40,7 +43,7 @@ jobs:
           log-level: verbose
           local-dir: ./dist/
           server-dir: /public_html/
-          dangerous-clean-slate: false
+          dangerous-clean-slate: true
           exclude: |
             **/.DS_Store
             **/node_modules/**
