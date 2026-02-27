@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
-import QRCodeStyling from 'qr-code-styling'
+// Use dynamic import for qr-code-styling to ensure correct constructor at runtime
+// import QRCodeStyling from 'qr-code-styling'
 import { supabase } from '../lib/supabase'
 import type { QRCode, QRStyles } from '../lib/supabase'
 
@@ -24,7 +25,7 @@ export function QRHistoryModal({ user, onClose }: QRHistoryModalProps) {
     codes.forEach((qr) => {
       const container = qrRefs.current.get(qr.id)
       if (container) {
-        renderQR(qr, container)
+        void renderQR(qr, container)
       }
     })
   }, [codes])
@@ -44,8 +45,11 @@ export function QRHistoryModal({ user, onClose }: QRHistoryModalProps) {
     setLoading(false)
   }
 
-  const renderQR = (qr: QRCode, container: HTMLDivElement) => {
+  const renderQR = async (qr: QRCode, container: HTMLDivElement) => {
     container.innerHTML = ''
+
+    const mod = await import('qr-code-styling')
+    const QRCodeStyling = (mod as any).default || (mod as any)
     
     const styles: QRStyles = qr.styles as QRStyles
     
@@ -96,7 +100,7 @@ export function QRHistoryModal({ user, onClose }: QRHistoryModalProps) {
       },
     })
 
-    qrCode.append(container)
+    await qrCode.append(container)
   }
 
   const handleDownload = async (qr: QRCode) => {
@@ -111,6 +115,9 @@ export function QRHistoryModal({ user, onClose }: QRHistoryModalProps) {
     // Generate full-size QR for download
     const container = qrRefs.current.get(qr.id)
     if (!container) return
+
+    const mod = await import('qr-code-styling')
+    const QRCodeStyling = (mod as any).default || (mod as any)
 
     const styles: QRStyles = qr.styles as QRStyles
     
