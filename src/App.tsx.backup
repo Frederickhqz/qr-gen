@@ -554,6 +554,7 @@ function App() {
                 })}
               </div>
             </div>
+          </div>
 
           {/* Data Form */}
           <div className="section">
@@ -715,7 +716,6 @@ function App() {
               <label>Size: {qrSize}px</label>
               <input type="range" min="200" max="800" step="50" value={qrSize} onChange={(e) => setQrSize(parseInt(e.target.value))} />
             </div>
-          </div>
           </div>
           
           {/* Footer inside content wrapper */}
