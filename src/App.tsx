@@ -400,6 +400,18 @@ function App() {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  // Apply preset
+  const applyPreset = (preset: typeof presets[0]) => {
+    setFgColor(preset.fg)
+    setBgColor(preset.bg === 'transparent' ? '#ffffff' : preset.bg)
+    setBgTransparent(preset.bg === 'transparent')
+    setGradientEnabled(preset.gradient || false)
+    if (preset.gradient) {
+      setGradientColor1(preset.gradientColor1 || '#007AFF')
+      setGradientColor2(preset.gradientColor2 || '#5856D6')
+    }
+  }
+
   // Render form fields based on QR type
   const renderForm = () => {
     const typeInfo = getQRTypeInfo(qrType)
@@ -541,6 +553,168 @@ function App() {
                   )
                 })}
               </div>
+            </div>
+          </div>
+
+          {/* Data Form */}
+          <div className="section">
+            <h3>Details</h3>
+            {renderForm()}
+          </div>
+
+          {/* Style Options */}
+          <div className="section">
+            <h3>Style</h3>
+            
+            {/* Presets */}
+            <div className="option-group">
+              <label>Presets</label>
+              <div className="preset-grid">
+                {presets.map((preset, i) => (
+                  <button
+                    key={i}
+                    className="preset-btn"
+                    onClick={() => applyPreset(preset)}
+                    title={preset.name}
+                    style={{ 
+                      background: preset.bg === 'transparent' 
+                        ? 'repeating-conic-gradient(#e5e5e5 0 25%, #fff 0 50%) 50% / 8px 8px' 
+                        : preset.bg,
+                      border: preset.bg === '#1c1c1e' ? '1px solid #333' : '1px solid #e5e5e5'
+                    }}
+                  >
+                    <div style={{ background: preset.fg, width: 20, height: 20, borderRadius: 4 }} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Dot Pattern */}
+            <div className="option-group">
+              <label>Pattern</label>
+              <div className="pattern-grid">
+                {dotStyles.map((style) => (
+                  <button
+                    key={style.id}
+                    className={`pattern-btn ${dotsStyle === style.id ? 'active' : ''}`}
+                    onClick={() => setDotsStyle(style.id as DotStyle)}
+                  >
+                    {style.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Corner Style */}
+            <div className="option-group">
+              <label>Corners</label>
+              <div className="pattern-grid">
+                {cornerStyles.map((style) => (
+                  <button
+                    key={style.id}
+                    className={`pattern-btn ${cornersStyle === style.id ? 'active' : ''}`}
+                    onClick={() => setCornersStyle(style.id as CornerStyle)}
+                  >
+                    {style.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Colors */}
+            <div className="option-group">
+              <label>Colors</label>
+              <div className="color-row">
+                <div className="color-picker-group">
+                  <span>Foreground</span>
+                  <div className="color-input-wrap">
+                    <input type="color" value={fgColor} onChange={(e) => setFgColor(e.target.value)} />
+                    <input type="text" value={fgColor} onChange={(e) => setFgColor(e.target.value)} className="color-hex" />
+                  </div>
+                </div>
+                <div className="color-picker-group">
+                  <span>Background</span>
+                  <div className="color-input-wrap">
+                    <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} disabled={bgTransparent} />
+                    <label className="transparent-check">
+                      <input type="checkbox" checked={bgTransparent} onChange={(e) => setBgTransparent(e.target.checked)} />
+                      <span>Transparent</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Gradient */}
+            <div className="option-group">
+              <label className="toggle-label">
+                <input type="checkbox" checked={gradientEnabled} onChange={(e) => setGradientEnabled(e.target.checked)} />
+                <span>Gradient</span>
+              </label>
+              {gradientEnabled && (
+                <div className="gradient-options">
+                  <div className="color-row">
+                    <div className="color-picker-group">
+                      <span>Start</span>
+                      <input type="color" value={gradientColor1} onChange={(e) => setGradientColor1(e.target.value)} />
+                    </div>
+                    <div className="color-picker-group">
+                      <span>End</span>
+                      <input type="color" value={gradientColor2} onChange={(e) => setGradientColor2(e.target.value)} />
+                    </div>
+                    <select value={gradientType} onChange={(e) => setGradientType(e.target.value as 'linear' | 'radial')}>
+                      <option value="linear">Linear</option>
+                      <option value="radial">Radial</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Logo */}
+            <div className="option-group">
+              <label>Logo</label>
+              {logo ? (
+                <div className="logo-preview-wrap">
+                  <div className="logo-preview">
+                    <img src={logo} alt="Logo" />
+                    <button className="remove-logo" onClick={() => { setLogo(null); setLogoInfo(null); }}>×</button>
+                  </div>
+                  <div className="logo-controls">
+                    {logoInfo?.wasCompressed && (
+                      <p className="logo-info">
+                        Resized from {logoInfo.originalWidth}×{logoInfo.originalHeight} to {logoInfo.newWidth}×{logoInfo.newHeight}
+                      </p>
+                    )}
+                    <div className="logo-sliders">
+                      <label>
+                        <span>Size</span>
+                        <input type="range" min="0.15" max="0.5" step="0.05" value={logoSize} onChange={(e) => setLogoSize(parseFloat(e.target.value))} />
+                      </label>
+                      <label>
+                        <span>Margin</span>
+                        <input type="range" min="0" max="15" step="1" value={logoMargin} onChange={(e) => setLogoMargin(parseInt(e.target.value))} />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <label className="upload-btn">
+                  <input type="file" accept="image/*" onChange={handleLogoUpload} />
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span>Upload Logo</span>
+                </label>
+              )}
+            </div>
+
+            {/* Size */}
+            <div className="option-group">
+              <label>Size: {qrSize}px</label>
+              <input type="range" min="200" max="800" step="50" value={qrSize} onChange={(e) => setQrSize(parseInt(e.target.value))} />
             </div>
           </div>
           
