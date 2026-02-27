@@ -103,12 +103,13 @@ export interface QRTypeOption {
   icon: LucideIcon | ((props: { className?: string; size?: number }) => JSX.Element)
   category: 'core' | 'social' | 'payment' | 'platform' | 'business'
   placeholder: string
+  fields: string[]
 }
 
 export const qrTypes: QRTypeOption[] = [
   // Core
-  { id: 'url', label: 'URL', icon: Link, category: 'core', placeholder: 'https://yoursite.com' },
-  { id: 'text', label: 'Text', icon: FileText, category: 'core', placeholder: 'Your message here' },
+  { id: 'url', label: 'URL', icon: Link, category: 'core', placeholder: 'https://yoursite.com', fields: ['url'] },
+  { id: 'text', label: 'Text', icon: FileText, category: 'core', placeholder: 'Your message here', fields: ['text'] },
   { id: 'wifi', label: 'WiFi', icon: Wifi, category: 'core', placeholder: 'Network credentials' },
   { id: 'email', label: 'Email', icon: Mail, category: 'core', placeholder: 'email@example.com' },
   { id: 'phone', label: 'Phone', icon: Phone, category: 'core', placeholder: '+1 555 123 4567' },

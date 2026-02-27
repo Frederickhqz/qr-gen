@@ -1,0 +1,22 @@
+set ssl:verify-certificate no
+set ftp:charset utf8
+open ftp://u811644574.qrgen.studio:%2BEd2ajqV%5BtEPLoEX@86.38.202.68:21
+# Remove files from wrong location
+cd .builds
+glob rm -f index.html favicon.svg favicon.png logo.png og-image.svg prompts.json robots.txt sitemap.xml vite.svg
+# Navigate to public_html
+cd ../public_html
+# Upload new files
+put /data/.openclaw/workspace/qr-gen/dist/index.html
+put /data/.openclaw/workspace/qr-gen/dist/favicon.svg
+put /data/.openclaw/workspace/qr-gen/dist/favicon.png
+put /data/.openclaw/workspace/qr-gen/dist/logo.png
+put /data/.openclaw/workspace/qr-gen/dist/og-image.svg
+put /data/.openclaw/workspace/qr-gen/dist/prompts.json
+put /data/.openclaw/workspace/qr-gen/dist/robots.txt
+put /data/.openclaw/workspace/qr-gen/dist/sitemap.xml
+put /data/.openclaw/workspace/qr-gen/dist/vite.svg
+cd assets
+glob rm -f *
+mput /data/.openclaw/workspace/qr-gen/dist/assets/*
+bye

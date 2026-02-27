@@ -415,6 +415,9 @@ function App() {
   // Render form fields based on QR type
   const renderForm = () => {
     const typeInfo = getQRTypeInfo(qrType)
+    if (!typeInfo.fields || typeInfo.fields.length === 0) {
+      return <div className="form-fields"><p>No form fields for this type</p></div>
+    }
     const handle = formData.handle
     const updateHandle = (v: string) => updateField('handle', v)
     const updateUrl = (v: string) => updateField('url', v)

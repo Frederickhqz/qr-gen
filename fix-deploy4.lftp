@@ -1,0 +1,15 @@
+set ssl:verify-certificate no
+set ftp:charset utf8
+open ftp://u811644574.qrgen.studio:%2BEd2ajqV%5BtEPLoEX@86.38.202.68:21
+cd /public_html
+# Create assets directory
+!mkdir -p assets
+# Move JS files to assets
+mv index-BZpevjS6.js assets/
+mv qr-code-styling-BdcHtb37.js assets/
+# Clean up old files in .builds
+cd .builds
+glob rm -f *
+cd ..
+ls
+bye
