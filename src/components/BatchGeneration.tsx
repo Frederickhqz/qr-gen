@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { Download, FileText, X, Loader2, CheckCircle, AlertCircle, CreditCard } from 'lucide-react'
 
-const PRICE_PER_QR = 0.99
+const PRICE_PER_QR = 1.99
 
 interface BatchGenerationProps {
   isOpen: boolean
