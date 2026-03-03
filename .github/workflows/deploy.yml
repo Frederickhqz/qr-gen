@@ -34,17 +34,15 @@ jobs:
       
       - name: Deploy to Hostinger via FTP
         run: |
-          lftp -e "
-            set ftp:ssl-allow no
-            set ftp:passive-mode on
-            set net:timeout 30
-            set net:reconnect-interval-base 5
-            set net:max-retries 3
-            open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}
-            mkdir -fp /public_html/assets
-            mirror -R -v --parallel 4 --delete ./dist/ /public_html/ \
-              --exclude .htaccess \
-              --exclude .well-known/
-            bye
-          "
+          lftp << EOF
+          set ftp:ssl-allow no
+          set ftp:passive-mode on
+          set net:timeout 30
+          set net:reconnect-interval-base 5
+          set net:max-retries 3
+          open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}
+          mkdir -fp /public_html/assets
+          mirror -R -v --parallel 4 --delete ./dist/ /public_html/ --exclude .htaccess --exclude .well-known/
+          bye
+          EOF
         timeout-minutes: 10
