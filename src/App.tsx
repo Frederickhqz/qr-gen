@@ -1052,6 +1052,72 @@ function App() {
             {/* Logo */}
             <div className="option-group">
               <label>Logo</label>
+              
+              {/* Platform Icon Toggle */}
+              {hasPlatformIcon(qrType) && !logo && (
+                <div className="platform-icon-toggle" style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={usePlatformIcon}
+                      onChange={(e) => {
+                        setUsePlatformIcon(e.target.checked)
+                        if (e.target.checked && useOfficialColor) {
+                          setIconColor(brandColors[qrType] || '#000000')
+                        }
+                      }}
+                      style={{ width: '16px', height: '16px' }}
+                    />
+                    <span style={{ fontSize: '14px' }}>Use {qrType.charAt(0).toUpperCase() + qrType.slice(1)} icon</span>
+                  </label>
+                  
+                  {usePlatformIcon && (
+                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                        <input
+                          type="radio"
+                          name="iconColorMode"
+                          checked={useOfficialColor}
+                          onChange={() => {
+                            setUseOfficialColor(true)
+                            setIconColor(brandColors[qrType] || '#000000')
+                          }}
+                          style={{ width: '14px', height: '14px' }}
+                        />
+                        <span style={{ fontSize: '13px' }}>Official color</span>
+                        <span 
+                          style={{ 
+                            width: '16px', 
+                            height: '16px', 
+                            borderRadius: '4px', 
+                            background: brandColors[qrType] || '#000000',
+                            display: 'inline-block',
+                            border: '1px solid #ddd'
+                          }} 
+                        />
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                        <input
+                          type="radio"
+                          name="iconColorMode"
+                          checked={!useOfficialColor}
+                          onChange={() => setUseOfficialColor(false)}
+                          style={{ width: '14px', height: '14px' }}
+                        />
+                        <span style={{ fontSize: '13px' }}>Custom:</span>
+                        <input
+                          type="color"
+                          value={iconColor}
+                          onChange={(e) => setIconColor(e.target.value)}
+                          disabled={useOfficialColor}
+                          style={{ width: '32px', height: '24px', border: '1px solid #ddd', borderRadius: '4px', cursor: useOfficialColor ? 'not-allowed' : 'pointer' }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               {logo ? (
                 <div className="logo-preview-wrap">
                   <div className="logo-preview">
@@ -1076,7 +1142,7 @@ function App() {
                     </div>
                   </div>
                 </div>
-              ) : (
+              ) : !usePlatformIcon && (
                 <label className="upload-btn">
                   <input type="file" accept="image/*" onChange={handleLogoUpload} />
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
