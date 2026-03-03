@@ -10,6 +10,7 @@ import { AuthModal } from './components/AuthModal'
 import { UserMenu } from './components/UserMenu'
 import { QRHistoryModal } from './components/QRHistory'
 import { AnalyticsDashboard } from './components/AnalyticsDashboard'
+import { BatchGeneration } from './components/BatchGeneration'
 import { supabase } from './lib/supabase'
 import './index.css'
 
@@ -123,6 +124,9 @@ function App() {
   
   // Analytics modal state
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false)
+  
+  // Batch generation modal state
+  const [showBatchModal, setShowBatchModal] = useState(false)
 
   // Preview size based on screen width
   const [previewSize, setPreviewSize] = useState(240)
@@ -806,6 +810,35 @@ function App() {
               </svg>
               Download ${PRICE.toFixed(2)}
             </button>
+            
+            <button 
+              className="batch-btn"
+              onClick={() => setShowBatchModal(true)}
+              style={{
+                marginTop: '8px',
+                width: '100%',
+                padding: '10px 16px',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb',
+                background: 'transparent',
+                color: '#6b7280',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'all 0.2s'
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+              </svg>
+              Batch Generate
+            </button>
           </div>
         </aside>
 
@@ -1122,6 +1155,13 @@ function App() {
         <AnalyticsDashboard
           isOpen={showAnalyticsModal}
           onClose={() => setShowAnalyticsModal(false)}
+        />
+      )}
+      
+      {showBatchModal && (
+        <BatchGeneration
+          isOpen={showBatchModal}
+          onClose={() => setShowBatchModal(false)}
         />
       )}
     </div>
