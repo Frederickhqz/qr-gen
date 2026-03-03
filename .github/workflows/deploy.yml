@@ -43,7 +43,8 @@ jobs:
           log-level: verbose
           local-dir: ./dist/
           server-dir: /public_html/
-          dangerous-clean-slate: true
           exclude: |
             **/.DS_Store
             **/node_modules/**
+            **/.htaccess
+            **/.well-known/**
