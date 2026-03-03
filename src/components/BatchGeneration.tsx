@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react'
-import { Download, FileText, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { Download, FileText, X, Loader2, CheckCircle, AlertCircle, CreditCard } from 'lucide-react'
+
+const PRICE_PER_QR = 0.99
 
 interface BatchGenerationProps {
   isOpen: boolean
@@ -20,9 +22,12 @@ export function BatchGeneration({ isOpen, onClose, onBatchComplete }: BatchGener
   const [items, setItems] = useState<BatchItem[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [processedCount, setProcessedCount] = useState(0)
+  const [showPayment, setShowPayment] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (!isOpen) return null
+  
+  const totalPrice = items.length * PRICE_PER_QR
 
   const parseInput = (text: string): string[] => {
     const lines = text
@@ -103,9 +108,15 @@ export function BatchGeneration({ isOpen, onClose, onBatchComplete }: BatchGener
     }
   }
 
+  const startBatch = () => {
+    if (items.length === 0) return
+    setShowPayment(true)
+  }
+
   const processBatch = async () => {
     if (items.length === 0) return
     
+    setShowPayment(false)
     setIsProcessing(true)
     setProcessedCount(0)
     
@@ -312,9 +323,10 @@ export function BatchGeneration({ isOpen, onClose, onBatchComplete }: BatchGener
 
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {items.length} items ready
-          </span>
+          <div className="text-sm">
+            <span className="text-gray-500 dark:text-gray-400">{items.length} items × ${PRICE_PER_QR.toFixed(2)} = </span>
+            <span className="font-bold text-gray-900 dark:text-white">${totalPrice.toFixed(2)}</span>
+          </div>
           <div className="flex gap-3">
             {successCount > 0 && !isProcessing && (
               <button
@@ -326,7 +338,7 @@ export function BatchGeneration({ isOpen, onClose, onBatchComplete }: BatchGener
               </button>
             )}
             <button
-              onClick={processBatch}
+              onClick={startBatch}
               disabled={items.length === 0 || isProcessing}
               className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
@@ -337,12 +349,59 @@ export function BatchGeneration({ isOpen, onClose, onBatchComplete }: BatchGener
                 </>
               ) : (
                 <>
-                  Generate All
+                  <CreditCard className="w-4 h-4" />
+                  Pay ${totalPrice.toFixed(2)}
                 </>
               )}
             </button>
           </div>
         </div>
+
+        {/* Payment Confirmation Modal */}
+        {showPayment && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CreditCard className="w-8 h-8 text-blue-500" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Confirm Payment</h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  Generate {items.length} QR codes for ${totalPrice.toFixed(2)}
+                </p>
+                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 mb-4">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-500">Quantity</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{items.length} QR codes</span>
+                  </div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-500">Price each</span>
+                    <span className="font-medium text-gray-900 dark:text-white">${PRICE_PER_QR.toFixed(2)}</span>
+                  </div>
+                  <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-900 dark:text-white">Total</span>
+                    <span className="font-bold text-blue-500 text-lg">${totalPrice.toFixed(2)}</span>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowPayment(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={processBatch}
+                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                  >
+                    Pay & Generate
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
