@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
-import { Download, FileText, X, Loader2, CheckCircle, AlertCircle, CreditCard } from 'lucide-react'
+import { Download, FileText, X, Loader2, CheckCircle, AlertCircle, CreditCard, FileArchive } from 'lucide-react'
+import JSZip from 'jszip'
 
 const PRICE_PER_QR = 1.99
 
@@ -13,6 +14,7 @@ interface BatchItem {
   id: string
   data: string
   status: 'pending' | 'generating' | 'success' | 'error'
+  blob?: Blob
   error?: string
 }
 
@@ -127,8 +129,8 @@ export function BatchGeneration({ isOpen, onClose, onBatchComplete }: BatchGener
       setItems([...updatedItems])
       
       try {
-        await generateQRCode(updatedItems[i].data)
-        updatedItems[i] = { ...updatedItems[i], status: 'success' }
+        const blob = await generateQRCode(updatedItems[i].data)
+        updatedItems[i] = { ...updatedItems[i], status: 'success', blob }
       } catch (error) {
         updatedItems[i] = { 
           ...updatedItems[i], 
@@ -146,30 +148,33 @@ export function BatchGeneration({ isOpen, onClose, onBatchComplete }: BatchGener
   }
 
   const downloadAll = async () => {
-    // Create a zip-like download of all successful items
-    const successfulItems = items.filter(item => item.status === 'success')
+    const successfulItems = items.filter(item => item.status === 'success' && item.blob)
     
-    for (const item of successfulItems) {
-      try {
-        const blob = await generateQRCode(item.data)
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        // Clean filename
-        const filename = item.data
-          .replace(/[^a-z0-9]/gi, '_')
-          .replace(/_+/g, '_')
-          .substring(0, 50)
-        link.download = `qr-${filename}.png`
-        link.click()
-        URL.revokeObjectURL(url)
-        
-        // Small delay between downloads
-        await new Promise(resolve => setTimeout(resolve, 100))
-      } catch (error) {
-        console.error('Failed to download:', item.data)
-      }
+    if (successfulItems.length === 0) return
+    
+    // Create ZIP file
+    const zip = new JSZip()
+    
+    for (let i = 0; i < successfulItems.length; i++) {
+      const item = successfulItems[i]
+      // Clean filename
+      const filename = item.data
+        .replace(/[^a-z0-9]/gi, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '')
+        .substring(0, 50) || `qr-${i + 1}`
+      
+      zip.file(`qr-${filename}.png`, item.blob!)
     }
+    
+    // Generate and download ZIP
+    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    const url = URL.createObjectURL(zipBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `qr-codes-${successfulItems.length}.zip`
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
   const pendingCount = items.filter(i => i.status === 'pending').length
@@ -333,8 +338,8 @@ export function BatchGeneration({ isOpen, onClose, onBatchComplete }: BatchGener
                 onClick={downloadAll}
                 className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
               >
-                <Download className="w-4 h-4" />
-                Download All
+                <FileArchive className="w-4 h-4" />
+                Download ZIP ({successCount})
               </button>
             )}
             <button
