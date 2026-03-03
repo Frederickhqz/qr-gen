@@ -13,10 +13,30 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
 })
 
-// CORS configuration
+// CORS configuration - allow multiple origins
+const allowedOrigins = [
+  'https://qrgen.studio',
+  'http://qrgen.studio',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL
+].filter(Boolean)
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl)
+    if (!origin) return callback(null, true)
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      console.log('CORS blocked origin:', origin)
+      callback(null, true) // Allow anyway for now
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }))
 
 app.use(express.json())
@@ -31,6 +51,8 @@ app.post('/api/create-checkout-session', async (req, res) => {
   try {
     const { quantity, successUrl, cancelUrl, customerEmail } = req.body
     const itemQuantity = quantity || 1
+
+    console.log('Creating checkout session:', { quantity: itemQuantity, customerEmail })
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -59,6 +81,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
       },
     })
 
+    console.log('Session created:', session.id)
     res.json({ sessionId: session.id, url: session.url })
   } catch (error) {
     console.error('Stripe error:', error)
@@ -113,4 +136,5 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 app.listen(PORT, () => {
   console.log(`QR Gen server running on port ${PORT}`)
   console.log(`Health check: http://localhost:${PORT}/health`)
+  console.log(`Allowed origins:`, allowedOrigins)
 })
