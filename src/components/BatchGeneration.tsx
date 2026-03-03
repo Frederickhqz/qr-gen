@@ -3,7 +3,7 @@ import { Download, FileText, X, Loader2, CheckCircle, AlertCircle, CreditCard, F
 import JSZip from 'jszip'
 
 const PRICE_PER_QR = 1.99
-const API_BASE = import.meta.env.VITE_API_URL || 'https://qr-gen-server.fly.dev'
+const API_BASE = 'http://168.231.69.92:3002'
 
 interface BatchGenerationProps {
   isOpen: boolean

@@ -39,7 +39,7 @@ declare global {
 }
 
 const PRICE = 1.99
-const API_BASE = import.meta.env.VITE_API_URL || 'https://qr-gen-server.fly.dev'
+const API_BASE = 'http://168.231.69.92:3002'
 
 // Stripe checkout function
 const createCheckoutSession = async (quantity: number = 1, email?: string): Promise<string | null> => {

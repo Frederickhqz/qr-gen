@@ -9,7 +9,7 @@ const app = express()
 const PORT = process.env.PORT || 3001
 
 // Initialize Stripe with secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
 })
 
@@ -60,7 +60,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
     })
 
     res.json({ sessionId: session.id, url: session.url })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Stripe error:', error)
     res.status(500).json({ error: error.message })
   }
@@ -76,7 +76,7 @@ app.get('/api/verify-session/:sessionId', async (req, res) => {
       paid: session.payment_status === 'paid',
       status: session.payment_status,
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Verify error:', error)
     res.status(500).json({ error: error.message })
   }
@@ -84,25 +84,25 @@ app.get('/api/verify-session/:sessionId', async (req, res) => {
 
 // Stripe webhook for payment confirmation
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'] as string
+  const sig = req.headers['stripe-signature']
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
   if (!webhookSecret) {
     return res.status(400).send('Webhook secret not configured')
   }
 
-  let event: Stripe.Event
+  let event
 
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret)
-  } catch (err: any) {
+  } catch (err) {
     console.error('Webhook signature verification failed:', err.message)
     return res.status(400).send(`Webhook Error: ${err.message}`)
   }
 
   // Handle the event
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session
+    const session = event.data.object
     console.log('Payment successful:', session.id, session.customer_email)
     // Here you could store payment info in a database
   }
