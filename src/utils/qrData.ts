@@ -94,7 +94,7 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
     case 'xrp':
     case 'bnb':
     case 'ton':
-      const coinId = data.cryptoCoin || 'bitcoin'
+      const coinId = data.symbol || 'bitcoin'
       const coinSchemes: Record<string, string> = {
         bitcoin: 'bitcoin',
         ethereum: 'ethereum',
@@ -104,17 +104,20 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
         ton: 'ton'
       }
       const scheme = coinSchemes[coinId] || coinId
-      const address = data.cryptoAddress || data.address || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'
+      const address = data.address || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'
       let cryptoUrl = `${scheme}:${address}`
       const cryptoParams = []
-      if (data.cryptoAmount || data.amount) cryptoParams.push(`amount=${data.cryptoAmount || data.amount}`)
+      if (data.amount) cryptoParams.push(`amount=${data.amount}`)
       return cryptoParams.length ? `${cryptoUrl}?${cryptoParams.join('&')}` : cryptoUrl
     case 'paypal':
-      return data.amount ? `https://paypal.me/${handle}/${data.amount}` : `https://paypal.me/${handle}`
+      const paypalHandle = (data.handle || 'username').replace('@', '')
+      return data.amount ? `https://paypal.me/${paypalHandle}/${data.amount}` : `https://paypal.me/${paypalHandle}`
     case 'venmo':
-      return data.message ? `https://venmo.com/${handle}?note=${encodeURIComponent(data.message)}` : `https://venmo.com/${handle}`
+      const venmoHandle = (data.handle || 'username').replace('@', '').replace('$', '')
+      return data.message ? `https://venmo.com/${venmoHandle}?note=${encodeURIComponent(data.message)}` : `https://venmo.com/${venmoHandle}`
     case 'cashapp':
-      return `https://cash.app/${handle.replace('$', '')}`
+      const cashHandle = (data.handle || 'username').replace('$', '')
+      return `https://cash.app/${cashHandle}`
     
     // Platform
     case 'appstore':
@@ -126,18 +129,29 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
     case 'amazon':
       return url || 'https://amazon.com'
     case 'googlemaps':
-      const coords = url.match(/[-.\d]+,[-.\d]+/)?.[0]
-      return coords ? `https://www.google.com/maps?q=${coords}` : url || 'https://maps.google.com'
+      if (data.lat && data.lng) {
+        return `https://www.google.com/maps?q=${data.lat},${data.lng}`
+      }
+      if (data.name) {
+        return `https://www.google.com/maps/search/${encodeURIComponent(data.name)}`
+      }
+      return url || 'https://maps.google.com'
     case 'applemaps':
-      const appleCoords = url.match(/[-.\d]+,[-.\d]+/)?.[0]
-      return appleCoords ? `http://maps.apple.com/?q=${appleCoords}` : url || 'http://maps.apple.com'
+      if (data.lat && data.lng) {
+        return `http://maps.apple.com/?q=${data.lat},${data.lng}`
+      }
+      if (data.name) {
+        return `http://maps.apple.com/?q=${encodeURIComponent(data.name)}`
+      }
+      return url || 'http://maps.apple.com'
     case 'spotify':
       return url || 'https://spotify.com'
     case 'website':
       return url || 'https://example.com'
     case 'calendly':
-      const calendlyUrl = data.url || data.handle || 'username'
-      return calendlyUrl.startsWith('http') ? calendlyUrl : `https://calendly.com/${calendlyUrl.replace(/^\//, '')}`
+      const calendlyPath = (data.handle || 'username').replace('@', '').replace(/^\//, '')
+      const calendlyBase = `https://calendly.com/${calendlyPath}`
+      return data.event ? `${calendlyBase}/${data.event}` : calendlyBase
     case 'zillow':
       const zillowUrl = data.url || data.handle || 'profile'
       return zillowUrl.startsWith('http') ? zillowUrl : `https://www.zillow.com/profile/${zillowUrl.replace(/^\//, '')}`

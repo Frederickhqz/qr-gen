@@ -708,6 +708,239 @@ function App() {
               placeholder="Enter wallet address"
             />
           </div>
+          <div className="form-group">
+            <label>Amount (Optional)</label>
+            <input
+              type="number"
+              step="0.0001"
+              value={formData.amount || ''}
+              onChange={(e) => updateField('amount', e.target.value)}
+              placeholder="0.00"
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // WhatsApp Form
+    if (qrType === 'whatsapp') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>Phone Number</label>
+            <input
+              type="tel"
+              value={formData.phone || ''}
+              onChange={(e) => updateField('phone', e.target.value)}
+              placeholder="+1 555 123 4567"
+            />
+          </div>
+          <div className="form-group">
+            <label>Message (Optional)</label>
+            <textarea
+              value={formData.message || ''}
+              onChange={(e) => updateField('message', e.target.value)}
+              placeholder="Pre-filled message..."
+              rows={3}
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // PayPal Form
+    if (qrType === 'paypal') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>PayPal Username</label>
+            <input
+              type="text"
+              value={formData.handle || ''}
+              onChange={(e) => updateField('handle', e.target.value)}
+              placeholder="@username or email"
+            />
+          </div>
+          <div className="form-group">
+            <label>Amount (Optional)</label>
+            <div className="input-group">
+              <span className="input-prefix">$</span>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.amount || ''}
+                onChange={(e) => updateField('amount', e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Venmo Form
+    if (qrType === 'venmo') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>Venmo Username</label>
+            <input
+              type="text"
+              value={formData.handle || ''}
+              onChange={(e) => updateField('handle', e.target.value)}
+              placeholder="@username"
+            />
+          </div>
+          <div className="form-group">
+            <label>Note (Optional)</label>
+            <textarea
+              value={formData.message || ''}
+              onChange={(e) => updateField('message', e.target.value)}
+              placeholder="Payment note..."
+              rows={2}
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // Cash App Form
+    if (qrType === 'cashapp') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>$Cashtag</label>
+            <input
+              type="text"
+              value={formData.handle || ''}
+              onChange={(e) => updateField('handle', e.target.value)}
+              placeholder="$username"
+            />
+          </div>
+          <div className="form-group">
+            <label>Amount (Optional)</label>
+            <div className="input-group">
+              <span className="input-prefix">$</span>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.amount || ''}
+                onChange={(e) => updateField('amount', e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Note (Optional)</label>
+            <input
+              type="text"
+              value={formData.note || ''}
+              onChange={(e) => updateField('note', e.target.value)}
+              placeholder="Payment for..."
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // Discord Form
+    if (qrType === 'discord') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>Invite Code</label>
+            <input
+              type="text"
+              value={formData.handle || ''}
+              onChange={(e) => updateField('handle', e.target.value)}
+              placeholder="abc123 or discord.gg/abc123"
+            />
+          </div>
+          <div className="form-group checkbox-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={formData.permanent === 'true'}
+                onChange={(e) => updateField('permanent', e.target.checked ? 'true' : 'false')}
+              />
+              <span>Permanent invite link</span>
+            </label>
+          </div>
+        </div>
+      )
+    }
+
+    // Location Forms (Google Maps, Apple Maps)
+    if (qrType === 'googlemaps' || qrType === 'applemaps') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>Location Name</label>
+            <input
+              type="text"
+              value={formData.name || ''}
+              onChange={(e) => updateField('name', e.target.value)}
+              placeholder="Business or place name"
+            />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Latitude</label>
+              <input
+                type="number"
+                step="0.000001"
+                value={formData.lat || ''}
+                onChange={(e) => updateField('lat', e.target.value)}
+                placeholder="40.7128"
+              />
+            </div>
+            <div className="form-group">
+              <label>Longitude</label>
+              <input
+                type="number"
+                step="0.000001"
+                value={formData.lng || ''}
+                onChange={(e) => updateField('lng', e.target.value)}
+                placeholder="-74.0060"
+              />
+            </div>
+          </div>
+          <p className="form-hint">Or paste a Google Maps URL</p>
+          <div className="form-group">
+            <label>Maps URL</label>
+            <input
+              type="url"
+              value={formData.url || ''}
+              onChange={(e) => updateField('url', e.target.value)}
+              placeholder="https://maps.google.com/..."
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // Calendly Form
+    if (qrType === 'calendly') {
+      return (
+        <div className="form-fields">
+          <div className="form-group">
+            <label>Calendly Username</label>
+            <input
+              type="text"
+              value={formData.handle || ''}
+              onChange={(e) => updateField('handle', e.target.value)}
+              placeholder="username"
+            />
+          </div>
+          <div className="form-group">
+            <label>Event Type (Optional)</label>
+            <input
+              type="text"
+              value={formData.event || ''}
+              onChange={(e) => updateField('event', e.target.value)}
+              placeholder="30min"
+            />
+          </div>
         </div>
       )
     }
