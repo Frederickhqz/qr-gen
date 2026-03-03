@@ -42,7 +42,7 @@ const PRICE = 1.99
 const API_BASE = 'https://api.qrgen.studio'
 
 // Stripe checkout function
-const createCheckoutSession = async (quantity: number = 1, email?: string): Promise<string | null> => {
+const createCheckoutSession = async (quantity: number = 1, email?: string, promo?: string): Promise<string | null> => {
   try {
     const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
       method: 'POST',
@@ -50,6 +50,7 @@ const createCheckoutSession = async (quantity: number = 1, email?: string): Prom
       body: JSON.stringify({
         quantity,
         customerEmail: email,
+        promoCode: promo,
         successUrl: `${window.location.origin}?payment=success`,
         cancelUrl: `${window.location.origin}?payment=cancelled`
       })
@@ -130,6 +131,8 @@ function App() {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [promoCode, setPromoCode] = useState('')
+  const [promoApplied, setPromoApplied] = useState<{code: string, type: string, value: number} | null>(null)
   
   // Crypto state
   const [cryptoSearch, setCryptoSearch] = useState('')
@@ -1479,12 +1482,45 @@ function App() {
               <span className="price-note">One-time purchase</span>
             </div>
 
+            {/* Promo Code Input */}
+            <div className="promo-code-section">
+              <div className="promo-input-row">
+                <input
+                  type="text"
+                  placeholder="Promo code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  className="promo-input"
+                />
+                <button
+                  className="promo-apply-btn"
+                  onClick={async () => {
+                    if (promoCode.trim()) {
+                      setPromoApplied({ code: promoCode, type: 'percent', value: 20 })
+                      setPromoCode('')
+                    }
+                  }}
+                >
+                  Apply
+                </button>
+              </div>
+              {promoApplied && (
+                <div className="promo-applied">
+                  <span className="promo-badge">{promoApplied.code}</span>
+                  <span className="promo-discount">
+                    {promoApplied.type === 'percent' ? `${promoApplied.value}% off` : `$${promoApplied.value} off`}
+                  </span>
+                  <button className="promo-remove" onClick={() => setPromoApplied(null)}>×</button>
+                </div>
+              )}
+            </div>
+
             <button 
               className="pay-btn btn-primary"
               onClick={async () => {
                 setShowConfirmation(false)
                 setPaymentLoading(true)
-                const checkoutUrl = await createCheckoutSession(1, user?.email)
+                const checkoutUrl = await createCheckoutSession(1, user?.email, promoApplied?.code)
                 if (checkoutUrl) {
                   // Store pending download data
                   sessionStorage.setItem('pendingDownload', JSON.stringify({

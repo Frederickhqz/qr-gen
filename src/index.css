@@ -3033,6 +3033,95 @@ select:focus-visible {
     font-size: 1.5rem;
   }
   
+  /* Promo Code Section */
+  .promo-code-section {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .promo-input-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .promo-input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    background: var(--bg);
+    color: var(--text);
+  }
+  
+  .promo-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .promo-apply-btn {
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .promo-apply-btn:hover {
+    background: var(--bg-hover);
+  }
+  
+  .promo-applied {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+  }
+  
+  .promo-badge {
+    padding: 0.25rem 0.5rem;
+    background: rgba(34, 197, 94, 0.2);
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgb(22, 163, 74);
+  }
+  
+  .promo-discount {
+    font-size: 0.875rem;
+    color: rgb(22, 163, 74);
+    font-weight: 500;
+  }
+  
+  .promo-remove {
+    margin-left: auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239, 68, 68, 0.1);
+    border: none;
+    border-radius: 50%;
+    color: rgb(239, 68, 68);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  
+  .promo-remove:hover {
+    background: rgba(239, 68, 68, 0.2);
+  }
+  
   /* Auth Modal */
   .auth-modal {
     padding: 1.25rem;

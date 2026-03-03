@@ -49,26 +49,66 @@ app.get('/health', (req, res) => {
 // Create Stripe Checkout session
 app.post('/api/create-checkout-session', async (req, res) => {
   try {
-    const { quantity, successUrl, cancelUrl, customerEmail } = req.body
+    const { quantity, successUrl, cancelUrl, customerEmail, promoCode } = req.body
     const itemQuantity = quantity || 1
 
-    console.log('Creating checkout session:', { quantity: itemQuantity, customerEmail })
+    console.log('Creating checkout session:', { quantity: itemQuantity, customerEmail, promoCode })
+
+    // Check for promo codes (you can store these in a database)
+    let discountAmount = 0
+    let discountPercent = 0
+    let validPromoCode = null
+    
+    // Define promo codes (in production, store in database)
+    const promoCodes = {
+      'LAUNCH20': { type: 'percent', value: 20 },
+      'FIRST50': { type: 'percent', value: 50 },
+      'QRFREE': { type: 'percent', value: 100 },
+      'SAVE10': { type: 'fixed', value: 10 }, // $10 off
+    }
+    
+    if (promoCode && promoCodes[promoCode.toUpperCase()]) {
+      validPromoCode = promoCodes[promoCode.toUpperCase()]
+      if (validPromoCode.type === 'percent') {
+        discountPercent = validPromoCode.value
+      } else if (validPromoCode.type === 'fixed') {
+        discountAmount = validPromoCode.value * 100 // Convert to cents
+      }
+    }
+
+    // Calculate final price
+    const basePrice = 199 // $1.99 in cents
+    let finalPrice = basePrice
+    
+    if (discountPercent > 0) {
+      finalPrice = Math.max(0, basePrice - Math.floor(basePrice * discountPercent / 100))
+    } else if (discountAmount > 0) {
+      finalPrice = Math.max(0, basePrice - discountAmount)
+    }
+
+    // Build product description
+    let description = itemQuantity > 1 
+      ? `${itemQuantity} high-quality QR codes`
+      : 'High-quality QR code in PNG, SVG, and JPEG formats'
+    
+    if (validPromoCode) {
+      description += ` (${promoCode.toUpperCase()} applied)`
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
       customer_email: customerEmail,
+      allow_promotion_codes: true, // Allow Stripe's built-in promo code feature
       line_items: [
         {
           price_data: {
             currency: 'usd',
             product_data: {
               name: 'QR Code Download',
-              description: itemQuantity > 1 
-                ? `${itemQuantity} high-quality QR codes`
-                : 'High-quality QR code in PNG, SVG, and JPEG formats',
+              description,
             },
-            unit_amount: 199, // $1.99 in cents
+            unit_amount: finalPrice,
           },
           quantity: itemQuantity,
         },
@@ -78,11 +118,16 @@ app.post('/api/create-checkout-session', async (req, res) => {
       metadata: {
         product: 'qr-code-download',
         quantity: itemQuantity.toString(),
+        promo_code: promoCode || '',
       },
     })
 
     console.log('Session created:', session.id)
-    res.json({ sessionId: session.id, url: session.url })
+    res.json({ 
+      sessionId: session.id, 
+      url: session.url,
+      discount: validPromoCode ? { code: promoCode.toUpperCase(), ...validPromoCode } : null
+    })
   } catch (error) {
     console.error('Stripe error:', error)
     res.status(500).json({ error: error.message })
