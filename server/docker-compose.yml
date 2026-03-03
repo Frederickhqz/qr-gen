@@ -11,3 +11,16 @@ services:
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - FRONTEND_URL=https://qrgen.studio
       - PORT=3001
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.qr-gen.rule=Host(`api.qrgen.studio`)"
+      - "traefik.http.routers.qr-gen.tls=true"
+      - "traefik.http.routers.qr-gen.entrypoints=web,websecure"
+      - "traefik.http.routers.qr-gen.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.qr-gen.loadbalancer.server.port=3001"
+    networks:
+      - root_default
+
+networks:
+  root_default:
+    external: true

@@ -3,7 +3,7 @@ import { Download, FileText, X, Loader2, CheckCircle, AlertCircle, CreditCard, F
 import JSZip from 'jszip'
 
 const PRICE_PER_QR = 1.99
-const API_BASE = 'http://168.231.69.92:3002'
+const API_BASE = 'https://api.qrgen.studio'
 
 interface BatchGenerationProps {
   isOpen: boolean
