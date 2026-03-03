@@ -9,6 +9,7 @@ import { getPlatformIcon, hasPlatformIcon, brandColors } from './utils/platformI
 import { AuthModal } from './components/AuthModal'
 import { UserMenu } from './components/UserMenu'
 import { QRHistoryModal } from './components/QRHistory'
+import { AnalyticsDashboard } from './components/AnalyticsDashboard'
 import { supabase } from './lib/supabase'
 import './index.css'
 
@@ -119,6 +120,9 @@ function App() {
   
   // History modal state
   const [showHistoryModal, setShowHistoryModal] = useState(false)
+  
+  // Analytics modal state
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false)
 
   // Preview size based on screen width
   const [previewSize, setPreviewSize] = useState(240)
@@ -747,6 +751,7 @@ function App() {
               <UserMenu 
                 user={user}
                 onShowHistory={() => setShowHistoryModal(true)}
+                onShowAnalytics={() => setShowAnalyticsModal(true)}
                 onSignOut={() => setUser(null)}
               />
             ) : (
@@ -1110,6 +1115,13 @@ function App() {
         <QRHistoryModal
           user={user}
           onClose={() => setShowHistoryModal(false)}
+        />
+      )}
+      
+      {showAnalyticsModal && user && (
+        <AnalyticsDashboard
+          isOpen={showAnalyticsModal}
+          onClose={() => setShowAnalyticsModal(false)}
         />
       )}
     </div>

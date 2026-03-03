@@ -4,10 +4,11 @@ import { supabase } from '../lib/supabase'
 interface UserMenuProps {
   user: any
   onShowHistory: () => void
+  onShowAnalytics: () => void
   onSignOut: () => void
 }
 
-export function UserMenu({ user, onShowHistory, onSignOut }: UserMenuProps) {
+export function UserMenu({ user, onShowHistory, onShowAnalytics, onSignOut }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -69,6 +70,21 @@ export function UserMenu({ user, onShowHistory, onSignOut }: UserMenuProps) {
               <rect x="3" y="14" width="7" height="7"/>
             </svg>
             My QR Codes
+          </button>
+          
+          <button 
+            className="menu-item"
+            onClick={() => {
+              onShowAnalytics()
+              setIsOpen(false)
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            Analytics
           </button>
           
           <div className="menu-divider" />
