@@ -1,10 +1,11 @@
 name: Deploy to Hostinger
 
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
+  # Disabled auto-deploy - use manual deploy script instead
+  # push:
+  #   branches:
+  #     - master
 
 jobs:
   build-and-deploy:
@@ -35,20 +36,15 @@ jobs:
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
         run: |
-          # Install lftp
           sudo apt-get update && sudo apt-get install -y lftp
           
-          # Create lftp config
-          mkdir -p ~/.lftp
-          echo "set ftp:ssl-allow no" > ~/.lftp/rc
-          echo "set ftp:passive-mode on" >> ~/.lftp/rc
-          echo "set net:timeout 60" >> ~/.lftp/rc
-          echo "set net:max-retries 5" >> ~/.lftp/rc
-          
-          # Run lftp
-          lftp -u "$FTP_USER,$FTP_PASS" "$FTP_SERVER" -e "
-            mkdir -fp /public_html/assets
-            mirror -R --parallel 4 --delete ./dist/ /public_html/ --exclude .htaccess --exclude .well-known/
-            bye
-          "
+          lftp ftp://"$FTP_USER":"$FTP_PASS"@"$FTP_SERVER" << 'EOF'
+          set ftp:ssl-allow no
+          set ftp:passive-mode on
+          cd /public_html
+          mkdir -f assets
+          lcd dist
+          mirror -R --delete
+          bye
+          EOF
         timeout-minutes: 10
