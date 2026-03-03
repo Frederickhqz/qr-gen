@@ -34,7 +34,7 @@ const DiscordIcon = ({ className, size }: { className?: string; size?: number })
   </svg>
 )
 
-// Custom Threads icon
+// Custom Threads icon (Meta)
 const ThreadsIcon = ({ className, size }: { className?: string; size?: number }) => (
   <svg 
     width={size || 24} 
@@ -43,7 +43,176 @@ const ThreadsIcon = ({ className, size }: { className?: string; size?: number })
     fill="currentColor" 
     className={className}
   >
-    <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.5 12.068V12c.015-3.58 1.205-6.419 3.538-8.439C7.054 1.788 9.744.785 12.51.785c2.464 0 4.754.748 6.614 2.161 1.683 1.16 2.913 2.786 3.632 4.793l.025.072-2.52.838-.019-.06c-.498-1.463-1.377-2.632-2.539-3.38-1.36-.857-3.029-1.31-4.962-1.31-2.284 0-4.256.789-5.78 2.295-1.62 1.592-2.464 3.89-2.481 6.778v.047c.017 2.9.848 5.182 2.474 6.784 1.528 1.517 3.498 2.31 5.784 2.325h.052c1.906 0 3.57-.47 4.915-1.387 1.154-.774 2.02-1.938 2.506-3.373l.018-.059 2.513.854-.023.07c-.703 1.988-1.914 3.61-3.583 4.784-1.843 1.426-4.122 2.18-6.57 2.18h-.038zm-.004-8.467c-.975 0-1.765-.285-2.35-.848-.596-.572-.898-1.353-.898-2.32 0-1.027.333-1.866.965-2.428.59-.525 1.372-.79 2.323-.79.966 0 1.748.27 2.324.802.617.57.93 1.401.93 2.47 0 .934-.3 1.697-.867 2.208-.574.516-1.387.787-2.352.787l-.075-.081zm-.007-8.486c-1.494 0-2.743.463-3.713 1.375-1.027.963-1.549 2.338-1.549 4.089 0 1.667.503 3.011 1.454 3.886.939.863 2.215 1.317 3.79 1.317h.044c1.534 0 2.791-.468 3.675-1.368.935-.95 1.409-2.272 1.409-3.929 0-1.644-.477-2.963-1.382-3.819-.879-.832-2.122-1.257-3.599-1.257l-.129.003z"/>
+    <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.5 12.068V12c.015-3.58 1.205-6.419 3.538-8.439C7.054 1.788 9.744.785 12.51.785c2.464 0 4.754.748 6.614 2.161 1.683 1.16 2.913 2.786 3.632 4.793l.025.072-2.52.838-.019-.06c-.498-1.463-1.377-2.632-2.539-3.38-1.36-.857-3.029-1.31-4.962-1.31-2.284 0-4.256.789-5.78 2.295-1.62 1.592-2.464 3.89-2.481 6.778v.047c.017 2.9.848 5.182 2.474 6.784 1.528 1.517 3.498 2.31 5.784 2.325h.052c1.906 0 3.57-.47 4.915-1.387 1.154-.774 2.02-1.938 2.506-3.373l.018-.059 2.513.854-.023.07c-.703 1.988-1.914 3.61-3.583 4.784-1.843 1.426-4.122 2.18-6.57 2.18h-.038z"/>
+  </svg>
+)
+
+// TikTok icon
+const TikTokIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+  </svg>
+)
+
+// PayPal icon
+const PayPalIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M7.076 21.337H2.47a.641.641 0 01-.633-.74L4.944 3.72a.77.77 0 01.76-.65h6.978c2.313 0 4.04.582 5.007 1.69.926 1.06 1.24 2.59.907 4.432-.016.088-.036.176-.058.264-.69 3.156-3.055 4.25-6.078 4.25H9.82a.76.76 0 00-.75.636l-.714 4.523a.641.641 0 01-.633.546l-.647-.074zm9.026-11.822c.06-.308.1-.61.12-.907.04-.468-.02-.878-.18-1.214-.38-.8-1.24-1.174-2.62-1.174h-1.31a.76.76 0 00-.75.636l-.75 4.76a.453.453 0 00.45.526h.85c1.86 0 3.25-.59 3.9-2.12.06-.15.12-.31.17-.48.05-.16.09-.33.12-.51v-.073z"/>
+  </svg>
+)
+
+// Venmo icon
+const VenmoIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M3.5 14.65c0-1.4.37-2.67 1.1-3.79.74-1.13 1.77-2.02 3.1-2.67l.43 1.16c-1.13.5-2.01 1.22-2.65 2.18-.63.95-.95 2.01-.95 3.18 0 .72.13 1.35.4 1.88.28.54.68.95 1.21 1.24.54.3 1.16.45 1.88.45.87 0 1.61-.26 2.22-.78.62-.52 1.07-1.23 1.35-2.14.28-.91.42-1.92.42-3.04 0-1.4-.24-2.65-.72-3.74-.48-1.09-1.15-1.95-2.02-2.58-.86-.62-1.85-.93-2.96-.93-1.26 0-2.35.41-3.26 1.24C4.15 8.21 3.5 9.44 3.5 11.07v3.58zm17 0c0-1.4-.37-2.67-1.1-3.79-.74-1.13-1.77-2.02-3.1-2.67l-.43 1.16c1.13.5 2.01 1.22 2.65 2.18.63.95.95 2.01.95 3.18 0 .72-.13 1.35-.4 1.88-.28.54-.68.95-1.21 1.24-.54.3-1.16.45-1.88.45-.87 0-1.61-.26-2.22-.78-.62-.52-1.07-1.23-1.35-2.14-.28-.91-.42-1.92-.42-3.04 0-1.4.24-2.65.72-3.74.48-1.09 1.15-1.95 2.02-2.58.86-.62 1.85-.93 2.96-.93 1.26 0 2.35.41 3.26 1.24.91.83 1.56 2.06 1.56 3.69v3.58z"/>
+  </svg>
+)
+
+// Cash App icon
+const CashAppIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 1.97-2.38-2.38-1.41 1.41 2.38 2.38-4.24 4.24-2.38-2.38-1.41 1.41 2.38 2.38-1.97 1.97L7.106 16l1.97-1.97-2.38-2.38 1.41-1.41 2.38 2.38 4.24-4.24-2.38-2.38 1.41-1.41 2.38 2.38 1.97-1.97L17.894 8.22z"/>
+  </svg>
+)
+
+// App Store icon (Apple)
+const AppStoreIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+  </svg>
+)
+
+// Amazon icon
+const AmazonIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M15.93 17.09c-.17.17-.43.17-.6 0l-1.12-1.12c-.17-.17-.17-.43 0-.6l.04-.04c.17-.17.43-.17.6 0l1.12 1.12c.17.17.17.43 0 .6l-.04.04zm-3.93-6.09c1.55 0 2.81 1.26 2.81 2.81 0 .28-.04.54-.11.79l-.02.07c-.06.18-.24.3-.43.3h-.07c-.22-.04-.37-.25-.33-.47l.02-.06c.05-.2.08-.41.08-.63 0-1.07-.87-1.94-1.94-1.94s-1.94.87-1.94 1.94c0 .22.04.43.09.63l.02.06c.04.22-.11.43-.33.47h-.07c-.19 0-.37-.12-.43-.3l-.02-.07c-.07-.25-.11-.51-.11-.79-.01-1.55 1.25-2.81 2.8-2.81zm6.5 5.68c-.25.23-.62.21-.85-.04l-.08-.08c-.23-.25-.21-.62.04-.85 1.34-1.21 2.15-2.82 2.15-4.58 0-3.42-3.22-6.2-7.19-6.2s-7.19 2.78-7.19 6.2c0 1.76.81 3.37 2.15 4.58.25.23.27.6.04.85l-.08.08c-.23.25-.6.27-.85.04-1.59-1.44-2.55-3.38-2.55-5.55 0-4.14 3.8-7.5 8.48-7.5s8.48 3.36 8.48 7.5c0 2.17-.96 4.11-2.55 5.55zm-13.41 2.95c.35-.26.82-.32 1.2-.12 1.48.77 3.19 1.19 5.03 1.19s3.55-.42 5.03-1.19c.38-.2.85-.14 1.2.12.45.33.45.99 0 1.32l-.02.02c-1.85 1.37-4.08 2.03-6.21 2.03s-4.36-.66-6.21-2.03l-.02-.02c-.45-.33-.45-.99 0-1.32z"/>
+  </svg>
+)
+
+// Spotify icon
+const SpotifyIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.66.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+  </svg>
+)
+
+// Calendly icon
+const CalendlyIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M19.5 3h-1.5V1.5c0-.28-.22-.5-.5-.5s-.5.22-.5.5V3H7V1.5c0-.28-.22-.5-.5-.5S6 1.22 6 1.5V3H4.5C3.67 3 3 3.67 3 4.5v15c0 .83.67 1.5 1.5 1.5h15c.83 0 1.5-.67 1.5-1.5v-15c0-.83-.67-1.5-1.5-1.5zm0 16.5h-15v-12h15v12zm-9-7.5v4.5c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-3.79l-.65.39c-.24.14-.54.06-.68-.18s-.06-.54.18-.68l1.25-.75c.15-.09.35-.1.51-.01.15.09.25.26.25.44v.08zm2.5 0v4.5c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-3.79l-.65.39c-.24.14-.54.06-.68-.18s-.06-.54.18-.68l1.25-.75c.15-.09.35-.1.51-.01.15.09.25.26.25.44v.08zm3 0c0-.55.45-1 1-1h1.5c.28 0 .5.22.5.5s-.22.5-.5.5H16v1h1c.55 0 1 .45 1 1v1c0 .55-.45 1-1 1h-1.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5H16v-1h-1c-.55 0-1-.45-1-1v-1z"/>
+  </svg>
+)
+
+// Zillow icon
+const ZillowIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M12.5 2.5L2 9l.5 2 10-6.5L22.5 11l.5-2L12.5 2.5zM4 14v6.5c0 .83.67 1.5 1.5 1.5h13c.83 0 1.5-.67 1.5-1.5V14l-8 5-8-5z"/>
+  </svg>
+)
+
+// Redfin icon
+const RedfinIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+  </svg>
+)
+
+// Realtor.com icon
+const RealtorIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm5 15h-2v-4H9v4H7v-7.17l5-5 5 5V18z"/>
+  </svg>
+)
+
+// Apartments.com icon
+const ApartmentsIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/>
+  </svg>
+)
+
+// Google Reviews icon
+const GoogleReviewsIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
   </svg>
 )
 
@@ -133,7 +302,7 @@ export const qrTypes: QRTypeOption[] = [
   { id: 'facebook', label: 'Facebook', icon: Facebook, category: 'social', placeholder: 'username', fields: ['handle'] },
   { id: 'twitter', label: 'X', icon: XIcon, category: 'social', placeholder: '@handle', fields: ['handle'] },
   { id: 'linkedin', label: 'LinkedIn', icon: Linkedin, category: 'social', placeholder: 'username', fields: ['handle'] },
-  { id: 'tiktok', label: 'TikTok', icon: Music, category: 'social', placeholder: '@username', fields: ['handle'] },
+  { id: 'tiktok', label: 'TikTok', icon: TikTokIcon, category: 'social', placeholder: '@username', fields: ['handle'] },
   { id: 'snapchat', label: 'Snapchat', icon: Ghost, category: 'social', placeholder: '@username', fields: ['handle'] },
   { id: 'youtube', label: 'YouTube', icon: Youtube, category: 'social', placeholder: 'Channel URL', fields: ['url'] },
   { id: 'pinterest', label: 'Pinterest', icon: PinterestIcon, category: 'social', placeholder: '@username', fields: ['handle'] },
@@ -152,48 +321,24 @@ export const qrTypes: QRTypeOption[] = [
   
   // Payment
   { id: 'crypto', label: 'Crypto', icon: Bitcoin, category: 'payment', placeholder: 'Wallet address', fields: ['symbol', 'address'] },
-  { id: 'paypal', label: 'PayPal', icon: CreditCard, category: 'payment', placeholder: '@username', fields: ['handle'] },
-  { id: 'venmo', label: 'Venmo', icon: Wallet, category: 'payment', placeholder: '@username', fields: ['handle'] },
-  { id: 'cashapp', label: 'Cash App', icon: ({ className, size }) => (
-    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.485 16.085c-.315.54-.92.915-1.62.915h-5.73c-.7 0-1.305-.375-1.62-.915l-.165-.285L7.5 12.75V7.5c0-.69.56-1.25 1.25-1.25h6.5c.69 0 1.25.56 1.25 1.25v5.25l-.135.285-.885 1.05z"/>
-    </svg>
-  ), category: 'payment', placeholder: '$Cashtag', fields: ['handle'] },
+  { id: 'paypal', label: 'PayPal', icon: PayPalIcon, category: 'payment', placeholder: '@username', fields: ['handle'] },
+  { id: 'venmo', label: 'Venmo', icon: VenmoIcon, category: 'payment', placeholder: '@username', fields: ['handle'] },
+  { id: 'cashapp', label: 'Cash App', icon: CashAppIcon, category: 'payment', placeholder: '$Cashtag', fields: ['handle'] },
   
   // Platform
-  { id: 'appstore', label: 'App Store', icon: Apple, category: 'platform', placeholder: 'App URL', fields: ['url'] },
+  { id: 'appstore', label: 'App Store', icon: AppStoreIcon, category: 'platform', placeholder: 'App URL', fields: ['url'] },
   { id: 'googleplay', label: 'Play Store', icon: Play, category: 'platform', placeholder: 'App URL', fields: ['url'] },
-  { id: 'amazon', label: 'Amazon', icon: Package, category: 'platform', placeholder: 'Product URL', fields: ['url'] },
+  { id: 'amazon', label: 'Amazon', icon: AmazonIcon, category: 'platform', placeholder: 'Product URL', fields: ['url'] },
   { id: 'googlemaps', label: 'Google Maps', icon: Map, category: 'platform', placeholder: 'Location', fields: ['location'] },
   { id: 'applemaps', label: 'Apple Maps', icon: MapPin, category: 'platform', placeholder: 'Location', fields: ['location'] },
-  { id: 'spotify', label: 'Spotify', icon: Music2, category: 'platform', placeholder: 'Track/Playlist URL', fields: ['url'] },
+  { id: 'spotify', label: 'Spotify', icon: SpotifyIcon, category: 'platform', placeholder: 'Track/Playlist URL', fields: ['url'] },
   { id: 'website', label: 'Website', icon: Globe, category: 'platform', placeholder: 'https://...', fields: ['url'] },
-  { id: 'calendly', label: 'Calendly', icon: Calendar, category: 'platform', placeholder: 'calendly.com/username', fields: ['handle'] },
-  { id: 'zillow', label: 'Zillow', icon: ({ className, size }) => (
-    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-    </svg>
-  ), category: 'platform', placeholder: 'zillow.com/profile', fields: ['handle'] },
-  { id: 'redfin', label: 'Redfin', icon: ({ className, size }) => (
-    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-6v2h18V3H3z"/>
-    </svg>
-  ), category: 'platform', placeholder: 'redfin.com/agent', fields: ['handle'] },
-  { id: 'realtor', label: 'Realtor.com', icon: ({ className, size }) => (
-    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.08L12 15l5-2.09v3.08z"/>
-    </svg>
-  ), category: 'platform', placeholder: 'realtor.com/profile', fields: ['handle'] },
-  { id: 'apartments', label: 'Apartments.com', icon: ({ className, size }) => (
-    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16H3v2h18v-2h-2zm-2 0H7v-4h10v4zm0-6H7V5h10v10z"/>
-    </svg>
-  ), category: 'platform', placeholder: 'apartments.com/listing', fields: ['url'] },
-  { id: 'googlereviews', label: 'Google Reviews', icon: ({ className, size }) => (
-    <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-    </svg>
-  ), category: 'platform', placeholder: 'Search for your business', fields: ['query'] },
+  { id: 'calendly', label: 'Calendly', icon: CalendlyIcon, category: 'platform', placeholder: 'calendly.com/username', fields: ['handle'] },
+  { id: 'zillow', label: 'Zillow', icon: ZillowIcon, category: 'platform', placeholder: 'zillow.com/profile', fields: ['handle'] },
+  { id: 'redfin', label: 'Redfin', icon: RedfinIcon, category: 'platform', placeholder: 'redfin.com/agent', fields: ['handle'] },
+  { id: 'realtor', label: 'Realtor.com', icon: RealtorIcon, category: 'platform', placeholder: 'realtor.com/profile', fields: ['handle'] },
+  { id: 'apartments', label: 'Apartments.com', icon: ApartmentsIcon, category: 'platform', placeholder: 'apartments.com/listing', fields: ['url'] },
+  { id: 'googlereviews', label: 'Google Reviews', icon: GoogleReviewsIcon, category: 'platform', placeholder: 'Search for your business', fields: ['query'] },
 ]
 
 export const categories = [
