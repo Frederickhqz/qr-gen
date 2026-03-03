@@ -1,0 +1,13 @@
+services:
+  qr-gen-server:
+    build: .
+    container_name: qr-gen-server
+    restart: unless-stopped
+    ports:
+      - "3002:3001"
+    environment:
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - FRONTEND_URL=https://qrgen.studio
+      - PORT=3001

@@ -39,7 +39,28 @@ declare global {
 }
 
 const PRICE = 1.99
-const API_BASE = 'https://n8n.srv796810.hstgr.cloud'
+const API_BASE = import.meta.env.VITE_API_URL || 'https://qr-gen-server.fly.dev'
+
+// Stripe checkout function
+const createCheckoutSession = async (quantity: number = 1, email?: string): Promise<string | null> => {
+  try {
+    const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quantity,
+        customerEmail: email,
+        successUrl: `${window.location.origin}?payment=success`,
+        cancelUrl: `${window.location.origin}?payment=cancelled`
+      })
+    })
+    const data = await response.json()
+    return data.url
+  } catch (error) {
+    console.error('Stripe checkout error:', error)
+    return null
+  }
+}
 
 // Popular cryptocurrencies for the dropdown
 const popularCryptos = [
@@ -1460,12 +1481,29 @@ function App() {
 
             <button 
               className="pay-btn btn-primary"
-              onClick={() => {
+              onClick={async () => {
                 setShowConfirmation(false)
-                handleDownload('png')
+                setPaymentLoading(true)
+                const checkoutUrl = await createCheckoutSession(1, user?.email)
+                if (checkoutUrl) {
+                  // Store pending download data
+                  sessionStorage.setItem('pendingDownload', JSON.stringify({
+                    type: qrType,
+                    data: formData,
+                    styles: {
+                      fgColor, bgColor, dotsStyle, cornersStyle,
+                      gradientEnabled, gradientColor1, gradientColor2, gradientType,
+                      logo, logoSize, logoMargin, usePlatformIcon, iconColor
+                    }
+                  }))
+                  window.location.href = checkoutUrl
+                } else {
+                  setPaymentError('Failed to create checkout session. Please try again.')
+                  setPaymentLoading(false)
+                }
               }}
             >
-              Continue to Payment
+              {paymentLoading ? 'Processing...' : 'Pay with Stripe'}
             </button>
 
             <button className="secondary-btn" onClick={() => setShowConfirmation(false)}>

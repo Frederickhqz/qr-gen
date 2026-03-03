@@ -3,6 +3,7 @@ import { Download, FileText, X, Loader2, CheckCircle, AlertCircle, CreditCard, F
 import JSZip from 'jszip'
 
 const PRICE_PER_QR = 1.99
+const API_BASE = import.meta.env.VITE_API_URL || 'https://qr-gen-server.fly.dev'
 
 interface BatchGenerationProps {
   isOpen: boolean
@@ -120,31 +121,34 @@ export function BatchGeneration({ isOpen, onClose, onBatchComplete }: BatchGener
     
     setShowPayment(false)
     setIsProcessing(true)
-    setProcessedCount(0)
     
-    const updatedItems = [...items]
-    
-    for (let i = 0; i < updatedItems.length; i++) {
-      updatedItems[i] = { ...updatedItems[i], status: 'generating' }
-      setItems([...updatedItems])
+    try {
+      // Create Stripe checkout session with quantity
+      const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quantity: items.length,
+          successUrl: `${window.location.origin}?payment=success&batch=true`,
+          cancelUrl: `${window.location.origin}?payment=cancelled`
+        })
+      })
       
-      try {
-        const blob = await generateQRCode(updatedItems[i].data)
-        updatedItems[i] = { ...updatedItems[i], status: 'success', blob }
-      } catch (error) {
-        updatedItems[i] = { 
-          ...updatedItems[i], 
-          status: 'error',
-          error: error instanceof Error ? error.message : 'Generation failed'
-        }
+      const data = await response.json()
+      
+      if (data.url) {
+        // Store batch data in sessionStorage for retrieval after payment
+        sessionStorage.setItem('pendingBatch', JSON.stringify(items.map(i => i.data)))
+        window.location.href = data.url
+      } else {
+        throw new Error('Failed to create checkout session')
       }
-      
-      setItems([...updatedItems])
-      setProcessedCount(i + 1)
+    } catch (error) {
+      console.error('Batch checkout error:', error)
+      alert('Failed to initiate payment. Please try again.')
     }
     
     setIsProcessing(false)
-    onBatchComplete?.()
   }
 
   const downloadAll = async () => {

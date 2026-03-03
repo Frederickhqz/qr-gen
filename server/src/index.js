@@ -29,7 +29,8 @@ app.get('/health', (req, res) => {
 // Create Stripe Checkout session
 app.post('/api/create-checkout-session', async (req, res) => {
   try {
-    const { priceId, successUrl, cancelUrl, customerEmail } = req.body
+    const { quantity, successUrl, cancelUrl, customerEmail } = req.body
+    const itemQuantity = quantity || 1
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -41,17 +42,20 @@ app.post('/api/create-checkout-session', async (req, res) => {
             currency: 'usd',
             product_data: {
               name: 'QR Code Download',
-              description: 'High-quality QR code in PNG, SVG, and JPEG formats',
+              description: itemQuantity > 1 
+                ? `${itemQuantity} high-quality QR codes`
+                : 'High-quality QR code in PNG, SVG, and JPEG formats',
             },
             unit_amount: 199, // $1.99 in cents
           },
-          quantity: 1,
+          quantity: itemQuantity,
         },
       ],
       success_url: successUrl || `${req.headers.origin || process.env.FRONTEND_URL}?payment=success`,
       cancel_url: cancelUrl || `${req.headers.origin || process.env.FRONTEND_URL}?payment=cancelled`,
       metadata: {
         product: 'qr-code-download',
+        quantity: itemQuantity.toString(),
       },
     })
 
