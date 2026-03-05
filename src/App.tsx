@@ -105,6 +105,7 @@ function App() {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [downloadComplete, setDownloadComplete] = useState(false)
   
   // Crypto state
   const [cryptoSearch, setCryptoSearch] = useState('')
@@ -310,7 +311,7 @@ function App() {
     }
   }
 
-  // Handle download - shows auth modal first for non-logged-in users
+  // Handle download - save to DB first, then download
   const handleDownload = async (format: 'png' | 'svg' | 'jpeg') => {
     // Store QR data for saving
     const qrDataToSave = {
@@ -333,31 +334,58 @@ function App() {
       }
     }
     
-    // If logged in, save and download immediately
-    if (user) {
-      await performDownload(format)
-      
-      // Save to Supabase
-      await supabase.from('qr_codes').insert({
-        user_id: user.id,
-        type: qrType,
-        data: qrDataToSave.data,
-        styles: qrDataToSave.styles
-      })
-      
-      // Track event
-      await supabase.from('events').insert({
-        user_id: user.id,
-        event_type: 'qr_downloaded',
-        event_data: { format, qr_type: qrType }
-      })
-      return
-    }
+    setPaymentLoading(true)
+    setPaymentError(null)
     
-    // Not logged in - show auth modal first
-    setPendingDownloadQR(qrDataToSave)
-    setPendingDownloadFormat(format)
-    setShowAuthModal(true)
+    try {
+      // If logged in, save to DB FIRST, then download
+      if (user) {
+        // 1. Save to Supabase BEFORE download
+        const { data: savedQR, error: saveError } = await supabase
+          .from('qr_codes')
+          .insert({
+            user_id: user.id,
+            type: qrType,
+            data: qrDataToSave.data,
+            styles: qrDataToSave.styles
+          })
+          .select()
+          .single()
+        
+        if (saveError) {
+          throw new Error('Failed to save QR code: ' + saveError.message)
+        }
+        
+        // 2. Track event
+        await supabase.from('events').insert({
+          user_id: user.id,
+          event_type: 'qr_downloaded',
+          event_data: { 
+            format, 
+            qr_type: qrType,
+            qr_id: savedQR.id
+          }
+        })
+        
+        // 3. NOW download
+        setPaymentLoading(false)
+        await performDownload(format)
+        
+        // Show success message
+        setPaymentSuccess(true)
+        setTimeout(() => setPaymentSuccess(false), 3000)
+        return
+      }
+      
+      // Not logged in - show auth modal first
+      setPendingDownloadQR(qrDataToSave)
+      setPendingDownloadFormat(format)
+      setShowAuthModal(true)
+    } catch (error: any) {
+      setPaymentLoading(false)
+      setPaymentError(error.message || 'Failed to process download')
+      console.error('Download error:', error)
+    }
   }
 
   // Check if running in Telegram
@@ -1114,23 +1142,22 @@ function App() {
             
             <div className="confirmation-header">
               <h3>Ready to download?</h3>
-              <p>You'll get your QR code in high quality</p>
+              <p>Your QR will be saved to your account</p>
             </div>
 
-            <div className="confirmation-qr">
-              <div ref={(el) => {
-                if (el) {
-                  el.innerHTML = ''
-                  ;(async () => {
-                    try {
-                      const qr = await generateDownloadQR()
-                      await qr.append(el)
-                    } catch (e) {
-                      console.error('Failed to render confirmation QR:', e)
-                    }
-                  })()
-                }
-              }} />
+            {/* Preview with overlay to prevent screenshot - shows generic QR pattern instead */}
+            <div className="confirmation-qr-preview">
+              <div className="qr-preview-blur">
+                <div className="blur-placeholder">
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                  </svg>
+                  <span>QR Preview</span>
+                </div>
+              </div>
             </div>
 
             <div className="confirmation-details">
@@ -1142,11 +1169,15 @@ function App() {
                 <span>Size</span>
                 <strong>{qrSize}×{qrSize}px</strong>
               </div>
+              <div className="detail-row">
+                <span>Format</span>
+                <strong>PNG (High Quality)</strong>
+              </div>
             </div>
 
             <div className="confirmation-price">
               <span className="price">${PRICE.toFixed(2)}</span>
-              <span className="price-note">One-time purchase</span>
+              <span className="price-note">One-time purchase • Lifetime access</span>
             </div>
 
             <button 
@@ -1155,11 +1186,36 @@ function App() {
                 setShowConfirmation(false)
                 handleDownload('png')
               }}
+              disabled={paymentLoading}
             >
-              Continue to Payment
+              {paymentLoading ? (
+                <>
+                  <span className="spinner-small"></span>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                    <line x1="1" y1="10" x2="23" y2="10"/>
+                  </svg>
+                  Pay ${PRICE.toFixed(2)} & Download
+                </>
+              )}
             </button>
 
-            <button className="secondary-btn" onClick={() => setShowConfirmation(false)}>
+            {paymentError && (
+              <div className="payment-error">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>{paymentError}</span>
+              </div>
+            )}
+
+            <button className="secondary-btn" onClick={() => setShowConfirmation(false)} disabled={paymentLoading}>
               Cancel
             </button>
           </div>
