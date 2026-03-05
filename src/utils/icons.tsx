@@ -285,7 +285,7 @@ export const qrTypes: QRTypeOption[] = [
   { id: 'sms', label: 'SMS', icon: MessageSquare, category: 'core', placeholder: 'Text message', fields: ['phone', 'message'] },
 
   // Business
-  { id: 'vcard', label: 'vCard', icon: User, category: 'business', placeholder: 'Contact info', fields: ['name', 'phone', 'email', 'company', 'title', 'address', 'website'] },
+  { id: 'vcard', label: 'vCard', icon: User, category: 'business', placeholder: 'Contact info', fields: ['firstName', 'lastName', 'phone', 'email', 'company', 'title', 'website'] },
   { id: 'event', label: 'Event', icon: Calendar, category: 'business', placeholder: 'Calendar event', fields: ['title', 'location', 'start', 'end', 'description'] },
   
   // Social

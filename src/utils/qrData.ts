@@ -1,5 +1,112 @@
 import type { QRType } from './icons'
 
+// Type definitions for multi-field QR data types
+export interface WiFiData {
+  ssid: string
+  password?: string
+  security?: 'WPA' | 'WEP' | 'nopass'
+  hidden?: 'true' | 'false'
+}
+
+export interface EmailData {
+  to?: string
+  subject?: string
+  body?: string
+}
+
+export interface PhoneData {
+  phone: string
+}
+
+export interface SMSData {
+  phone: string
+  message?: string
+}
+
+export interface VCardData {
+  firstName?: string
+  lastName?: string
+  phone?: string
+  email?: string
+  company?: string
+  title?: string
+  website?: string
+}
+
+export interface EventData {
+  title?: string
+  location?: string
+  start?: string  // ISO datetime format: YYYY-MM-DDTHH:mm
+  end?: string    // ISO datetime format: YYYY-MM-DDTHH:mm
+  description?: string
+}
+
+export interface CryptoData {
+  symbol?: string
+  address?: string
+  amount?: string
+  cryptoCoin?: string
+  cryptoAddress?: string
+  cryptoAmount?: string
+}
+
+export interface SocialData {
+  handle?: string
+  url?: string
+}
+
+// Union type for all QR data types
+export type QRDataMap = {
+  url: { url: string }
+  text: { text: string }
+  wifi: WiFiData
+  email: EmailData
+  phone: PhoneData
+  sms: SMSData
+  vcard: VCardData
+  event: EventData
+  whatsapp: PhoneData & { message?: string }
+  telegram: SocialData
+  messenger: SocialData
+  discord: SocialData
+  threads: SocialData
+  instagram: SocialData
+  facebook: SocialData
+  twitter: SocialData
+  linkedin: SocialData
+  tiktok: SocialData
+  snapchat: SocialData
+  youtube: SocialData
+  pinterest: SocialData
+  reddit: SocialData
+  twitch: SocialData
+  github: SocialData
+  medium: SocialData
+  crypto: CryptoData
+  bitcoin: CryptoData
+  ethereum: CryptoData
+  solana: CryptoData
+  xrp: CryptoData
+  bnb: CryptoData
+  ton: CryptoData
+  paypal: SocialData & { amount?: string }
+  venmo: SocialData & { message?: string }
+  cashapp: SocialData
+  appstore: SocialData
+  googleplay: SocialData
+  amazon: SocialData
+  googlemaps: SocialData
+  applemaps: SocialData
+  spotify: SocialData
+  website: SocialData
+  calendly: SocialData
+  zillow: SocialData
+  redfin: SocialData
+  realtor: SocialData
+  apartments: SocialData
+  googlereviews: SocialData
+}
+
 export function generateQRData(type: QRType, data: Record<string, string>): string {
   const handle = (data.handle || 'username').replace('@', '')
   const url = data.url || ''
@@ -22,9 +129,11 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
       if (data.body) params.push(`body=${encodeURIComponent(data.body)}`)
       return params.length ? `${mailto}?${params.join('&')}` : mailto
     case 'phone':
-      return data.phone ? `tel:${data.phone.replace(/\D/g, '')}` : 'tel:+15551234567'
+      // Keep the + prefix for international numbers, remove other non-digits
+      return data.phone ? `tel:${data.phone.replace(/[^\d+]/g, '')}` : 'tel:+15551234567'
     case 'sms':
-      const smsNum = (data.phone || '+15551234567').replace(/\D/g, '')
+      // Keep the + prefix for international numbers, remove other non-digits
+      const smsNum = (data.phone || '+15551234567').replace(/[^\d+]/g, '')
       return data.message ? `sms:${smsNum}?body=${encodeURIComponent(data.message)}` : `sms:${smsNum}`
     case 'vcard':
       const fn = `${data.firstName || 'John'} ${data.lastName || 'Doe'}`.trim()
@@ -38,8 +147,14 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
       vcard += '\nEND:VCARD'
       return vcard
     case 'event':
-      const start = (data.start || '20260101T100000').replace(/[-:]/g, '').replace('T', 'T')
-      const end = (data.end || '20260101T110000').replace(/[-:]/g, '').replace('T', 'T')
+      // Convert ISO datetime (YYYY-MM-DDTHH:mm) to iCal format (YYYYMMDDTHHmmss)
+      const formatDateTime = (dt: string): string => {
+        if (!dt) return ''
+        // Remove dashes and colons, ensure seconds are present
+        return dt.replace(/[-:]/g, '').replace(/T(\d{2})(\d{2})$/, 'T$1$200')
+      }
+      const start = formatDateTime(data.start || '20260101T100000')
+      const end = formatDateTime(data.end || '20260101T110000')
       let ical = 'BEGIN:VEVENT\n'
       if (data.title) ical += `SUMMARY:${data.title}\n`
       ical += `DTSTART:${start}\nDTEND:${end}\n`
@@ -50,7 +165,8 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
     
     // Social
     case 'whatsapp':
-      const waNum = (data.phone || '+15551234567').replace(/\D/g, '')
+      // Keep the + prefix for international numbers, remove other non-digits
+      const waNum = (data.phone || '+15551234567').replace(/[^\d+]/g, '')
       return data.message ? `https://wa.me/${waNum}?text=${encodeURIComponent(data.message)}` : `https://wa.me/${waNum}`
     case 'telegram':
       return `https://t.me/${handle}`
@@ -94,7 +210,8 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
     case 'xrp':
     case 'bnb':
     case 'ton':
-      const coinId = data.symbol || 'bitcoin'
+      // Map type to coin ID - use type directly for specific crypto types, otherwise use cryptoCoin from data
+      const coinId = type === 'crypto' ? (data.cryptoCoin || 'bitcoin') : type
       const coinSchemes: Record<string, string> = {
         bitcoin: 'bitcoin',
         ethereum: 'ethereum',
@@ -104,20 +221,17 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
         ton: 'ton'
       }
       const scheme = coinSchemes[coinId] || coinId
-      const address = data.address || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'
+      const address = data.cryptoAddress || data.address || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'
       let cryptoUrl = `${scheme}:${address}`
       const cryptoParams = []
-      if (data.amount) cryptoParams.push(`amount=${data.amount}`)
+      if (data.cryptoAmount || data.amount) cryptoParams.push(`amount=${data.cryptoAmount || data.amount}`)
       return cryptoParams.length ? `${cryptoUrl}?${cryptoParams.join('&')}` : cryptoUrl
     case 'paypal':
-      const paypalHandle = (data.handle || 'username').replace('@', '')
-      return data.amount ? `https://paypal.me/${paypalHandle}/${data.amount}` : `https://paypal.me/${paypalHandle}`
+      return data.amount ? `https://paypal.me/${handle}/${data.amount}` : `https://paypal.me/${handle}`
     case 'venmo':
-      const venmoHandle = (data.handle || 'username').replace('@', '').replace('$', '')
-      return data.message ? `https://venmo.com/${venmoHandle}?note=${encodeURIComponent(data.message)}` : `https://venmo.com/${venmoHandle}`
+      return data.message ? `https://venmo.com/${handle}?note=${encodeURIComponent(data.message)}` : `https://venmo.com/${handle}`
     case 'cashapp':
-      const cashHandle = (data.handle || 'username').replace('$', '')
-      return `https://cash.app/${cashHandle}`
+      return `https://cash.app/${handle.replace('$', '')}`
     
     // Platform
     case 'appstore':
@@ -129,29 +243,18 @@ export function generateQRData(type: QRType, data: Record<string, string>): stri
     case 'amazon':
       return url || 'https://amazon.com'
     case 'googlemaps':
-      if (data.lat && data.lng) {
-        return `https://www.google.com/maps?q=${data.lat},${data.lng}`
-      }
-      if (data.name) {
-        return `https://www.google.com/maps/search/${encodeURIComponent(data.name)}`
-      }
-      return url || 'https://maps.google.com'
+      const coords = url.match(/[-.\d]+,[-.\d]+/)?.[0]
+      return coords ? `https://www.google.com/maps?q=${coords}` : url || 'https://maps.google.com'
     case 'applemaps':
-      if (data.lat && data.lng) {
-        return `http://maps.apple.com/?q=${data.lat},${data.lng}`
-      }
-      if (data.name) {
-        return `http://maps.apple.com/?q=${encodeURIComponent(data.name)}`
-      }
-      return url || 'http://maps.apple.com'
+      const appleCoords = url.match(/[-.\d]+,[-.\d]+/)?.[0]
+      return appleCoords ? `http://maps.apple.com/?q=${appleCoords}` : url || 'http://maps.apple.com'
     case 'spotify':
       return url || 'https://spotify.com'
     case 'website':
       return url || 'https://example.com'
     case 'calendly':
-      const calendlyPath = (data.handle || 'username').replace('@', '').replace(/^\//, '')
-      const calendlyBase = `https://calendly.com/${calendlyPath}`
-      return data.event ? `${calendlyBase}/${data.event}` : calendlyBase
+      const calendlyUrl = data.url || data.handle || 'username'
+      return calendlyUrl.startsWith('http') ? calendlyUrl : `https://calendly.com/${calendlyUrl.replace(/^\//, '')}`
     case 'zillow':
       const zillowUrl = data.url || data.handle || 'profile'
       return zillowUrl.startsWith('http') ? zillowUrl : `https://www.zillow.com/profile/${zillowUrl.replace(/^\//, '')}`

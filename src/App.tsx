@@ -9,10 +9,6 @@ import { getPlatformIcon, hasPlatformIcon, brandColors } from './utils/platformI
 import { AuthModal } from './components/AuthModal'
 import { UserMenu } from './components/UserMenu'
 import { QRHistoryModal } from './components/QRHistory'
-import { AnalyticsDashboard } from './components/AnalyticsDashboard'
-import { BatchGeneration } from './components/BatchGeneration'
-import { TemplateSelector } from './components/TemplateSelector'
-import { qrTemplates, type QRTemplate } from './utils/templates'
 import { supabase } from './lib/supabase'
 import './index.css'
 
@@ -39,29 +35,7 @@ declare global {
 }
 
 const PRICE = 1.99
-const API_BASE = 'https://api.qrgen.studio'
-
-// Stripe checkout function
-const createCheckoutSession = async (quantity: number = 1, email?: string, promo?: string): Promise<string | null> => {
-  try {
-    const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        quantity,
-        customerEmail: email,
-        promoCode: promo,
-        successUrl: `${window.location.origin}?payment=success`,
-        cancelUrl: `${window.location.origin}?payment=cancelled`
-      })
-    })
-    const data = await response.json()
-    return data.url
-  } catch (error) {
-    console.error('Stripe checkout error:', error)
-    return null
-  }
-}
+const API_BASE = 'https://n8n.srv796810.hstgr.cloud'
 
 // Popular cryptocurrencies for the dropdown
 const popularCryptos = [
@@ -131,8 +105,6 @@ function App() {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
-  const [promoCode, setPromoCode] = useState('')
-  const [promoApplied, setPromoApplied] = useState<{code: string, type: string, value: number} | null>(null)
   
   // Crypto state
   const [cryptoSearch, setCryptoSearch] = useState('')
@@ -147,15 +119,6 @@ function App() {
   
   // History modal state
   const [showHistoryModal, setShowHistoryModal] = useState(false)
-  
-  // Analytics modal state
-  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false)
-  
-  // Batch generation modal state
-  const [showBatchModal, setShowBatchModal] = useState(false)
-  
-  // Template selector modal state
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
 
   // Preview size based on screen width
   const [previewSize, setPreviewSize] = useState(240)
@@ -202,7 +165,8 @@ function App() {
       const data = generatePlaceholderData(qrType)
 
       // Determine which logo to use: custom upload, platform icon, or none
-      const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType, iconColor) : null) || undefined
+      const platformIconColor = useOfficialColor ? (brandColors[qrType] || '#000000') : iconColor
+      const imageSource = logo || (usePlatformIcon ? getPlatformIcon(qrType, platformIconColor) : null) || undefined
 
       const options = {
         width: previewSize,
@@ -447,22 +411,6 @@ function App() {
     if (preset.gradient) {
       setGradientColor1(preset.gradientColor1 || '#007AFF')
       setGradientColor2(preset.gradientColor2 || '#5856D6')
-    }
-  }
-
-  // Apply template
-  const applyTemplate = (template: QRTemplate) => {
-    const config = template.config
-    setDotsStyle(config.dotsStyle)
-    setCornersStyle(config.cornersStyle)
-    setFgColor(config.fgColor)
-    setBgColor(config.bgColor)
-    setBgTransparent(config.bgTransparent)
-    setGradientEnabled(config.gradientEnabled)
-    if (config.gradientEnabled && config.gradientColor1 && config.gradientColor2) {
-      setGradientColor1(config.gradientColor1)
-      setGradientColor2(config.gradientColor2)
-      setGradientType(config.gradientType || 'linear')
     }
   }
 
@@ -732,239 +680,6 @@ function App() {
               placeholder="Enter wallet address"
             />
           </div>
-          <div className="form-group">
-            <label>Amount (Optional)</label>
-            <input
-              type="number"
-              step="0.0001"
-              value={formData.amount || ''}
-              onChange={(e) => updateField('amount', e.target.value)}
-              placeholder="0.00"
-            />
-          </div>
-        </div>
-      )
-    }
-
-    // WhatsApp Form
-    if (qrType === 'whatsapp') {
-      return (
-        <div className="form-fields">
-          <div className="form-group">
-            <label>Phone Number</label>
-            <input
-              type="tel"
-              value={formData.phone || ''}
-              onChange={(e) => updateField('phone', e.target.value)}
-              placeholder="+1 555 123 4567"
-            />
-          </div>
-          <div className="form-group">
-            <label>Message (Optional)</label>
-            <textarea
-              value={formData.message || ''}
-              onChange={(e) => updateField('message', e.target.value)}
-              placeholder="Pre-filled message..."
-              rows={3}
-            />
-          </div>
-        </div>
-      )
-    }
-
-    // PayPal Form
-    if (qrType === 'paypal') {
-      return (
-        <div className="form-fields">
-          <div className="form-group">
-            <label>PayPal Username</label>
-            <input
-              type="text"
-              value={formData.handle || ''}
-              onChange={(e) => updateField('handle', e.target.value)}
-              placeholder="@username or email"
-            />
-          </div>
-          <div className="form-group">
-            <label>Amount (Optional)</label>
-            <div className="input-group">
-              <span className="input-prefix">$</span>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.amount || ''}
-                onChange={(e) => updateField('amount', e.target.value)}
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    // Venmo Form
-    if (qrType === 'venmo') {
-      return (
-        <div className="form-fields">
-          <div className="form-group">
-            <label>Venmo Username</label>
-            <input
-              type="text"
-              value={formData.handle || ''}
-              onChange={(e) => updateField('handle', e.target.value)}
-              placeholder="@username"
-            />
-          </div>
-          <div className="form-group">
-            <label>Note (Optional)</label>
-            <textarea
-              value={formData.message || ''}
-              onChange={(e) => updateField('message', e.target.value)}
-              placeholder="Payment note..."
-              rows={2}
-            />
-          </div>
-        </div>
-      )
-    }
-
-    // Cash App Form
-    if (qrType === 'cashapp') {
-      return (
-        <div className="form-fields">
-          <div className="form-group">
-            <label>$Cashtag</label>
-            <input
-              type="text"
-              value={formData.handle || ''}
-              onChange={(e) => updateField('handle', e.target.value)}
-              placeholder="$username"
-            />
-          </div>
-          <div className="form-group">
-            <label>Amount (Optional)</label>
-            <div className="input-group">
-              <span className="input-prefix">$</span>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.amount || ''}
-                onChange={(e) => updateField('amount', e.target.value)}
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-          <div className="form-group">
-            <label>Note (Optional)</label>
-            <input
-              type="text"
-              value={formData.note || ''}
-              onChange={(e) => updateField('note', e.target.value)}
-              placeholder="Payment for..."
-            />
-          </div>
-        </div>
-      )
-    }
-
-    // Discord Form
-    if (qrType === 'discord') {
-      return (
-        <div className="form-fields">
-          <div className="form-group">
-            <label>Invite Code</label>
-            <input
-              type="text"
-              value={formData.handle || ''}
-              onChange={(e) => updateField('handle', e.target.value)}
-              placeholder="abc123 or discord.gg/abc123"
-            />
-          </div>
-          <div className="form-group checkbox-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={formData.permanent === 'true'}
-                onChange={(e) => updateField('permanent', e.target.checked ? 'true' : 'false')}
-              />
-              <span>Permanent invite link</span>
-            </label>
-          </div>
-        </div>
-      )
-    }
-
-    // Location Forms (Google Maps, Apple Maps)
-    if (qrType === 'googlemaps' || qrType === 'applemaps') {
-      return (
-        <div className="form-fields">
-          <div className="form-group">
-            <label>Location Name</label>
-            <input
-              type="text"
-              value={formData.name || ''}
-              onChange={(e) => updateField('name', e.target.value)}
-              placeholder="Business or place name"
-            />
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Latitude</label>
-              <input
-                type="number"
-                step="0.000001"
-                value={formData.lat || ''}
-                onChange={(e) => updateField('lat', e.target.value)}
-                placeholder="40.7128"
-              />
-            </div>
-            <div className="form-group">
-              <label>Longitude</label>
-              <input
-                type="number"
-                step="0.000001"
-                value={formData.lng || ''}
-                onChange={(e) => updateField('lng', e.target.value)}
-                placeholder="-74.0060"
-              />
-            </div>
-          </div>
-          <p className="form-hint">Or paste a Google Maps URL</p>
-          <div className="form-group">
-            <label>Maps URL</label>
-            <input
-              type="url"
-              value={formData.url || ''}
-              onChange={(e) => updateField('url', e.target.value)}
-              placeholder="https://maps.google.com/..."
-            />
-          </div>
-        </div>
-      )
-    }
-
-    // Calendly Form
-    if (qrType === 'calendly') {
-      return (
-        <div className="form-fields">
-          <div className="form-group">
-            <label>Calendly Username</label>
-            <input
-              type="text"
-              value={formData.handle || ''}
-              onChange={(e) => updateField('handle', e.target.value)}
-              placeholder="username"
-            />
-          </div>
-          <div className="form-group">
-            <label>Event Type (Optional)</label>
-            <input
-              type="text"
-              value={formData.event || ''}
-              onChange={(e) => updateField('event', e.target.value)}
-              placeholder="30min"
-            />
-          </div>
         </div>
       )
     }
@@ -1033,7 +748,6 @@ function App() {
               <UserMenu 
                 user={user}
                 onShowHistory={() => setShowHistoryModal(true)}
-                onShowAnalytics={() => setShowAnalyticsModal(true)}
                 onSignOut={() => setUser(null)}
               />
             ) : (
@@ -1088,35 +802,6 @@ function App() {
               </svg>
               Download ${PRICE.toFixed(2)}
             </button>
-            
-            <button 
-              className="batch-btn"
-              onClick={() => setShowBatchModal(true)}
-              style={{
-                marginTop: '8px',
-                width: '100%',
-                padding: '10px 16px',
-                borderRadius: '8px',
-                border: '1px solid #e5e7eb',
-                background: 'transparent',
-                color: '#6b7280',
-                cursor: 'pointer',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                transition: 'all 0.2s'
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="7"/>
-                <rect x="14" y="3" width="7" height="7"/>
-                <rect x="14" y="14" width="7" height="7"/>
-                <rect x="3" y="14" width="7" height="7"/>
-              </svg>
-              Batch Generate
-            </button>
           </div>
         </aside>
 
@@ -1168,38 +853,6 @@ function App() {
           {/* Style Options */}
           <div className="section">
             <h3>Style</h3>
-            
-            {/* Templates Button */}
-            <div className="option-group">
-              <button
-                className="templates-btn"
-                onClick={() => setShowTemplateSelector(true)}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '8px',
-                  border: '1px dashed #3b82f6',
-                  background: 'transparent',
-                  color: '#3b82f6',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="7" height="7"/>
-                  <rect x="14" y="3" width="7" height="7"/>
-                  <rect x="14" y="14" width="7" height="7"/>
-                  <rect x="3" y="14" width="7" height="7"/>
-                </svg>
-                Browse Templates
-              </button>
-            </div>
             
             {/* Presets */}
             <div className="option-group">
@@ -1310,83 +963,73 @@ function App() {
             <div className="option-group">
               <label>Logo</label>
               
-              {/* Platform Icon Toggle */}
-              {hasPlatformIcon(qrType) && !logo && (
-                <div className="platform-icon-toggle" style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={usePlatformIcon}
-                      onChange={(e) => {
-                        setUsePlatformIcon(e.target.checked)
-                        if (e.target.checked && useOfficialColor) {
-                          setIconColor(brandColors[qrType] || '#000000')
-                        }
-                      }}
-                      style={{ width: '16px', height: '16px' }}
-                    />
-                    <span style={{ fontSize: '14px' }}>Use {qrType.charAt(0).toUpperCase() + qrType.slice(1)} icon</span>
-                  </label>
-                  
-                  {usePlatformIcon && (
-                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                        <input
-                          type="radio"
-                          name="iconColorMode"
-                          checked={useOfficialColor}
-                          onChange={() => {
-                            setUseOfficialColor(true)
-                            setIconColor(brandColors[qrType] || '#000000')
-                          }}
-                          style={{ width: '14px', height: '14px' }}
-                        />
-                        <span style={{ fontSize: '13px' }}>Official color</span>
-                        <span 
-                          style={{ 
-                            width: '16px', 
-                            height: '16px', 
-                            borderRadius: '4px', 
-                            background: brandColors[qrType] || '#000000',
-                            display: 'inline-block',
-                            border: '1px solid #ddd'
-                          }} 
-                        />
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                        <input
-                          type="radio"
-                          name="iconColorMode"
-                          checked={!useOfficialColor}
-                          onChange={() => setUseOfficialColor(false)}
-                          style={{ width: '14px', height: '14px' }}
-                        />
-                        <span style={{ fontSize: '13px' }}>Custom:</span>
-                        <input
-                          type="color"
-                          value={iconColor}
-                          onChange={(e) => setIconColor(e.target.value)}
-                          disabled={useOfficialColor}
-                          style={{ width: '32px', height: '24px', border: '1px solid #ddd', borderRadius: '4px', cursor: useOfficialColor ? 'not-allowed' : 'pointer' }}
-                        />
-                      </label>
+              {/* Logo Type Toggle */}
+              <div className="logo-type-toggle">
+                <button
+                  className={`logo-type-btn ${!usePlatformIcon ? 'active' : ''}`}
+                  onClick={() => setUsePlatformIcon(false)}
+                >
+                  Custom Logo
+                </button>
+                <button
+                  className={`logo-type-btn ${usePlatformIcon ? 'active' : ''}`}
+                  onClick={() => setUsePlatformIcon(true)}
+                  disabled={!hasPlatformIcon(qrType)}
+                >
+                  Platform Icon
+                </button>
+              </div>
+
+              {!usePlatformIcon ? (
+                /* Custom Logo Upload */
+                logo ? (
+                  <div className="logo-preview-wrap">
+                    <div className="logo-preview">
+                      <img src={logo} alt="Logo" />
+                      <button className="remove-logo" onClick={() => { setLogo(null); setLogoInfo(null); }}>×</button>
                     </div>
-                  )}
-                </div>
-              )}
-              
-              {logo ? (
-                <div className="logo-preview-wrap">
-                  <div className="logo-preview">
-                    <img src={logo} alt="Logo" />
-                    <button className="remove-logo" onClick={() => { setLogo(null); setLogoInfo(null); }}>×</button>
+                    <div className="logo-controls">
+                      {logoInfo?.wasCompressed && (
+                        <p className="logo-info">
+                          Resized from {logoInfo.originalWidth}×{logoInfo.originalHeight} to {logoInfo.newWidth}×{logoInfo.newHeight}
+                        </p>
+                      )}
+                      <div className="logo-sliders">
+                        <label>
+                          <span>Size</span>
+                          <input type="range" min="0.15" max="0.5" step="0.05" value={logoSize} onChange={(e) => setLogoSize(parseFloat(e.target.value))} />
+                        </label>
+                        <label>
+                          <span>Margin</span>
+                          <input type="range" min="0" max="15" step="1" value={logoMargin} onChange={(e) => setLogoMargin(parseInt(e.target.value))} />
+                        </label>
+                      </div>
+                    </div>
                   </div>
-                  <div className="logo-controls">
-                    {logoInfo?.wasCompressed && (
-                      <p className="logo-info">
-                        Resized from {logoInfo.originalWidth}×{logoInfo.originalHeight} to {logoInfo.newWidth}×{logoInfo.newHeight}
-                      </p>
-                    )}
+                ) : (
+                  <label className="upload-btn">
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/>
+                      <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span>Upload Logo</span>
+                  </label>
+                )
+              ) : (
+                /* Platform Icon Section */
+                hasPlatformIcon(qrType) ? (
+                  <div className="platform-icon-section">
+                    {/* Icon Preview */}
+                    <div className="platform-icon-preview">
+                      <img
+                        src={getPlatformIcon(qrType, useOfficialColor ? (brandColors[qrType] || '#000000') : iconColor) || ''}
+                        alt={`${qrType} icon`}
+                      />
+                    </div>
+
+                    {/* Icon Controls */}
                     <div className="logo-sliders">
                       <label>
                         <span>Size</span>
@@ -1397,18 +1040,42 @@ function App() {
                         <input type="range" min="0" max="15" step="1" value={logoMargin} onChange={(e) => setLogoMargin(parseInt(e.target.value))} />
                       </label>
                     </div>
+
+                    {/* Official Brand Color Toggle */}
+                    <label className="toggle-label platform-toggle">
+                      <input
+                        type="checkbox"
+                        checked={useOfficialColor}
+                        onChange={(e) => setUseOfficialColor(e.target.checked)}
+                      />
+                      <span>Use official brand color</span>
+                    </label>
+
+                    {/* Custom Color Picker (when official color is OFF) */}
+                    {!useOfficialColor && (
+                      <div className="platform-color-picker">
+                        <span>Icon color</span>
+                        <div className="color-input-wrap">
+                          <input
+                            type="color"
+                            value={iconColor}
+                            onChange={(e) => setIconColor(e.target.value)}
+                          />
+                          <input
+                            type="text"
+                            value={iconColor}
+                            onChange={(e) => setIconColor(e.target.value)}
+                            className="color-hex"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ) : !usePlatformIcon && (
-                <label className="upload-btn">
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} />
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                  </svg>
-                  <span>Upload Logo</span>
-                </label>
+                ) : (
+                  <div className="no-icon-message">
+                    No platform icon available for {qrTypes.find(t => t.id === qrType)?.label || qrType}
+                  </div>
+                )
               )}
             </div>
 
@@ -1482,64 +1149,14 @@ function App() {
               <span className="price-note">One-time purchase</span>
             </div>
 
-            {/* Promo Code Input */}
-            <div className="promo-code-section">
-              <div className="promo-input-row">
-                <input
-                  type="text"
-                  placeholder="Promo code"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                  className="promo-input"
-                />
-                <button
-                  className="promo-apply-btn"
-                  onClick={async () => {
-                    if (promoCode.trim()) {
-                      setPromoApplied({ code: promoCode, type: 'percent', value: 20 })
-                      setPromoCode('')
-                    }
-                  }}
-                >
-                  Apply
-                </button>
-              </div>
-              {promoApplied && (
-                <div className="promo-applied">
-                  <span className="promo-badge">{promoApplied.code}</span>
-                  <span className="promo-discount">
-                    {promoApplied.type === 'percent' ? `${promoApplied.value}% off` : `$${promoApplied.value} off`}
-                  </span>
-                  <button className="promo-remove" onClick={() => setPromoApplied(null)}>×</button>
-                </div>
-              )}
-            </div>
-
             <button 
               className="pay-btn btn-primary"
-              onClick={async () => {
+              onClick={() => {
                 setShowConfirmation(false)
-                setPaymentLoading(true)
-                const checkoutUrl = await createCheckoutSession(1, user?.email, promoApplied?.code)
-                if (checkoutUrl) {
-                  // Store pending download data
-                  sessionStorage.setItem('pendingDownload', JSON.stringify({
-                    type: qrType,
-                    data: formData,
-                    styles: {
-                      fgColor, bgColor, dotsStyle, cornersStyle,
-                      gradientEnabled, gradientColor1, gradientColor2, gradientType,
-                      logo, logoSize, logoMargin, usePlatformIcon, iconColor
-                    }
-                  }))
-                  window.location.href = checkoutUrl
-                } else {
-                  setPaymentError('Failed to create checkout session. Please try again.')
-                  setPaymentLoading(false)
-                }
+                handleDownload('png')
               }}
             >
-              {paymentLoading ? 'Processing...' : 'Pay with Stripe'}
+              Continue to Payment
             </button>
 
             <button className="secondary-btn" onClick={() => setShowConfirmation(false)}>
@@ -1574,39 +1191,6 @@ function App() {
         <QRHistoryModal
           user={user}
           onClose={() => setShowHistoryModal(false)}
-        />
-      )}
-      
-      {showAnalyticsModal && user && (
-        <AnalyticsDashboard
-          isOpen={showAnalyticsModal}
-          onClose={() => setShowAnalyticsModal(false)}
-        />
-      )}
-      
-      {showBatchModal && (
-        <BatchGeneration
-          isOpen={showBatchModal}
-          onClose={() => setShowBatchModal(false)}
-        />
-      )}
-      
-      {showTemplateSelector && (
-        <TemplateSelector
-          isOpen={showTemplateSelector}
-          onClose={() => setShowTemplateSelector(false)}
-          onSelect={applyTemplate}
-          currentStyle={{
-            dotsStyle,
-            cornersStyle,
-            fgColor,
-            bgColor,
-            bgTransparent,
-            gradientEnabled,
-            gradientColor1,
-            gradientColor2,
-            gradientType,
-          }}
         />
       )}
     </div>
