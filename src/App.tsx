@@ -1005,6 +1005,7 @@ function App() {
                 <button
                   className={`logo-type-btn ${!usePlatformIcon ? 'active' : ''}`}
                   onClick={() => setUsePlatformIcon(false)}
+                  title="Upload your own custom logo"
                 >
                   Custom Logo
                 </button>
@@ -1012,6 +1013,7 @@ function App() {
                   className={`logo-type-btn ${usePlatformIcon ? 'active' : ''}`}
                   onClick={() => setUsePlatformIcon(true)}
                   disabled={!hasPlatformIcon(qrType)}
+                  title={hasPlatformIcon(qrType) ? 'Use platform brand icon' : `No platform icon for ${qrTypes.find(t => t.id === qrType)?.label}`}
                 >
                   Platform Icon
                 </button>

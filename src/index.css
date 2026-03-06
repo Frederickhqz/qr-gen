@@ -461,7 +461,7 @@ body {
   }
 }
 
-/* Category Tabs */
+/* Category Tabs - Sticky with shadow underneath */
 .category-tabs {
   display: flex;
   gap: 0.375rem;
@@ -473,6 +473,12 @@ body {
   z-index: 20;
   background: var(--bg);
   padding-top: 1rem;
+  /* Shadow to block content scrolling underneath */
+  box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.05),
+              0 1px 3px -1px rgba(0, 0, 0, 0.03);
+  /* Translucent backdrop blur for modern look */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 @media (min-width: 1024px) {
@@ -482,10 +488,16 @@ body {
     padding-top: 1.5rem;
     border-bottom: 1px solid var(--border);
     margin-bottom: 0;
+    flex-shrink: 0; /* Never shrink */
     position: sticky;
     top: 0;
     z-index: 20;
-    background: var(--bg);
+    background: rgba(250, 251, 252, 0.95); /* Slightly translucent */
+    /* Stronger shadow on desktop */
+    box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.08),
+                0 1px 3px -1px rgba(0, 0, 0, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }
 
