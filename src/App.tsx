@@ -313,6 +313,8 @@ function App() {
 
   // Handle download - save to DB first, then download
   const handleDownload = async (format: 'png' | 'svg' | 'jpeg') => {
+    if (paymentLoading || paymentSuccess) return // Prevent multiple clicks
+    
     // Store QR data for saving
     const qrDataToSave = {
       type: qrType,
@@ -336,6 +338,7 @@ function App() {
     
     setPaymentLoading(true)
     setPaymentError(null)
+    setPaymentSuccess(false)
     
     try {
       // If logged in, save to DB FIRST, then download
@@ -368,12 +371,18 @@ function App() {
         })
         
         // 3. NOW download
-        setPaymentLoading(false)
         await performDownload(format)
         
-        // Show success message
+        // 4. Show success state
+        setPaymentLoading(false)
         setPaymentSuccess(true)
-        setTimeout(() => setPaymentSuccess(false), 3000)
+        
+        // 5. Auto-close modal after download starts
+        setTimeout(() => {
+          setShowConfirmation(false)
+          setPaymentSuccess(false)
+        }, 1500)
+        
         return
       }
       
@@ -793,9 +802,9 @@ function App() {
         </div>
       </header>
 
-      {/* Main Layout - Desktop: Fixed header/preview, scrollable content */}
+      {/* Main Layout - Fixed header, fixed left panel, scrollable right content */}
       <main className="main">
-        {/* Fixed Left Panel - Preview */}
+        {/* Fixed Left Panel - Preview & Download (unscrollable) */}
         <aside className="preview-panel">
           <div className="preview-card">
             <div ref={qrRef} className="qr-container" />
@@ -836,7 +845,7 @@ function App() {
         {/* Scrollable Content Area */}
         <div className="content-wrapper">
           <div className="content-scrollable">
-            {/* Category Tabs */}
+            {/* Category Tabs (fixed at top of scroll area) */}
             <div className="category-tabs">
               {categories.map(cat => (
                 <button
@@ -850,7 +859,7 @@ function App() {
               ))}
             </div>
 
-            {/* QR Type Selector */}
+            {/* QR Type Selector (scrollable) */}
             <div className="section">
               <div className="type-grid">
                 {filteredTypes.map((type) => {
@@ -872,7 +881,7 @@ function App() {
               </div>
             </div>
 
-          {/* Data Form */}
+          {/* Data Form (scrollable) */}
           <div className="section">
             <h3>Details</h3>
             {renderForm()}
@@ -1142,22 +1151,63 @@ function App() {
             
             <div className="confirmation-header">
               <h3>Ready to download?</h3>
-              <p>Your QR will be saved to your account</p>
+              <p>Preview with your selected style</p>
             </div>
 
-            {/* Preview with overlay to prevent screenshot - shows generic QR pattern instead */}
-            <div className="confirmation-qr-preview">
-              <div className="qr-preview-blur">
-                <div className="blur-placeholder">
-                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="3" y="3" width="7" height="7" rx="1"/>
-                    <rect x="14" y="3" width="7" height="7" rx="1"/>
-                    <rect x="3" y="14" width="7" height="7" rx="1"/>
-                    <rect x="14" y="14" width="7" height="7" rx="1"/>
-                  </svg>
-                  <span>QR Preview</span>
-                </div>
-              </div>
+            {/* Preview QR with placeholder data but user's selected style */}
+            <div className="confirmation-qr">
+              <div ref={(el) => {
+                if (el) {
+                  el.innerHTML = ''
+                  ;(async () => {
+                    try {
+                      // Generate QR with placeholder data but user's styles
+                      const mod = await import('qr-code-styling')
+                      const QRCodeStyling = (mod as any).default || (mod as any)
+                      
+                      const placeholderQR = new QRCodeStyling({
+                        width: 280,
+                        height: 280,
+                        data: generatePlaceholderData(qrType),
+                        image: logo || (usePlatformIcon ? getPlatformIcon(qrType, useOfficialColor ? (brandColors[qrType] || '#000000') : iconColor) : null) || undefined,
+                        dotsOptions: {
+                          color: fgColor,
+                          type: dotsStyle as any,
+                          ...(gradientEnabled && {
+                            gradient: {
+                              type: gradientType,
+                              rotation: 0,
+                              colorStops: [
+                                { offset: 0, color: gradientColor1 },
+                                { offset: 1, color: gradientColor2 }
+                              ]
+                            }
+                          })
+                        },
+                        backgroundOptions: {
+                          color: bgTransparent ? 'transparent' : bgColor,
+                        },
+                        cornersSquareOptions: {
+                          type: cornersStyle as any,
+                          color: fgColor,
+                        },
+                        cornersDotOptions: {
+                          type: cornersStyle as any,
+                          color: fgColor,
+                        },
+                        imageOptions: {
+                          crossOrigin: 'anonymous',
+                          margin: logoMargin,
+                          imageSize: logoSize,
+                        },
+                      })
+                      await placeholderQR.append(el)
+                    } catch (e) {
+                      console.error('Failed to render confirmation QR:', e)
+                    }
+                  })()
+                }
+              }} />
             </div>
 
             <div className="confirmation-details">
@@ -1186,12 +1236,19 @@ function App() {
                 setShowConfirmation(false)
                 handleDownload('png')
               }}
-              disabled={paymentLoading}
+              disabled={paymentLoading || paymentSuccess}
             >
               {paymentLoading ? (
                 <>
                   <span className="spinner-small"></span>
                   Processing...
+                </>
+              ) : paymentSuccess ? (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Downloading...
                 </>
               ) : (
                 <>
