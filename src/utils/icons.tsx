@@ -125,6 +125,46 @@ const CashAppIcon = ({ className, size }: { className?: string; size?: number })
   </svg>
 )
 
+// Google Maps icon (official from Simple Icons)
+const GoogleMapsIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M19.527 4.799c1.212 2.608.937 5.678-.405 8.173c-1.101 2.047-2.744 3.74-4.098 5.614c-.619.858-1.244 1.75-1.669 2.727c-.141.325-.263.658-.383.992c-.121.333-.224.673-.34 1.008c-.109.314-.236.684-.627.687h-.007c-.466-.001-.579-.53-.695-.887c-.284-.874-.581-1.713-1.019-2.525c-.51-.944-1.145-1.817-1.79-2.671zM8.545 7.705l-3.959 4.707c.724 1.54 1.821 2.863 2.871 4.18q.371.465.737.936l4.984-5.925l-.029.01c-1.741.601-3.691-.291-4.392-1.987a3.4 3.4 0 0 1-.209-.716c-.063-.437-.077-.761-.004-1.198zM5.492 3.149l-.003.004c-1.947 2.466-2.281 5.88-1.117 8.77l4.785-5.689l-.058-.05zM14.661.436l-3.838 4.563l.027-.01c1.6-.551 3.403.15 4.22 1.626c.176.319.323.683.377 1.045c.068.446.085.773.012 1.22l-.003.016l3.836-4.561A8.38 8.38 0 0 0 14.67.439zM9.466 5.868L14.162.285l-.047-.012A8.3 8.3 0 0 0 11.986 0a8.44 8.44 0 0 0-6.169 2.766l-.016.018z"/>
+  </svg>
+)
+
+// Apple Maps icon (pin with arrow - brand-appropriate)
+const AppleMapsIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+    <path d="M14.5 15l3 5-2.5-1.5-1.5 2.5-1-3z"/>
+  </svg>
+)
+
+// Google Play icon (official from Simple Icons)
+const GooglePlayIcon = ({ className, size }: { className?: string; size?: number }) => (
+  <svg 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+  >
+    <path d="m22.018 13.298l-3.919 2.218l-3.515-3.493l3.543-3.521l3.891 2.202a1.49 1.49 0 0 1 0 2.594M1.337.924a1.5 1.5 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087zm12.207 10.065l3.258-3.238L3.45.195a1.47 1.47 0 0 0-.946-.179zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54z"/>
+  </svg>
+)
+
 // App Store icon (Apple)
 const AppStoreIcon = ({ className, size }: { className?: string; size?: number }) => (
   <svg 
@@ -354,10 +394,10 @@ export const qrTypes: QRTypeOption[] = [
   
   // Platform
   { id: 'appstore', label: 'App Store', icon: AppStoreIcon, category: 'platform', placeholder: 'App URL', fields: ['url'] },
-  { id: 'googleplay', label: 'Play Store', icon: Play, category: 'platform', placeholder: 'App URL', fields: ['url'] },
+  { id: 'googleplay', label: 'Play Store', icon: GooglePlayIcon, category: 'platform', placeholder: 'App URL', fields: ['url'] },
   { id: 'amazon', label: 'Amazon', icon: AmazonIcon, category: 'platform', placeholder: 'Product URL', fields: ['url'] },
-  { id: 'googlemaps', label: 'Google Maps', icon: Map, category: 'platform', placeholder: 'Location', fields: ['location'] },
-  { id: 'applemaps', label: 'Apple Maps', icon: MapPin, category: 'platform', placeholder: 'Location', fields: ['location'] },
+  { id: 'googlemaps', label: 'Google Maps', icon: GoogleMapsIcon, category: 'platform', placeholder: 'Location', fields: ['location'] },
+  { id: 'applemaps', label: 'Apple Maps', icon: AppleMapsIcon, category: 'platform', placeholder: 'Location', fields: ['location'] },
   { id: 'spotify', label: 'Spotify', icon: SpotifyIcon, category: 'platform', placeholder: 'Track/Playlist URL', fields: ['url'] },
   { id: 'website', label: 'Website', icon: Globe, category: 'platform', placeholder: 'https://...', fields: ['url'] },
   { id: 'calendly', label: 'Calendly', icon: CalendlyIcon, category: 'platform', placeholder: 'calendly.com/username', fields: ['handle'] },
