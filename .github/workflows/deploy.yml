@@ -2,10 +2,9 @@ name: Deploy to Hostinger
 
 on:
   workflow_dispatch:
-  # Disabled auto-deploy - use manual deploy script instead
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - master
 
 jobs:
   build-and-deploy:
@@ -41,10 +40,14 @@ jobs:
           lftp ftp://"$FTP_USER":"$FTP_PASS"@"$FTP_SERVER" << 'EOF'
           set ftp:ssl-allow no
           set ftp:passive-mode on
+          set net:timeout 30
+          set net:max-retries 3
+          set net:reconnect-interval-base 5
+          set mirror:use-pget-n 4
           cd /public_html
           mkdir -f assets
           lcd dist
-          mirror -R --delete
+          mirror -R --delete --parallel=4
           bye
           EOF
-        timeout-minutes: 10
+        timeout-minutes: 20
