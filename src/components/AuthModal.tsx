@@ -1,20 +1,13 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { QRStyles } from '../lib/supabase'
 
 interface AuthModalProps {
-  qrData?: {
-    type: string
-    data: Record<string, string>
-    styles: QRStyles
-  }
   onClose: () => void
   onSuccess: () => void
-  onDownload?: () => void
   mode?: 'save' | 'login'
 }
 
-export function AuthModal({ qrData, onClose, onSuccess, onDownload, mode: initialMode = 'save' }: AuthModalProps) {
+export function AuthModal({ onClose, onSuccess, mode: initialMode = 'login' }: AuthModalProps) {
   const [mode, setMode] = useState<'save' | 'login'>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -66,39 +59,18 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload, mode: initia
         marketing_consent: marketingConsent
       }).eq('id', authData.user.id)
 
-      // 4. Save QR code to their account (if exists)
-      if (qrData) {
-        const { error: qrError } = await supabase
-          .from('qr_codes')
-          .insert({
-            user_id: authData.user.id,
-            type: qrData.type,
-            data: qrData.data,
-            styles: qrData.styles
-          })
-
-        if (qrError) {
-          console.error('QR save error:', qrError)
-        }
-      }
-
-      // 5. Track event
+      // 4. Track event
       await supabase.from('events').insert({
         user_id: authData.user.id,
         event_type: 'user_signed_up',
         event_data: { 
-          qr_type: qrData?.type,
           marketing_consent: marketingConsent
         }
       })
 
       setStatus('success')
       
-      // Trigger download (if exists) and close after short delay
       setTimeout(() => {
-        if (onDownload && qrData) {
-          onDownload()
-        }
         onSuccess()
       }, 1500)
       
@@ -132,35 +104,16 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload, mode: initia
         return
       }
 
-      // Save QR to their account (if exists)
-      if (qrData) {
-        const { error: qrError } = await supabase
-          .from('qr_codes')
-          .insert({
-            user_id: authData.user.id,
-            type: qrData.type,
-            data: qrData.data,
-            styles: qrData.styles
-          })
-
-        if (qrError) {
-          console.error('QR save error:', qrError)
-        }
-      }
-
       // Track event
       await supabase.from('events').insert({
         user_id: authData.user.id,
         event_type: 'user_logged_in',
-        event_data: { qr_type: qrData?.type }
+        event_data: {}
       })
 
       setStatus('success')
       
       setTimeout(() => {
-        if (onDownload && qrData) {
-          onDownload()
-        }
         onSuccess()
       }, 1000)
       
@@ -171,13 +124,6 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload, mode: initia
     }
   }
 
-  const handleJustDownload = () => {
-    if (onDownload) {
-      onDownload()
-    }
-    onClose()
-  }
-
   if (status === 'success') {
     return (
       <div className="modal-overlay" onClick={onSuccess}>
@@ -185,7 +131,7 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload, mode: initia
           <div className="auth-success">
             <div className="success-icon">✅</div>
             <h3>Welcome{mode === 'save' ? '!' : ' back!'}</h3>
-            <p>{qrData ? 'Your QR code is being downloaded...' : 'You\'re now signed in.'}</p>
+            <p>You're now signed in.</p>
           </div>
         </div>
       </div>
@@ -294,18 +240,6 @@ export function AuthModal({ qrData, onClose, onSuccess, onDownload, mode: initia
             )}
           </button>
         </form>
-
-        {qrData && (
-          <>
-            <div className="auth-divider">
-              <span>or</span>
-            </div>
-
-            <button className="auth-skip-btn" onClick={handleJustDownload}>
-              Just download, don't save
-            </button>
-          </>
-        )}
       </div>
     </div>
   )
