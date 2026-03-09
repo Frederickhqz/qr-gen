@@ -350,19 +350,18 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 
 **Category:** Platform  
 **Usage:** Redfin agent QR  
-**Status:** ⚠️ Brand-appropriate (matching official house shape)
+**Status:** ✅ Official (from brand assets)
 
 ```svg
-<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M12 2L2 9v12h20V9L12 2zm0 2.4l7 5.6v9H5v-9l7-5.6z"/>
-  <path d="M9.5 11v6.5h5V11h-5z"/>
+<svg viewBox="0 0 23.5 23" fill="currentColor">
+  <path d="M23.313 12.928c0 4.26-2.274 7.985-5.673 10.025a.323.323 0 01-.4-.058l-3.913-4.172a.324.324 0 01.13-.528 5.568 5.568 0 003.755-5.267 5.561 5.561 0 00-5.651-5.566C8.515 7.412 6.1 9.967 6.1 13.019v9.618a.325.325 0 01-.495.275A11.673 11.673 0 010 13.077C-.08 6.665 5.09 1.339 11.49 1.25c6.513-.09 11.822 5.173 11.822 11.678z"/>
 </svg>
 ```
 
 **Notes:**
-- House shape with door opening (matching official Redfin logo)
+- Official icon extracted from Redfin brand assets
 - Simple Icons doesn't have Redfin
-- Custom design based on official branding
+- Distinctive house/windmill shape
 
 ---
 
