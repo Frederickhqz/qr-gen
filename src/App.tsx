@@ -34,7 +34,7 @@ declare global {
   }
 }
 
-const PRICE = 1.99
+const PRICE = 0 // Free!
 const API_BASE = 'https://n8n.srv796810.hstgr.cloud'
 
 // Popular cryptocurrencies for the dropdown
@@ -100,12 +100,9 @@ function App() {
   
   // UI state
   const [activeCategory, setActiveCategory] = useState<string>('core')
-  const [showPayment, setShowPayment] = useState(false)
-  const [showConfirmation, setShowConfirmation] = useState(false)
-  const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
-  const [downloadComplete, setDownloadComplete] = useState(false)
   
   // Crypto state
   const [cryptoSearch, setCryptoSearch] = useState('')
@@ -113,9 +110,7 @@ function App() {
 
   // Auth modal state
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const [authModalMode, setAuthModalMode] = useState<'save' | 'login'>('save')
-  const [pendingDownloadQR, setPendingDownloadQR] = useState<{ type: string; data: Record<string, string>; styles: any } | null>(null)
-  const [pendingDownloadFormat, setPendingDownloadFormat] = useState<'png' | 'svg' | 'jpeg'>('png')
+  const [authModalMode, setAuthModalMode] = useState<'save' | 'login'>('login')
   const [user, setUser] = useState<any>(null)
   
   // History modal state
@@ -363,89 +358,63 @@ function App() {
     }
   }
 
-  // Handle download - save to DB first, then download
+  // Handle download - free QR codes!
   const handleDownload = async (format: 'png' | 'svg' | 'jpeg') => {
-    if (paymentLoading || paymentSuccess) return // Prevent multiple clicks
-    
-    // Store QR data for saving
-    const qrDataToSave = {
-      type: qrType,
-      data: { ...formData },
-      styles: {
-        fgColor,
-        bgColor,
-        dotsStyle,
-        cornersStyle,
-        gradientEnabled,
-        gradientColor1,
-        gradientColor2,
-        gradientType,
-        logo: logo || undefined,
-        logoSize,
-        logoMargin,
-        usePlatformIcon,
-        iconColor
-      }
-    }
+    if (paymentLoading) return // Prevent multiple clicks
     
     setPaymentLoading(true)
     setPaymentError(null)
-    setPaymentSuccess(false)
     
     try {
-      // If logged in, save to DB FIRST, then download
+      // If logged in, save to DB
       if (user) {
-        // 1. Save to Supabase BEFORE download
         const { data: savedQR, error: saveError } = await supabase
           .from('qr_codes')
           .insert({
             user_id: user.id,
             type: qrType,
-            data: qrDataToSave.data,
-            styles: qrDataToSave.styles
+            data: { ...formData },
+            styles: {
+              fgColor,
+              bgColor,
+              dotsStyle,
+              cornersStyle,
+              gradientEnabled,
+              gradientColor1,
+              gradientColor2,
+              gradientType,
+              logo: logo || undefined,
+              logoSize,
+              logoMargin,
+              usePlatformIcon,
+              iconColor
+            }
           })
           .select()
           .single()
         
         if (saveError) {
-          throw new Error('Failed to save QR code: ' + saveError.message)
+          console.error('Failed to save QR code:', saveError)
+          // Continue with download even if save fails
+        } else {
+          // Track event
+          await supabase.from('events').insert({
+            user_id: user.id,
+            event_type: 'qr_downloaded',
+            event_data: { format, qr_type: qrType, qr_id: savedQR.id }
+          })
         }
-        
-        // 2. Track event
-        await supabase.from('events').insert({
-          user_id: user.id,
-          event_type: 'qr_downloaded',
-          event_data: { 
-            format, 
-            qr_type: qrType,
-            qr_id: savedQR.id
-          }
-        })
-        
-        // 3. NOW download
-        await performDownload(format)
-        
-        // 4. Show success state
-        setPaymentLoading(false)
-        setPaymentSuccess(true)
-        
-        // 5. Auto-close modal after download starts
-        setTimeout(() => {
-          setShowConfirmation(false)
-          setPaymentSuccess(false)
-        }, 1500)
-        
-        return
       }
       
-      // Not logged in - show auth modal first
-      setPendingDownloadQR(qrDataToSave)
-      setPendingDownloadFormat(format)
-      setShowAuthModal(true)
+      // Download the QR
+      await performDownload(format)
+      
+      setPaymentSuccess(true)
+      setTimeout(() => setPaymentSuccess(false), 2000)
     } catch (error: any) {
+      setPaymentError(error.message || 'Download failed')
+    } finally {
       setPaymentLoading(false)
-      setPaymentError(error.message || 'Failed to process download')
-      console.error('Download error:', error)
     }
   }
 
@@ -460,12 +429,6 @@ function App() {
     
     // Parse URL params
     const urlParams = new URLSearchParams(window.location.search)
-    
-    // Check for payment success from redirect
-    if (urlParams.get('payment') === 'success') {
-      setPaymentSuccess(true)
-      setShowPayment(true)
-    }
     
     // Check for QR type in URL (e.g., ?type=whatsapp)
     const typeParam = urlParams.get('type') as QRType
@@ -878,18 +841,18 @@ function App() {
           <div className="preview-content">
             <div className="preview-info">
               <h3>Customize your QR</h3>
-              <p className="preview-subtitle">Adjust style options below. Pay to download.</p>
+              <p className="preview-subtitle">Adjust style options below, then download.</p>
             </div>
 
             <p className="preview-tagline">No subscription. No strings attached. Your QR works forever.</p>
 
-            <button className="download-btn btn-primary" onClick={() => setShowConfirmation(true)}>
+            <button className="download-btn btn-primary" onClick={() => handleDownload('png')}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
                 <line x1="12" y1="15" x2="12" y2="3"/>
               </svg>
-              Download ${PRICE.toFixed(2)}
+              Download Free
             </button>
           </div>
         </aside>
@@ -1197,160 +1160,20 @@ function App() {
         </div>
       </main>
 
-      {/* Confirmation Modal */}
-      {showConfirmation && (
-        <div className="modal-overlay" onClick={() => setShowConfirmation(false)}>
-          <div className="modal confirmation-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowConfirmation(false)}>×</button>
-            
-            <div className="confirmation-header">
-              <h3>Ready to download?</h3>
-              <p>Preview with your selected style</p>
-            </div>
-
-            {/* Preview QR with placeholder data but user's selected style */}
-            <div className="confirmation-qr">
-              <div ref={(el) => {
-                if (el) {
-                  el.innerHTML = ''
-                  ;(async () => {
-                    try {
-                      // Generate QR with placeholder data but user's styles
-                      const mod = await import('qr-code-styling')
-                      const QRCodeStyling = (mod as any).default || (mod as any)
-                      
-                      const placeholderQR = new QRCodeStyling({
-                        width: 280,
-                        height: 280,
-                        data: generatePlaceholderData(qrType),
-                        image: logo || (usePlatformIcon ? getPlatformIcon(qrType, useOfficialColor ? (brandColors[qrType] || '#000000') : iconColor) : null) || undefined,
-                        dotsOptions: {
-                          color: fgColor,
-                          type: dotsStyle as any,
-                          ...(gradientEnabled && {
-                            gradient: {
-                              type: gradientType,
-                              rotation: 0,
-                              colorStops: [
-                                { offset: 0, color: gradientColor1 },
-                                { offset: 1, color: gradientColor2 }
-                              ]
-                            }
-                          })
-                        },
-                        backgroundOptions: {
-                          color: bgTransparent ? 'transparent' : bgColor,
-                        },
-                        cornersSquareOptions: {
-                          type: cornersStyle as any,
-                          color: fgColor,
-                        },
-                        cornersDotOptions: {
-                          type: cornersStyle as any,
-                          color: fgColor,
-                        },
-                        imageOptions: {
-                          crossOrigin: 'anonymous',
-                          margin: logoMargin,
-                          imageSize: logoSize,
-                        },
-                      })
-                      await placeholderQR.append(el)
-                    } catch (e) {
-                      console.error('Failed to render confirmation QR:', e)
-                    }
-                  })()
-                }
-              }} />
-            </div>
-
-            <div className="confirmation-details">
-              <div className="detail-row">
-                <span>Type</span>
-                <strong>{qrTypes.find(t => t.id === qrType)?.label}</strong>
-              </div>
-              <div className="detail-row">
-                <span>Size</span>
-                <strong>{qrSize}×{qrSize}px</strong>
-              </div>
-              <div className="detail-row">
-                <span>Format</span>
-                <strong>PNG (High Quality)</strong>
-              </div>
-            </div>
-
-            <div className="confirmation-price">
-              <span className="price">${PRICE.toFixed(2)}</span>
-              <span className="price-note">One-time purchase • Lifetime access</span>
-            </div>
-
-            <button 
-              className="pay-btn btn-primary"
-              onClick={() => {
-                setShowConfirmation(false)
-                handleDownload('png')
-              }}
-              disabled={paymentLoading || paymentSuccess}
-            >
-              {paymentLoading ? (
-                <>
-                  <span className="spinner-small"></span>
-                  Processing...
-                </>
-              ) : paymentSuccess ? (
-                <>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  Downloading...
-                </>
-              ) : (
-                <>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                    <line x1="1" y1="10" x2="23" y2="10"/>
-                  </svg>
-                  Pay ${PRICE.toFixed(2)} & Download
-                </>
-              )}
-            </button>
-
-            {paymentError && (
-              <div className="payment-error">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                <span>{paymentError}</span>
-              </div>
-            )}
-
-            <button className="secondary-btn" onClick={() => setShowConfirmation(false)} disabled={paymentLoading}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Auth Modal */}
       {showAuthModal && (
         <AuthModal
-          qrData={pendingDownloadQR || undefined}
           mode={authModalMode}
           onClose={() => {
             setShowAuthModal(false)
-            setPendingDownloadQR(null)
           }}
           onSuccess={() => {
             setShowAuthModal(false)
-            setPendingDownloadQR(null)
             // Refresh user session
             supabase.auth.getSession().then(({ data: { session } }) => {
               setUser(session?.user || null)
             })
           }}
-          onDownload={pendingDownloadQR ? () => performDownload(pendingDownloadFormat) : undefined}
         />
       )}
 

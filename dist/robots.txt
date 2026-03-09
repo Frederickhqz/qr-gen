@@ -2,5 +2,13 @@
 User-agent: *
 Allow: /
 
+# Allow all major search engines
+User-agent: Googlebot
+Allow: /
+User-agent: Bingbot
+Allow: /
+User-agent: DuckDuckBot
+Allow: /
+
 # Sitemaps
 Sitemap: https://qrgen.studio/sitemap.xml
