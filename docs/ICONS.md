@@ -20,9 +20,9 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 | 10 | Spotify | Spotify | Platform | ✅ Official |
 | 11 | Calendly | Calendly | Platform | ✅ Official (Simple Icons) |
 | 12 | Zillow | Zillow | Platform | ✅ Official (Simple Icons) |
-| 13 | Redfin | Redfin | Platform | ⚠️ Generic (Simple Icons has no icon) |
-| 14 | Realtor.com | Realtor | Platform | ⚠️ Generic (Simple Icons has no icon) |
-| 15 | Apartments.com | Apartments | Platform | ⚠️ Generic (Simple Icons has no icon) |
+| 13 | Redfin | Redfin | Platform | ⚠️ Brand-appropriate |
+| 14 | Realtor.com | Realtor | Platform | ⚠️ Brand-appropriate |
+| 15 | Apartments.com | Apartments | Platform | ⚠️ Brand-appropriate |
 | 16 | Google Reviews | GoogleReviews | Platform | ✅ Official (Google G logo) |
 | 17 | Pinterest | Pinterest | Social | ✅ Official |
 | 18 | Reddit | Reddit | Social | ✅ Official |
@@ -254,17 +254,18 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 
 **Category:** Platform  
 **Usage:** Redfin agent QR  
-**Status:** ✅ Official
+**Status:** ⚠️ Brand-appropriate (not official)
 
 ```svg
 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+  <path d="M12 2L2 10.5V22h8v-6h4v6h8V10.5L12 2zm6 16h-2v-4H8v4H6v-6.5l6-5 6 5V18z"/>
 </svg>
 ```
 
 **Notes:**
-- **ISSUE:** This is a generic checkmark circle, not Redfin branding
-- **ACTION NEEDED:** Replace with Redfin logo (redfin.com/brand)
+- Brand-appropriate house icon with roof arrow design
+- Simple Icons doesn't have Redfin
+- Custom design based on real estate theme
 
 ---
 
@@ -272,18 +273,19 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 
 **Category:** Platform  
 **Usage:** Realtor.com profile QR  
-**Status:** ✅ Official
+**Status:** ⚠️ Brand-appropriate (not official)
 
 ```svg
 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm5 15h-2v-4H9v4H7v-7.17l5-5 5 5V18z"/>
+  <path d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3zm5 15h-2v-5H9v5H7v-6.5l5-4.5 5 4.5V18z"/>
+  <circle cx="12" cy="13" r="1.5"/>
 </svg>
 ```
 
 **Notes:**
-- Generic house icon
-- **ISSUE:** Not the official Realtor.com logo
-- **ACTION NEEDED:** Replace with official branding
+- Brand-appropriate house with keyhole (key = real estate access)
+- Simple Icons doesn't have Realtor.com
+- Custom design based on real estate theme
 
 ---
 
@@ -291,18 +293,18 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 
 **Category:** Platform  
 **Usage:** Apartments.com listing QR  
-**Status:** ✅ Official
+**Status:** ⚠️ Brand-appropriate (not official)
 
 ```svg
 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/>
+  <path d="M17 3H7c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-2h2v2zm0-4h-2V9h2v4zm4 4h-2v-2h2v2zm0-4h-2V9h2v4zM8 7h8v2H8V7z"/>
 </svg>
 ```
 
 **Notes:**
-- Generic apartment building icon
-- **ISSUE:** Not the official Apartments.com logo
-- **ACTION NEEDED:** Replace with official branding
+- Brand-appropriate building with door/window pattern
+- Simple Icons doesn't have Apartments.com
+- Custom design based on apartment building theme
 
 ---
 
@@ -310,18 +312,17 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 
 **Category:** Platform  
 **Usage:** Google Business review QR  
-**Status:** ✅ Official
+**Status:** ✅ Official (Google G logo)
 
 ```svg
 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
 </svg>
 ```
 
 **Notes:**
-- Generic globe icon
-- **ISSUE:** Not a Google Reviews icon
-- **ACTION NEEDED:** Replace with Google G or star rating icon
+- ✅ Official Google G logo
+- Recognizable for Google services
 
 ---
 
@@ -445,13 +446,13 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 | Zillow | ❌ Generic house | ✅ Official logo |
 | Google Reviews | ❌ Generic globe | ✅ Google G logo |
 
-### ⚠️ No Official Icon Available
+### ⚠️ Brand-Appropriate (Simple Icons doesn't have these)
 
-| Icon | Current | Notes |
-|------|---------|-------|
-| Redfin | Generic checkmark | Simple Icons has no Redfin icon |
-| Realtor.com | Generic house | Simple Icons has no Realtor icon |
-| Apartments.com | Generic building | Simple Icons has no Apartments icon |
+| Icon | Design | Notes |
+|------|--------|-------|
+| Redfin | House with roof arrow | Real estate search theme |
+| Realtor.com | House with keyhole | Key = real estate access |
+| Apartments.com | Building with windows | Apartment building theme |
 
 ### 🟢 Low Priority (Works, minor concerns)
 
