@@ -164,7 +164,7 @@ const ZillowIcon = ({ className, size }: { className?: string; size?: number }) 
   </svg>
 )
 
-// Redfin icon
+// Redfin icon (house with arrow - brand-appropriate)
 const RedfinIcon = ({ className, size }: { className?: string; size?: number }) => (
   <svg 
     width={size || 24} 
@@ -173,11 +173,11 @@ const RedfinIcon = ({ className, size }: { className?: string; size?: number }) 
     fill="currentColor" 
     className={className}
   >
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+    <path d="M12 2L2 10.5V22h8v-6h4v6h8V10.5L12 2zm6 16h-2v-4H8v4H6v-6.5l6-5 6 5V18z"/>
   </svg>
 )
 
-// Realtor.com icon
+// Realtor.com icon (house with keyhole - brand-appropriate)
 const RealtorIcon = ({ className, size }: { className?: string; size?: number }) => (
   <svg 
     width={size || 24} 
@@ -186,11 +186,12 @@ const RealtorIcon = ({ className, size }: { className?: string; size?: number })
     fill="currentColor" 
     className={className}
   >
-    <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm5 15h-2v-4H9v4H7v-7.17l5-5 5 5V18z"/>
+    <path d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3zm5 15h-2v-5H9v5H7v-6.5l5-4.5 5 4.5V18z"/>
+    <circle cx="12" cy="13" r="1.5"/>
   </svg>
 )
 
-// Apartments.com icon
+// Apartments.com icon (building with A - brand-appropriate)
 const ApartmentsIcon = ({ className, size }: { className?: string; size?: number }) => (
   <svg 
     width={size || 24} 
@@ -199,7 +200,7 @@ const ApartmentsIcon = ({ className, size }: { className?: string; size?: number
     fill="currentColor" 
     className={className}
   >
-    <path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/>
+    <path d="M17 3H7c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-2h2v2zm0-4h-2V9h2v4zm4 4h-2v-2h2v2zm0-4h-2V9h2v4zM8 7h8v2H8V7z"/>
   </svg>
 )
 
