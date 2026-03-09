@@ -123,6 +123,10 @@ function App() {
 
   // Preview size based on screen width
   const [previewSize, setPreviewSize] = useState(240)
+  
+  // Track current QR instance for cleanup
+  const qrInstanceRef = useRef<any>(null)
+  const updateIdRef = useRef(0)
 
   useEffect(() => {
     const updateSize = () => {
@@ -154,13 +158,34 @@ function App() {
   // Generate QR code (fixed size for preview)
   const updateQR = useCallback(async () => {
     if (!qrRef.current) return
+    
+    // Increment update ID to track this specific update
+    const currentUpdateId = ++updateIdRef.current
+    
     setIsInitializingQR(true)
+    
+    // Clean up previous QR instance properly
+    if (qrInstanceRef.current) {
+      try {
+        // qr-code-styling doesn't have a destroy method, but we clear the DOM
+        qrInstanceRef.current = null
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+    }
+    
+    // Clear container before async work
     qrRef.current.innerHTML = ''
 
     try {
       // Dynamic import to ensure correct constructor and avoid SSR issues
       const mod = await import('qr-code-styling')
       const QRCodeStyling = (mod as any).default || (mod as any)
+      
+      // Check if this update is still the current one (not superseded)
+      if (currentUpdateId !== updateIdRef.current) {
+        return // Another update has started, abort this one
+      }
 
       // Use placeholder data for preview
       const data = generatePlaceholderData(qrType)
@@ -207,7 +232,26 @@ function App() {
       }
 
       const newQr = new QRCodeStyling(options)
+      
+      // Check again before appending
+      if (currentUpdateId !== updateIdRef.current || !qrRef.current) {
+        return // Another update started or component unmounted
+      }
+      
+      // Clear again right before append (in case another update cleared)
+      qrRef.current.innerHTML = ''
       await newQr.append(qrRef.current)
+      
+      // Final check
+      if (currentUpdateId !== updateIdRef.current) {
+        // Another update started, clean up this one
+        if (qrRef.current) {
+          qrRef.current.innerHTML = ''
+        }
+        return
+      }
+      
+      qrInstanceRef.current = newQr
       setQr(newQr)
       setQrInitError(null)
     } catch (err) {
@@ -221,6 +265,14 @@ function App() {
 
   useEffect(() => {
     updateQR()
+    
+    // Cleanup: clear QR container on unmount
+    return () => {
+      if (qrRef.current) {
+        qrRef.current.innerHTML = ''
+      }
+      qrInstanceRef.current = null
+    }
   }, [updateQR])
 
   // Handle logo upload with compression
