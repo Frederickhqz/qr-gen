@@ -35,7 +35,7 @@ declare global {
 }
 
 const PRICE = 1.99
-const API_BASE = 'https://n8n.srv796810.hstgr.cloud'
+const API_BASE = import.meta.env.VITE_N8N_URL || 'https://n8n.srv796810.hstgr.cloud'
 
 // Popular cryptocurrencies for the dropdown
 const popularCryptos = [
