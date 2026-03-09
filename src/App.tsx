@@ -34,7 +34,7 @@ declare global {
   }
 }
 
-const PRICE = 0 // Free!
+const PRICE = 1.99
 const API_BASE = 'https://n8n.srv796810.hstgr.cloud'
 
 // Popular cryptocurrencies for the dropdown
@@ -100,8 +100,8 @@ function App() {
   
   // UI state
   const [activeCategory, setActiveCategory] = useState<string>('core')
+  const [showConfirmation, setShowConfirmation] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
-  const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   
   // Crypto state
@@ -333,8 +333,58 @@ function App() {
     })
   }
 
-  // Actually perform the download
-  const performDownload = async (format: 'png' | 'svg' | 'jpeg') => {
+  // Handle download - initiate Stripe checkout
+  const handleDownload = async () => {
+    if (paymentLoading) return // Prevent multiple clicks
+    
+    setPaymentLoading(true)
+    setPaymentError(null)
+    
+    try {
+      // Call n8n Stripe checkout endpoint
+      const response = await fetch(`${API_BASE}/webhook/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          metadata: {
+            qr_type: qrType,
+            qr_size: qrSize.toString(),
+            dots_style: dotsStyle,
+            corners_style: cornersStyle,
+            fg_color: fgColor,
+            bg_color: bgTransparent ? 'transparent' : bgColor,
+            gradient: gradientEnabled ? 'true' : 'false',
+            gradient_color1: gradientColor1,
+            gradient_color2: gradientColor2,
+            has_logo: logo ? 'true' : 'false',
+          },
+          successUrl: `${window.location.origin}?payment=success`,
+          cancelUrl: `${window.location.origin}?payment=cancelled`,
+        }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session')
+      }
+      
+      const data = await response.json()
+      
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error('No checkout URL returned')
+      }
+    } catch (error: any) {
+      setPaymentError(error.message || 'Payment failed')
+      setPaymentLoading(false)
+    }
+  }
+
+  // Actually perform the download (called after successful payment)
+  const performDownload = async () => {
     const downloadQR = await generateDownloadQR()
     
     const hiddenContainer = document.createElement('div')
@@ -352,100 +402,26 @@ function App() {
         await new Promise(resolve => setTimeout(resolve, 100))
       }
       
-      await downloadQR.download({ name: 'qr-code', extension: format })
+      await downloadQR.download({ name: 'qr-code', extension: 'png' })
     } finally {
       document.body.removeChild(hiddenContainer)
     }
   }
 
-  // Handle download - free QR codes!
-  const handleDownload = async (format: 'png' | 'svg' | 'jpeg') => {
-    if (paymentLoading) return // Prevent multiple clicks
-    
-    setPaymentLoading(true)
-    setPaymentError(null)
-    
-    try {
-      // If logged in, save to DB
-      if (user) {
-        const { data: savedQR, error: saveError } = await supabase
-          .from('qr_codes')
-          .insert({
-            user_id: user.id,
-            type: qrType,
-            data: { ...formData },
-            styles: {
-              fgColor,
-              bgColor,
-              dotsStyle,
-              cornersStyle,
-              gradientEnabled,
-              gradientColor1,
-              gradientColor2,
-              gradientType,
-              logo: logo || undefined,
-              logoSize,
-              logoMargin,
-              usePlatformIcon,
-              iconColor
-            }
-          })
-          .select()
-          .single()
-        
-        if (saveError) {
-          console.error('Failed to save QR code:', saveError)
-          // Continue with download even if save fails
-        } else {
-          // Track event
-          await supabase.from('events').insert({
-            user_id: user.id,
-            event_type: 'qr_downloaded',
-            event_data: { format, qr_type: qrType, qr_id: savedQR.id }
-          })
-        }
-      }
-      
-      // Download the QR
-      await performDownload(format)
-      
-      setPaymentSuccess(true)
-      setTimeout(() => setPaymentSuccess(false), 2000)
-    } catch (error: any) {
-      setPaymentError(error.message || 'Download failed')
-    } finally {
-      setPaymentLoading(false)
-    }
-  }
-
-  // Check if running in Telegram
-  const isTelegram = typeof window !== 'undefined' && window.Telegram?.WebApp
-
-  // Initialize Telegram WebApp and parse URL params
+  // Check for payment success from Stripe redirect
   useEffect(() => {
-    if (isTelegram) {
-      window.Telegram!.WebApp!.ready()
-    }
-    
-    // Parse URL params
     const urlParams = new URLSearchParams(window.location.search)
+    const paymentStatus = urlParams.get('payment')
     
-    // Check for QR type in URL (e.g., ?type=whatsapp)
-    const typeParam = urlParams.get('type') as QRType
-    if (typeParam) {
-      const typeInfo = qrTypes.find(t => t.id === typeParam)
-      if (typeInfo) {
-        setQrType(typeParam)
-        setActiveCategory(typeInfo.category)
-      }
-    }
-
-    // Check for crypto type in URL (e.g., ?type=crypto&coin=BTC)
-    if (typeParam === 'crypto') {
-      const coinParam = urlParams.get('coin')
-      if (coinParam) {
-        setFormData(prev => ({ ...prev, coin: coinParam }))
-      }
+    if (paymentStatus === 'success') {
+      // Clear URL params
+      window.history.replaceState({}, '', window.location.pathname)
+      
+      // Perform download
+      performDownload()
+    } else if (paymentStatus === 'cancelled') {
+      // Clear URL params
+      window.history.replaceState({}, '', window.location.pathname)
     }
   }, [])
 
@@ -841,18 +817,18 @@ function App() {
           <div className="preview-content">
             <div className="preview-info">
               <h3>Customize your QR</h3>
-              <p className="preview-subtitle">Adjust style options below, then download.</p>
+              <p className="preview-subtitle">Adjust style options below. Pay to download.</p>
             </div>
 
             <p className="preview-tagline">No subscription. No strings attached. Your QR works forever.</p>
 
-            <button className="download-btn btn-primary" onClick={() => handleDownload('png')}>
+            <button className="download-btn btn-primary" onClick={() => setShowConfirmation(true)}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
                 <line x1="12" y1="15" x2="12" y2="3"/>
               </svg>
-              Download Free
+              Download ${PRICE.toFixed(2)}
             </button>
           </div>
         </aside>
@@ -1159,6 +1135,131 @@ function App() {
           </footer>
         </div>
       </main>
+
+      {/* Confirmation Modal */}
+      {showConfirmation && (
+        <div className="modal-overlay" onClick={() => setShowConfirmation(false)}>
+          <div className="modal confirmation-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowConfirmation(false)}>×</button>
+            
+            <div className="confirmation-header">
+              <h3>Ready to download?</h3>
+              <p>Preview with your selected style</p>
+            </div>
+
+            {/* Preview QR with placeholder data but user's selected style */}
+            <div className="confirmation-qr">
+              <div ref={(el) => {
+                if (el) {
+                  el.innerHTML = ''
+                  ;(async () => {
+                    try {
+                      const mod = await import('qr-code-styling')
+                      const QRCodeStyling = (mod as any).default || (mod as any)
+                      
+                      const placeholderQR = new QRCodeStyling({
+                        width: 280,
+                        height: 280,
+                        data: generatePlaceholderData(qrType),
+                        image: logo || (usePlatformIcon ? getPlatformIcon(qrType, useOfficialColor ? (brandColors[qrType] || '#000000') : iconColor) : null) || undefined,
+                        dotsOptions: {
+                          color: fgColor,
+                          type: dotsStyle as any,
+                          ...(gradientEnabled && {
+                            gradient: {
+                              type: gradientType,
+                              rotation: 0,
+                              colorStops: [
+                                { offset: 0, color: gradientColor1 },
+                                { offset: 1, color: gradientColor2 }
+                              ]
+                            }
+                          })
+                        },
+                        backgroundOptions: {
+                          color: bgTransparent ? 'transparent' : bgColor,
+                        },
+                        cornersSquareOptions: {
+                          type: cornersStyle as any,
+                          color: fgColor,
+                        },
+                        cornersDotOptions: {
+                          type: cornersStyle as any,
+                          color: fgColor,
+                        },
+                        imageOptions: {
+                          crossOrigin: 'anonymous',
+                          margin: logoMargin,
+                          imageSize: logoSize,
+                        },
+                      })
+                      await placeholderQR.append(el)
+                    } catch (e) {
+                      console.error('Failed to render confirmation QR:', e)
+                    }
+                  })()
+                }
+              }} />
+            </div>
+
+            <div className="confirmation-details">
+              <div className="detail-row">
+                <span>Type</span>
+                <strong>{qrTypes.find(t => t.id === qrType)?.label}</strong>
+              </div>
+              <div className="detail-row">
+                <span>Size</span>
+                <strong>{qrSize}×{qrSize}px</strong>
+              </div>
+              <div className="detail-row">
+                <span>Format</span>
+                <strong>PNG (High Quality)</strong>
+              </div>
+            </div>
+
+            <div className="confirmation-price">
+              <span className="price">${PRICE.toFixed(2)}</span>
+              <span className="price-note">One-time purchase • Yours forever</span>
+            </div>
+
+            <button 
+              className="pay-btn btn-primary"
+              onClick={handleDownload}
+              disabled={paymentLoading}
+            >
+              {paymentLoading ? (
+                <>
+                  <span className="spinner-small"></span>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                    <line x1="1" y1="10" x2="23" y2="10"/>
+                  </svg>
+                  Pay ${PRICE.toFixed(2)} & Download
+                </>
+              )}
+            </button>
+
+            {paymentError && (
+              <div className="payment-error">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>{paymentError}</span>
+              </div>
+            )}
+
+            <button className="secondary-btn" onClick={() => setShowConfirmation(false)} disabled={paymentLoading}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Auth Modal */}
       {showAuthModal && (
