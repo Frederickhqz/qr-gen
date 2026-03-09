@@ -393,4 +393,4 @@ export const categories = [
 
 export function getQRTypeInfo(type: QRType): QRTypeOption {
   return qrTypes.find(t => t.id === type) || qrTypes[0]
-}
+}// Build trigger 1773078925
