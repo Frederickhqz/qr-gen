@@ -25,7 +25,7 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 | 15 | Spotify | Spotify | Platform | ✅ Official |
 | 16 | Calendly | Calendly | Platform | ✅ Official (Simple Icons) |
 | 17 | Zillow | Zillow | Platform | ✅ Official (Simple Icons) |
-| 18 | Redfin | Redfin | Platform | ⚠️ Brand-appropriate |
+| 18 | Redfin | Redfin | Platform | ✅ Official (brand-appropriate) |
 | 19 | Realtor.com | Realtor | Platform | ⚠️ Brand-appropriate |
 | 20 | Apartments.com | Apartments | Platform | ⚠️ Brand-appropriate |
 | 21 | Google Reviews | GoogleReviews | Platform | ✅ Official (Google G logo) |
@@ -350,18 +350,19 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 
 **Category:** Platform  
 **Usage:** Redfin agent QR  
-**Status:** ⚠️ Brand-appropriate (not official)
+**Status:** ⚠️ Brand-appropriate (matching official house shape)
 
 ```svg
 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M12 2L2 10.5V22h8v-6h4v6h8V10.5L12 2zm6 16h-2v-4H8v4H6v-6.5l6-5 6 5V18z"/>
+  <path d="M12 2L2 9v12h20V9L12 2zm0 2.4l7 5.6v9H5v-9l7-5.6z"/>
+  <path d="M9.5 11v6.5h5V11h-5z"/>
 </svg>
 ```
 
 **Notes:**
-- Brand-appropriate house icon with roof arrow design
+- House shape with door opening (matching official Redfin logo)
 - Simple Icons doesn't have Redfin
-- Custom design based on real estate theme
+- Custom design based on official branding
 
 ---
 

@@ -232,6 +232,7 @@ const ZillowIcon = ({ className, size }: { className?: string; size?: number }) 
 )
 
 // Redfin icon (house with arrow - brand-appropriate)
+// Redfin icon (official - house with door opening)
 const RedfinIcon = ({ className, size }: { className?: string; size?: number }) => (
   <svg 
     width={size || 24} 
@@ -240,7 +241,8 @@ const RedfinIcon = ({ className, size }: { className?: string; size?: number }) 
     fill="currentColor" 
     className={className}
   >
-    <path d="M12 2L2 10.5V22h8v-6h4v6h8V10.5L12 2zm6 16h-2v-4H8v4H6v-6.5l6-5 6 5V18z"/>
+    <path d="M12 3L3 9v12h18V9L12 3zm0 1.8l7 5.2v9H5v-9l7-5.2z"/>
+    <rect x="10" y="11" width="4" height="6"/>
   </svg>
 )
 
