@@ -3,20 +3,65 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://qrgen.studio/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Create beautiful, customizable QR codes instantly. Choose from 25+ types, customize colors, patterns, and add your logo." />
-    <meta name="keywords" content="QR code, QR generator, QR maker, custom QR, QR with logo" />
+    <meta name="description" content="Create beautiful, customizable QR codes instantly. Choose from 25+ types including URL, WiFi, vCard, payment, and social media. Customize colors, patterns, and add your logo. No subscription required." />
+    <meta name="keywords" content="QR code generator, QR maker, custom QR codes, WiFi QR, vCard QR, payment QR, social media QR, QR with logo, free QR generator" />
     <meta name="theme-color" content="#0066FF" />
+    <meta name="robots" content="index, follow" />
     
     <!-- Open Graph -->
-    <meta property="og:title" content="QR Studio - Beautiful QR Codes" />
-    <meta property="og:description" content="Create beautiful, customizable QR codes instantly." />
+    <meta property="og:title" content="QR Studio - Create Beautiful Custom QR Codes" />
+    <meta property="og:description" content="Generate stunning QR codes for URLs, WiFi, payments, social media, and more. Fully customizable colors, patterns, and logos. One-time payment, yours forever." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/og-image.svg" />
+    <meta property="og:url" content="https://qrgen.studio/" />
+    <meta property="og:image" content="https://qrgen.studio/og-image.svg" />
+    <meta property="og:site_name" content="QR Studio" />
+    <meta property="og:locale" content="en_US" />
     
-    <title>QR Studio - Create Beautiful QR Codes</title>
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="QR Studio - Create Beautiful Custom QR Codes" />
+    <meta name="twitter:description" content="Generate stunning QR codes for URLs, WiFi, payments, social media, and more. Fully customizable." />
+    <meta name="twitter:image" content="https://qrgen.studio/og-image.svg" />
+    
+    <title>QR Studio - Create Beautiful Custom QR Codes | Free QR Generator</title>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "QR Studio",
+      "description": "Create beautiful, customizable QR codes for URLs, WiFi, payments, social media, and more. Choose from 25+ types, customize colors, patterns, and add your logo.",
+      "url": "https://qrgen.studio",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "1.99",
+        "priceCurrency": "USD",
+        "description": "One-time payment per QR code download"
+      },
+      "featureList": [
+        "25+ QR code types",
+        "Custom colors and gradients",
+        "Logo upload",
+        "Multiple pattern styles",
+        "High resolution export",
+        "No subscription required"
+      ],
+      "screenshot": "https://qrgen.studio/og-image.svg",
+      "creator": {
+        "@type": "Organization",
+        "name": "QR Studio"
+      }
+    }
+    </script>
   </head>
   <body>
+    <h1 style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">QR Studio - Professional QR Code Generator</h1>
+    <h2 style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Create beautiful, customizable QR codes for URLs, WiFi, payments, and social media</h2>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
