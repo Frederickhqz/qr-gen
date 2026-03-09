@@ -2,32 +2,34 @@
 
 This document contains all custom SVG icons used in QR Studio for review and debugging.
 
+**Last Updated:** 2026-03-09
+
 ## Icon Index
 
 | # | Icon | Name | Category | Status |
 |---|------|------|----------|--------|
-| 1 | X | X (Twitter) | Social | ⬜ Review |
-| 2 | Discord | Discord | Social | ⬜ Review |
-| 3 | Threads | Threads | Social | ⬜ Review |
-| 4 | TikTok | TikTok | Social | ⬜ Review |
-| 5 | PayPal | PayPal | Payment | ⬜ Review |
-| 6 | Venmo | Venmo | Payment | ⬜ Review |
-| 7 | Cash App | CashApp | Payment | ⬜ Review |
-| 8 | App Store | AppStore | Platform | ⬜ Review |
-| 9 | Amazon | Amazon | Platform | ⬜ Review |
-| 10 | Spotify | Spotify | Platform | ⬜ Review |
-| 11 | Calendly | Calendly | Platform | ⬜ Review |
-| 12 | Zillow | Zillow | Platform | ⬜ Review |
-| 13 | Redfin | Redfin | Platform | ⬜ Review |
-| 14 | Realtor.com | Realtor | Platform | ⬜ Review |
-| 15 | Apartments.com | Apartments | Platform | ⬜ Review |
-| 16 | Google Reviews | GoogleReviews | Platform | ⬜ Review |
-| 17 | Pinterest | Pinterest | Social | ⬜ Review |
-| 18 | Reddit | Reddit | Social | ⬜ Review |
-| 19 | Twitch | Twitch | Social | ⬜ Review |
-| 20 | Telegram | Telegram | Social | ⬜ Review |
-| 21 | GitHub | GitHub | Social | ⬜ Review |
-| 22 | Medium | Medium | Social | ⬜ Review |
+| 1 | X | X (Twitter) | Social | ✅ Official |
+| 2 | Discord | Discord | Social | ✅ Official |
+| 3 | Threads | Threads | Social | ✅ Official |
+| 4 | TikTok | TikTok | Social | ✅ Official |
+| 5 | PayPal | PayPal | Payment | ✅ Official |
+| 6 | Venmo | Venmo | Payment | ✅ Official (Simple Icons) |
+| 7 | Cash App | CashApp | Payment | ✅ Official (Simple Icons) |
+| 8 | App Store | AppStore | Platform | ✅ Official |
+| 9 | Amazon | Amazon | Platform | ⚠️ Generic (needs review) |
+| 10 | Spotify | Spotify | Platform | ✅ Official |
+| 11 | Calendly | Calendly | Platform | ✅ Official (Simple Icons) |
+| 12 | Zillow | Zillow | Platform | ✅ Official (Simple Icons) |
+| 13 | Redfin | Redfin | Platform | ⚠️ Generic (Simple Icons has no icon) |
+| 14 | Realtor.com | Realtor | Platform | ⚠️ Generic (Simple Icons has no icon) |
+| 15 | Apartments.com | Apartments | Platform | ⚠️ Generic (Simple Icons has no icon) |
+| 16 | Google Reviews | GoogleReviews | Platform | ✅ Official (Google G logo) |
+| 17 | Pinterest | Pinterest | Social | ✅ Official |
+| 18 | Reddit | Reddit | Social | ✅ Official |
+| 19 | Twitch | Twitch | Social | ✅ Official |
+| 20 | Telegram | Telegram | Social | ✅ Official |
+| 21 | GitHub | GitHub | Social | ✅ Official |
+| 22 | Medium | Medium | Social | ✅ Official |
 
 ---
 
@@ -125,17 +127,17 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 
 **Category:** Payment  
 **Usage:** Venmo payment QR  
-**Status:** ⬜ Review
+**Status:** ✅ Official (Simple Icons)
 
 ```svg
 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M3.5 14.65c0-1.4.37-2.67 1.1-3.79.74-1.13 1.77-2.02 3.1-2.67l.43 1.16c-1.13.5-2.01 1.22-2.65 2.18-.63.95-.95 2.01-.95 3.18 0 .72.13 1.35.4 1.88.28.54.68.95 1.21 1.24.54.3 1.16.45 1.88.45.87 0 1.61-.26 2.22-.78.62-.52 1.07-1.23 1.35-2.14.28-.91.42-1.92.42-3.04 0-1.4-.24-2.65-.72-3.74-.48-1.09-1.15-1.95-2.02-2.58-.86-.62-1.85-.93-2.96-.93-1.26 0-2.35.41-3.26 1.24C4.15 8.21 3.5 9.44 3.5 11.07v3.58zm17 0c0-1.4-.37-2.67-1.1-3.79-.74-1.13-1.77-2.02-3.1-2.67l-.43 1.16c1.13.5 2.01 1.22 2.65 2.18.63.95.95 2.01.95 3.18 0 .72-.13 1.35-.4 1.88-.28.54-.68.95-1.21 1.24-.54.3-1.16.45-1.88.45-.87 0-1.61-.26-2.22-.78-.62-.52-1.07-1.23-1.35-2.14-.28-.91-.42-1.92-.42-3.04 0-1.4.24-2.65.72-3.74.48-1.09 1.15-1.95 2.02-2.58.86-.62 1.85-.93 2.96-.93 1.26 0 2.35.41 3.26 1.24.91.83 1.56 2.06 1.56 3.69v3.58z"/>
+  <path d="M21.772 13.119c-.267 0-.381-.251-.38-.655 0-.533.121-1.575.712-1.575.267 0 .357.243.357.598 0 .533-.13 1.632-.689 1.632Zm.502-3.377c-1.677 0-2.405 1.285-2.405 2.658 0 1.042.421 1.874 1.693 1.874 1.717 0 2.438-1.406 2.438-2.763 0-1.025-.462-1.769-1.726-1.769Zm-3.833 0c-.558 0-.964.17-1.393.477-.154-.275-.462-.477-.932-.477-.542 0-.947.219-1.247.437l-.04-.364H13.54l-.688 4.354h1.506l.479-3.053c.129-.065.323-.154.518-.154.145 0 .267.049.267.267 0 .056-.016.145-.024.218l-.429 2.722h1.498l.478-3.053c.138-.073.324-.154.51-.154.146 0 .268.049.268.267 0 .056-.017.145-.025.218l-.429 2.722h1.499l.461-2.908c.025-.153.049-.388.049-.549 0-.582-.267-.97-1.037-.97Zm-6.871 0c-.575 0-.98.219-1.287.421l-.017-.348H8.962l-.689 4.354H9.78l.478-3.053c.13-.065.324-.154.518-.154.147 0 .268.049.268.242 0 .081-.024.227-.032.299l-.422 2.666h1.499l.462-2.908c.024-.153.049-.388.049-.549 0-.582-.268-.97-1.03-.97Zm-5.631 1.834c.041-.485.413-.824.697-.824.162 0 .299.097.299.291 0 .404-.713.533-.996.533Zm.843-1.834c-1.604 0-2.382 1.39-2.382 2.698 0 1.01.478 1.817 1.814 1.817.527 0 1.07-.113 1.418-.282l.186-1.26c-.494.25-.874.347-1.271.347-.365 0-.64-.194-.64-.687.826-.008 2.252-.347 2.252-1.453 0-.687-.494-1.18-1.377-1.18Zm-4.239.267c.089.186.146.412.146.743 0 .606-.429 1.494-.777 2.06l-.373-2.989L0 9.969l.705 4.2h1.757c.77-1.01 1.718-2.448 1.718-3.554 0-.347-.073-.622-.235-.889l-1.402.283Z"/>
 </svg>
 ```
 
 **Notes:**
-- **ISSUE:** This appears to be decorative quotation marks, not the Venmo V logo
-- **ACTION NEEDED:** Replace with proper Venmo logo
+- ✅ Official Venmo wordmark logo from Simple Icons
+- Updated from incorrect quotation mark icon
 
 ---
 
@@ -143,17 +145,17 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 
 **Category:** Payment  
 **Usage:** Cash App payment QR  
-**Status:** ⬜ Review
+**Status:** ✅ Official (Simple Icons)
 
 ```svg
 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 1.97-2.38-2.38-1.41 1.41 2.38 2.38-4.24 4.24-2.38-2.38-1.41 1.41 2.38 2.38-1.97 1.97L7.106 16l1.97-1.97-2.38-2.38 1.41-1.41 2.38 2.38 4.24-4.24-2.38-2.38 1.41-1.41 2.38 2.38 1.97-1.97L17.894 8.22z"/>
+  <path d="M23.59 3.475a5.1 5.1 0 00-3.05-3.05c-1.31-.42-2.5-.42-4.92-.42H8.36c-2.4 0-3.61 0-4.9.4a5.1 5.1 0 00-3.05 3.06C0 4.765 0 5.965 0 8.365v7.27c0 2.41 0 3.6.4 4.9a5.1 5.1 0 003.05 3.05c1.3.41 2.5.41 4.9.41h7.28c2.41 0 3.61 0 4.9-.4a5.1 5.1 0 003.06-3.06c.41-1.3.41-2.5.41-4.9v-7.25c0-2.41 0-3.61-.41-4.91zm-6.17 4.63l-.93.93a.5.5 0 01-.67.01 5 5 0 00-3.22-1.18c-.97 0-1.94.32-1.94 1.21 0 .9 1.04 1.2 2.24 1.65 2.1.7 3.84 1.58 3.84 3.64 0 2.24-1.74 3.78-4.58 3.95l-.26 1.2a.49.49 0 01-.48.39H9.63l-.09-.01a.5.5 0 01-.38-.59l.28-1.27a6.54 6.54 0 01-2.88-1.57v-.01a.48.48 0 010-.68l1-.97a.49.49 0 01.67 0c.91.86 2.13 1.34 3.39 1.32 1.3 0 2.17-.55 2.17-1.42 0-.87-.88-1.1-2.54-1.72-1.76-.63-3.43-1.52-3.43-3.6 0-2.42 2.01-3.6 4.39-3.71l.25-1.23a.48.48 0 01.48-.38h1.78l.1.01c.26.06.43.31.37.57l-.27 1.37c.9.3 1.75.77 2.48 1.39l.02.02c.19.2.19.5 0 .68z"/>
 </svg>
 ```
 
 **Notes:**
-- **ISSUE:** This shows an X mark, not the Cash App $ logo
-- **ACTION NEEDED:** Replace with proper Cash App green dollar sign logo
+- ✅ Official Cash App logo with $ symbol from Simple Icons
+- Updated from incorrect X mark icon
 
 ---
 
@@ -216,18 +218,17 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 
 **Category:** Platform  
 **Usage:** Calendly scheduling QR  
-**Status:** ⬜ Review
+**Status:** ✅ Official (Simple Icons)
 
 ```svg
 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M19.5 3h-1.5V1.5c0-.28-.22-.5-.5-.5s-.5.22-.5.5V3H7V1.5c0-.28-.22-.5-.5-.5S6 1.22 6 1.5V3H4.5C3.67 3 3 3.67 3 4.5v15c0 .83.67 1.5 1.5 1.5h15c.83 0 1.5-.67 1.5-1.5v-15c0-.83-.67-1.5-1.5-1.5zm0 16.5h-15v-12h15v12zm-9-7.5v4.5c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-3.79l-.65.39c-.24.14-.54.06-.68-.18s-.06-.54.18-.68l1.25-.75c.15-.09.35-.1.51-.01.15.09.25.26.25.44v.08zm2.5 0v4.5c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-3.79l-.65.39c-.24.14-.54.06-.68-.18s-.06-.54.18-.68l1.25-.75c.15-.09.35-.1.51-.01.15.09.25.26.25.44v.08zm3 0c0-.55.45-1 1-1h1.5c.28 0 .5.22.5.5s-.22.5-.5.5H16v1h1c.55 0 1 .45 1 1v1c0 .55-.45 1-1 1h-1.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5H16v-1h-1c-.55 0-1-.45-1-1v-1z"/>
+  <path d="M19.655 14.262c.281 0 .557.023.828.064 0 .005-.005.01-.005.014-.105.267-.234.534-.381.786l-1.219 2.106c-1.112 1.936-3.177 3.127-5.411 3.127h-2.432c-2.23 0-4.294-1.191-5.412-3.127l-1.218-2.106a6.251 6.251 0 0 1 0-6.252l1.218-2.106C6.736 4.832 8.8 3.641 11.035 3.641h2.432c2.23 0 4.294 1.191 5.411 3.127l1.219 2.106c.147.252.271.519.381.786 0 .004.005.009.005.014-.267.041-.543.064-.828.064-1.816 0-2.501-.607-3.291-1.306-.764-.676-1.711-1.517-3.44-1.517h-1.029c-1.251 0-2.387.455-3.2 1.278-.796.805-1.233 1.904-1.233 3.099v1.411c0 1.196.437 2.295 1.233 3.099.813.823 1.949 1.278 3.2 1.278h1.034c1.729 0 2.676-.841 3.439-1.517.791-.703 1.471-1.306 3.287-1.301Zm.005-3.237c.399 0 .794-.036 1.179-.11-.002-.004-.002-.01-.002-.014-.073-.414-.193-.823-.349-1.218.731-.12 1.407-.396 1.986-.819 0-.004-.005-.013-.005-.018-.331-1.085-.832-2.101-1.489-3.03-.649-.915-1.435-1.719-2.331-2.395-1.867-1.398-4.088-2.138-6.428-2.138-1.448 0-2.855.28-4.175.841-1.273.543-2.423 1.315-3.407 2.299S2.878 6.552 2.341 7.83c-.557 1.324-.842 2.726-.842 4.175 0 1.448.281 2.855.842 4.174.542 1.274 1.314 2.423 2.298 3.407s2.129 1.761 3.407 2.299c1.324.556 2.727.841 4.175.841 2.34 0 4.561-.74 6.428-2.137a10.815 10.815 0 0 0 2.331-2.396c.652-.929 1.158-1.949 1.489-3.03 0-.004.005-.014.005-.018-.579-.423-1.255-.699-1.986-.819.161-.395.276-.804.349-1.218.005-.009.005-.014.005-.023.869.166 1.692.506 2.404 1.035.685.505.552 1.075.446 1.416C22.184 20.437 17.619 24 12.221 24c-6.625 0-12-5.375-12-12s5.37-12 12-12c5.398 0 9.963 3.563 11.471 8.464.106.341.239.915-.446 1.421-.717.529-1.535.873-2.404 1.034.128.716.128 1.45 0 2.166-.387-.074-.782-.11-1.182-.11-4.184 0-3.968 2.823-6.736 2.823h-1.029c-1.899 0-3.15-1.357-3.15-3.095v-1.411c0-1.738 1.251-3.094 3.15-3.094h1.034c2.768 0 2.552 2.823 6.731 2.827Z"/>
 </svg>
 ```
 
 **Notes:**
-- Calendar icon with "123"
-- **ISSUE:** Not the official Calendly logo (blue C)
-- **ACTION NEEDED:** Replace with official Calendly branding
+- ✅ Official Calendly C logo from Simple Icons
+- Updated from generic calendar icon
 
 ---
 
@@ -235,18 +236,17 @@ This document contains all custom SVG icons used in QR Studio for review and deb
 
 **Category:** Platform  
 **Usage:** Zillow profile QR  
-**Status:** ⬜ Review
+**Status:** ✅ Official (Simple Icons)
 
 ```svg
 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M12.5 2.5L2 9l.5 2 10-6.5L22.5 11l.5-2L12.5 2.5zM4 14v6.5c0 .83.67 1.5 1.5 1.5h13c.83 0 1.5-.67 1.5-1.5V14l-8 5-8-5z"/>
+  <path d="M12.006 0L1.086 8.627v3.868c3.386-2.013 11.219-5.13 14.763-6.015.11-.024.16.005.227.078.372.427 1.586 1.899 1.916 2.301a.128.128 0 0 1-.03.195 43.607 43.607 0 0 0-6.67 6.527c-.03.037-.006.043.012.03 2.642-1.134 8.828-2.94 11.622-3.452V8.627zm-.48 11.177c-2.136.708-8.195 3.307-10.452 4.576V24h21.852v-7.936c-2.99.506-11.902 3.16-15.959 5.246a.183.183 0 0 1-.23-.036l-2.044-2.429c-.055-.061-.062-.098.011-.208 1.574-2.3 4.789-5.899 6.833-7.418.042-.03.031-.06-.012-.042Z"/>
 </svg>
 ```
 
 **Notes:**
-- Generic house icon
-- **ISSUE:** Not the official Zillow logo
-- **ACTION NEEDED:** Replace with Zillow branding
+- ✅ Official Zillow logo from Simple Icons
+- Updated from generic house icon
 
 ---
 
