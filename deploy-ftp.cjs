@@ -3,9 +3,14 @@ const fs = require('fs')
 const path = require('path')
 
 const config = {
-  host: '86.38.202.68',
-  user: 'u811644574.qrgen.studio',
-  password: '+Ed2ajqV[tEPLoEX'
+  host: process.env.FTP_SERVER,
+  user: process.env.FTP_USER,
+  password: process.env.FTP_PASS
+}
+
+if (!config.host || !config.user || !config.password) {
+  console.error('Error: FTP credentials not set. Please set FTP_SERVER, FTP_USER, and FTP_PASS environment variables.')
+  process.exit(1)
 }
 
 const localDir = './dist'
