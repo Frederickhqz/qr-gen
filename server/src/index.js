@@ -26,12 +26,12 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps, curl)
     if (!origin) return callback(null, true)
-    
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true)
     } else {
       console.log('CORS blocked origin:', origin)
-      callback(null, true) // Allow anyway for now
+      callback(new Error(`Origin ${origin} not allowed by CORS`))
     }
   },
   credentials: true,
@@ -46,11 +46,48 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
+// Validation helpers
+const isValidUrl = (url) => {
+  try {
+    const parsed = new URL(url)
+    return ['http:', 'https:'].includes(parsed.protocol)
+  } catch {
+    return false
+  }
+}
+
+const isValidEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
 // Create Stripe Checkout session
 app.post('/api/create-checkout-session', async (req, res) => {
   try {
     const { quantity, successUrl, cancelUrl, customerEmail, promoCode } = req.body
-    const itemQuantity = quantity || 1
+
+    // Validate quantity
+    const itemQuantity = parseInt(quantity, 10) || 1
+    if (itemQuantity < 1 || itemQuantity > 100) {
+      return res.status(400).json({ error: 'Quantity must be between 1 and 100' })
+    }
+
+    // Validate URLs
+    if (successUrl && !isValidUrl(successUrl)) {
+      return res.status(400).json({ error: 'Invalid success URL' })
+    }
+    if (cancelUrl && !isValidUrl(cancelUrl)) {
+      return res.status(400).json({ error: 'Invalid cancel URL' })
+    }
+
+    // Validate email if provided
+    if (customerEmail && !isValidEmail(customerEmail)) {
+      return res.status(400).json({ error: 'Invalid email address' })
+    }
+
+    // Validate promo code format (alphanumeric only)
+    if (promoCode && !/^[A-Z0-9]{1,20}$/i.test(promoCode)) {
+      return res.status(400).json({ error: 'Invalid promo code format' })
+    }
 
     console.log('Creating checkout session:', { quantity: itemQuantity, customerEmail, promoCode })
 
